@@ -19,7 +19,16 @@ type
     ttCubeInOut,
     ttQuartIn,
     ttQuartOut,
-    ttQuartInOut
+    ttQuartInOut,
+    ttQuintIn,
+    ttQuintOut,
+    ttQuintInOut,
+    ttSineIn,
+    ttSineOut,
+    ttSineInOut,
+    ttExpoIn,
+    ttExpoOut,
+    ttExpoInOut
     );
 
   TTweenBehavior = (
@@ -36,16 +45,32 @@ type
   TW3TweenEase = class
   public
     class function  Linear(t,b,c,d:float):float;
+
     class function  QuadIn(t, b, c, d:float):float;
     class function  QuadOut(t, b, c, d:float):float;
     class function  QuadInOut(t, b, c, d:float):float;
+
     class function  CubeIn(t, b, c, d:float):float;
     class function  CubeOut(t, b, c, d:float):float;
     class function  CubeInOut(t, b, c, d:float):float;
+
     class function  QuartIn(t, b, c, d:float):float;
     class function  QuartOut(t, b, c, d:float):float;
     class function  QuartInOut(t, b, c, d:float):float;
+
+    class function  QuintIn(t, b, c, d:float):float;
+    class function  QuintOut(t, b, c, d:float):float;
+    class function  QuintInOut(t, b, c, d:float):float;
+
+    class function  SineIn(t, b, c, d:float):float;
+    class function  SineOut(t, b, c, d:float):float;
+    class function  SineInOut(t, b, c, d:float):float;
+
+    class function  ExpoIn(t, b, c, d:float):float;
+    class function  ExpoOut(t, b, c, d:float):float;
+    class function  ExpoInOut(t, b, c, d:float):float;
   end;
+
 
   TW3TweenItemUpdatedEvent = procedure (Item:TTweenElement);
   TW3TweenUpdatedEvent = procedure (Sender:TObject);
@@ -56,13 +81,19 @@ type
   TTweenState = (tsIdle,tsRunning,tsPaused,tsDone);
 
   TTweenData = class
+  private
+    FEntry:     TProcedureRef;
+    FAnimType:  TW3TweenAnimationType;
+    procedure   SetAnimType(Value:TW3TweenAnimationType);
   public
     Property    Id: String;
     Property    StartTime: TDateTime;
     Property    StartValue: Float;
     Property    Distance: Float;
     Property    Duration: Float;
-    Property    AnimationType: TW3TweenAnimationType;
+    Property    AnimationType: TW3TweenAnimationType
+                read FAnimType write SetAnimtype;
+
     Property    Behavior: TTweenBehavior;
 
     function    Expired: Boolean;virtual;
@@ -203,20 +234,30 @@ var
   begin
     result := 0.0;
     case Item.AnimationType of
-    ttlinear:     result := TW3TweenEase.Linear(t,b,c,d);
-    ttQuadIn:     result := TW3TweenEase.QuadIn(t,b,c,d);
-    ttQuadOut:    result := TW3TweenEase.QuadOut(t,b,c,d);
-    ttQuadInOut:  result := TW3TweenEase.QuadInOut(t,b,c,d);
-    ttCubeIn:     result := TW3TweenEase.CubeIn(t,b,c,d);
-    ttCubeOut:    result := TW3TweenEase.CubeOut(t,b,c,d);
-    ttCubeInOut:  result := TW3TweenEase.CubeInOut(t,b,c,d);
-    ttQuartIn:    result := TW3TweenEase.QuartIn(t,b,c,d);
-    ttQuartOut:   result := TW3TweenEase.QuartOut(t,b,c,d);
-    ttQuartInOut: result := TW3TweenEase.QuartInOut(t,b,c,d);
+    ttlinear:       result := TW3TweenEase.Linear(t,b,c,d);
+    ttQuadIn:       result := TW3TweenEase.QuadIn(t,b,c,d);
+    ttQuadOut:      result := TW3TweenEase.QuadOut(t,b,c,d);
+    ttQuadInOut:    result := TW3TweenEase.QuadInOut(t,b,c,d);
+    ttCubeIn:       result := TW3TweenEase.CubeIn(t,b,c,d);
+    ttCubeOut:      result := TW3TweenEase.CubeOut(t,b,c,d);
+    ttCubeInOut:    result := TW3TweenEase.CubeInOut(t,b,c,d);
+    ttQuartIn:      result := TW3TweenEase.QuartIn(t,b,c,d);
+    ttQuartOut:     result := TW3TweenEase.QuartOut(t,b,c,d);
+    ttQuartInOut:   result := TW3TweenEase.QuartInOut(t,b,c,d);
+    ttQuintIn:      result := TW3TweenEase.QuintIn(t,b,c,d);
+    ttQuintOut:     result := TW3TweenEase.QuintOut(t,b,c,d);
+    ttQuintInOut:   result := TW3TweenEase.QuintInOut(t,b,c,d);
+    ttSineIn:       result := TW3TweenEase.SineIn(t,b,c,d);
+    ttSineOut:      result := TW3TweenEase.SineOut(t,b,c,d);
+    ttSineInOut:    result := TW3TweenEase.SineInOut(t,b,c,d);
+    ttExpoIn:       result := TW3TweenEase.ExpoInOut(t,b,c,d);
+    ttExpoOut:      result := TW3TweenEase.ExpoInOut(t,b,c,d);
+    ttExpoInOut:    result := TW3TweenEase.ExpoInOut(t,b,c,d);
     end;
   end;
 
 begin
+
   if not Item.Expired then
   begin
     LTotal := PerformX(GetTimeCode-Item.StartTime,
@@ -698,6 +739,42 @@ end;
 // TTweenData
 //############################################################################
 
+
+procedure TTweenData.SetAnimType(Value:TW3TweenAnimationType);
+begin
+  FAnimType := Value;
+
+  self.
+
+  case value of
+  ttlinear:       asm (@self) end;
+  ttQuadIn:       result := TW3TweenEase.QuadIn(t,b,c,d);
+  ttQuadOut:      result := TW3TweenEase.QuadOut(t,b,c,d);
+  ttQuadInOut:    result := TW3TweenEase.QuadInOut(t,b,c,d);
+  ttCubeIn:       result := TW3TweenEase.CubeIn(t,b,c,d);
+  ttCubeOut:      result := TW3TweenEase.CubeOut(t,b,c,d);
+  ttCubeInOut:    result := TW3TweenEase.CubeInOut(t,b,c,d);
+  ttQuartIn:      result := TW3TweenEase.QuartIn(t,b,c,d);
+  ttQuartOut:     result := TW3TweenEase.QuartOut(t,b,c,d);
+  ttQuartInOut:   result := TW3TweenEase.QuartInOut(t,b,c,d);
+  ttQuintIn:      result := TW3TweenEase.QuintIn(t,b,c,d);
+  ttQuintOut:     result := TW3TweenEase.QuintOut(t,b,c,d);
+  ttQuintInOut:   result := TW3TweenEase.QuintInOut(t,b,c,d);
+  ttSineIn:       result := TW3TweenEase.SineIn(t,b,c,d);
+  ttSineOut:      result := TW3TweenEase.SineOut(t,b,c,d);
+  ttSineInOut:    result := TW3TweenEase.SineInOut(t,b,c,d);
+  ttExpoIn:       result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  ttExpoOut:      result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  ttExpoInOut:    result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  end;
+end;
+
+  asm
+    console.log( @TW3TweenEase.linear );
+  end;
+
+
+
 function TTweenData.Expired: Boolean;
 begin
   result := StartTime + Duration < GetTimeCode;
@@ -740,97 +817,156 @@ end;
 //  TW3TweenEase
 //#############################################################################
 {$HINTS OFF}
+
+
+class function TW3TweenEase.ExpoIn(t, b, c, d:float):float;
+begin
+  result := c * power(2,10 * (t/d-1))+b;
+end;
+
+class function TW3TweenEase.ExpoOut(t, b, c, d:float):float;
+begin
+  result := c * (-power(2,-10 * t/d)+1)+b;
+end;
+
+class function TW3TweenEase.ExpoInOut(t, b, c, d:float):float;
+begin
+  t := t / ( d / 2);
+  if (t<1) then
+  begin
+    result := c/2 * power(2,10 * (t-1)) + b;
+  end else
+  begin
+    t:=t-1;
+    result := c/2 * (power(2,-10*t)+2)+b;
+  end;
+end;
+
+
+class function TW3TweenEase.SineIn(t, b, c, d:float):float;
+begin
+  result := -c * cos(t/d * (PI / 2)) + c + b;
+end;
+
+class function TW3TweenEase.SineOut(t, b, c, d:float):float;
+begin
+  result := c * cos(t/d * (PI / 2)) + b;
+end;
+
+class function TW3TweenEase.SineInOut(t, b, c, d:float):float;
+begin
+  result := -c / 2 * (cos( PI * t / d) -1) + b;
+end;
+
+
+class function TW3TweenEase.QuintIn(t, b, c, d:float):float;
+begin
+  t := t / d;
+  result := c*t*t*t*t*t+b
+end;
+
+class function TW3TweenEase.QuintOut(t, b, c, d:float):float;
+begin
+  t := t / d;
+  t := t -1;
+  result := c * (t*t*t*t*t+1) + b;
+end;
+
+class function TW3TweenEase.QuintInOut(t, b, c, d:float):float;
+begin
+  t := t / (d / 2);
+  if (t<1) then
+  begin
+    result := c/2 * t * t * t * t * t + b;
+  end else
+  begin
+    t:=t-2;
+    result := c/2 * (t*t*t*t*t+2) +b;
+  end;
+end;
+
+
 class function TW3TweenEase.QuartIn(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    return @c * @t * @t * @t * @t + @b;
-  end;
+  t := t / d;
+  result := c * t * t * t * t + b;
 end;
 
 class function TW3TweenEase.QuartOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    @t--;
-    return -@c * (@t * @t * @t * @t - 1) + @b;
-  end;
+  t := t / d;
+  t := t - 1;
+  result := -c * (t * t * t * t - 1) + b;
 end;
 
 class function TW3TweenEase.QuartInOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d/2;
-    if (@t < 1) {
-        return @c / 2 * @t * @t * @t * @t + @b;
-    }
-    @t -= 2;
-    return -@c / 2 * (@t * @t * @t * @t - 2) + @b;
+  t := t / (d/2);
+  if (t<1) then
+  begin
+    result := c/2 * t * t * t * t + b;
+  end else
+  begin
+    t := t - 2;
+    result := -c / 2 * (t * t * t * t - 2) + b;
   end;
 end;
 
 class function TW3TweenEase.CubeInOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d/2;
-    if (@t < 1) {
-      return @c / 2 * @t * @t * @t + @b;
-    }
-    @t -= 2;
-    return @c/2 * (@t * @t * @t + 2) + @b;
+  t := t / (d / 2);
+  if ( t < 1) then
+  begin
+    result := c / 2 * (t * t * t) + b;
+  end else
+  begin
+    t := t -2;
+    result := c/2 * (t*t*t + 2) + b;
   end;
 end;
 
 class function TW3TweenEase.CubeOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    @t--;
-    return @c * (@t * @t * @t + 1) + @b;
-  end;
+  t := t / d;
+  t := t - 1;
+  result := c * (t * t * t + 1) + b;
 end;
 
 class function TW3TweenEase.CubeIn(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    return @c * @t * @t * @t + @b;
-  end;
+  t := t / d;
+  result := c * t * t * t + b;
 end;
 
 class function TW3TweenEase.QuadInOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d/2;
-    if (@t < 1) {
-      return @c / 2 * @t * @t * @t + @b;
-    }
-    @t -= 2;
-    @result = @c/2*(@t * @t * @t + 2) + @b;
+  t := t / (d / 2);
+  if (t<1) then
+  begin
+    result := c / 2 * t * t + b;
+    exit;
+  end else
+  begin
+    t := t -1;
+    result := -c / 2 * (t * (t - 2) -1) + b;
   end;
 end;
 
 class function TW3TweenEase.QuadOut(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    return -@c * @t * (@t - 2) + @b;
-  end;
+  t := t / d;
+  result := -c * t * (t - 2) + b;
 end;
 
 class function TW3TweenEase.QuadIn(t, b, c, d:float):float;
 begin
-  asm
-    @t /= @d;
-    return @c * @t * @t + @b;
-  end;
+  t := t / d;
+  result := c * t * t + b;
 end;
 
 class function TW3TweenEase.Linear(t,b,c,d:float):float;
 begin
-  asm
-   @result = @c * @t / @d + @b;
-  end;
+  result := c * t / d + b;
 end;
 {$HINTS ON}
 end.

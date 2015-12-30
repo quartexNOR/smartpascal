@@ -1,0 +1,19 @@
+<SMART>
+  <state>
+    <editor>
+      <tab filename="Form1" topline="13" col="17" row="40" splitview="1" designview="1" splitter="0.632222222222222" />
+      <tab filename="system.animation.effects" topline="98" col="58" row="125" />
+      <tab filename="system.animation.tween" topline="409" col="22" row="428" />
+      <activetab>system.animation.effects</activetab>
+      <breakpoints />
+    </editor>
+    <Statistics>
+      <BackgroundCompilations>728</BackgroundCompilations>
+      <EditTime>00:10:01.516</EditTime>
+      <CompileTime>00:00:22.121</CompileTime>
+      <TotalTime>00:33:13.971</TotalTime>
+      <DesigningTime>00:16:46.065</DesigningTime>
+      <RunningTime>00:01:49.733</RunningTime>
+    </Statistics>
+  </state>
+</SMART>

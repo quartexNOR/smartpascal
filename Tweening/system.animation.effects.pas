@@ -151,7 +151,7 @@ begin
 end;
 
 //#############################################################################
-// TMoveXEffect
+// TMoveYEffect
 //#############################################################################
 
 procedure TMoveYEffect.DoSetupTween;
@@ -164,7 +164,7 @@ begin
   LObj.StartValue := FromY;
   LObj.Distance := Distance ;
   LObj.Duration := Duration;
-  LObj.AnimationType := ttQuadInOut;
+  LObj.AnimationType := ttCubeIn;
   LObj.Behavior := tbSingle;
   LObj.OnUpdated := procedure (item:TTweenElement)
     begin
@@ -191,7 +191,7 @@ begin
   LObj.StartValue := FromX;
   LObj.Distance := Distance ;
   LObj.Duration := Duration;
-  LObj.AnimationType := ttQuadInOut;
+  LObj.AnimationType := ttSineInOut;
   LObj.Behavior := tbSingle;
   LObj.OnUpdated := procedure (item:TTweenElement)
     begin
