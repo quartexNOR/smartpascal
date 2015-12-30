@@ -47,7 +47,7 @@ type
     class function  QuartInOut(t, b, c, d:float):float;
   end;
 
-  TW3TweenItemUpdatedEvent = procedure (Sender:TObject;Item:TTweenElement);
+  TW3TweenItemUpdatedEvent = procedure (Item:TTweenElement);
   TW3TweenUpdatedEvent = procedure (Sender:TObject);
   TW3TweenStartedEvent = procedure (sender:TObject);
   TW3TweenFinishedEvent = procedure (sender:TObject);
@@ -77,6 +77,8 @@ type
     Property    OnFinished:TNotifyEvent;
     Property    OnUpdated:TW3TweenItemUpdatedEvent;
 
+    procedure   Update(const aValue:Float);virtual;
+
     Procedure   Reset;override;
     Constructor Create;virtual;
   end;
@@ -99,7 +101,7 @@ type
 
     Property    Active:Boolean read ( FActive );
     Property    Item[const index:Integer]:TTweenElement read (FValues[index]);
-    property    Tween[const Id:String]:TTweenElement read ObjectOf;
+    property    Tween[const Id:String]:TTweenElement read ObjectOf;default;
     property    Count:Integer read ( FValues.Length );
     Property    Interval:Integer read FInterval write ( TInteger.EnsureRange(Value,1,10000) );
 
@@ -118,6 +120,7 @@ type
 
     procedure   Clear;overload;
 
+    procedure   Execute(Finished:TProcedureRef);overload;
     procedure   Execute;overload;
     procedure   Execute(const TweenObjects:Array of TTweenElement);overload;
 
@@ -281,18 +284,16 @@ begin
     begin
       if IgnoreOscillate then
       begin
-        if (LItem.Behavior <> tbOscillate) then
+        //if (LItem.Behavior <> tbOscillate) then
+        if (LItem.Behavior = tbSingle) then
         inc(LCount) else
         inc(LDone);
       end else
       inc(LCount);
     end;
 
-    LItem.Value := Update(LItem);
-
-    // Fire "per item" event
-    if assigned(LItem.OnUpdated) then
-    LItem.OnUpdated(self,LItem);
+    // Update the element with the new value
+    LItem.Update(Update(LItem));
 
     // finished on this run?
     if LItem.Expired then
@@ -367,6 +368,16 @@ begin
 
   end else
   raise exception.Create('Tween already executing error');
+end;
+
+procedure TW3Tween.Execute(Finished:TProcedureRef);
+begin
+  self.OnFinished := procedure (sender:Tobject)
+    begin
+      if assigned(Finished) then
+      Finished;
+    end;
+  Execute;
 end;
 
 procedure TW3Tween.Execute;
@@ -718,11 +729,17 @@ begin
   State := tsIdle;
 end;
 
+procedure TTweenElement.Update(const aValue:Float);
+begin
+  Value := aValue;
+  if assigned(OnUpdated) then
+  OnUpdated(self);
+end;
 
 //#############################################################################
 //  TW3TweenEase
 //#############################################################################
-
+{$HINTS OFF}
 class function TW3TweenEase.QuartIn(t, b, c, d:float):float;
 begin
   asm
@@ -815,7 +832,5 @@ begin
    @result = @c * @t / @d + @b;
   end;
 end;
-
-
-
+{$HINTS ON}
 end.
