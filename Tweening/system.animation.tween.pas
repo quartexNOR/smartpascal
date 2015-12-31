@@ -71,6 +71,8 @@ type
 
     Property    OnStarted:TNotifyEvent;
     Property    OnFinished:TNotifyEvent;
+    Property    OnPaused:TNotifyEvent;
+    Property    OnResumed:TNotifyEvent;
     Property    OnUpdated:TW3TweenItemUpdatedEvent;
 
     procedure   Update(const aValue:Float);virtual;
@@ -98,6 +100,8 @@ type
   protected
     procedure   TweenStarted(const Item:TW3TweenElement);virtual;
     procedure   TweenComplete(const Item:TW3TweenElement);virtual;
+    procedure   TweenPaused(const Item:TW3TweenElement);virtual;
+    procedure   TweenResumed(const Item:TW3TweenElement);virtual;
   protected
     function    Linear(t,b,c,d:float):float;
     function    QuadIn(t, b, c, d:float):float;
@@ -257,9 +261,21 @@ begin
   end;
 end;
 
+procedure TW3Tween.TweenResumed(const Item:TW3TweenElement);
+begin
+  if assigned(Item.OnResumed) then
+  Item.OnResumed(Item);
+end;
+
 procedure TW3Tween.SetInterval(Const Value:Integer);
 begin
   FInterval := TInteger.EnsureRange(Value,1,10000);
+end;
+
+procedure TW3Tween.TweenPaused(const Item:TW3TweenElement);
+begin
+  if assigned(Item.OnPaused) then
+  Item.OnPaused(Item);
 end;
 
 procedure TW3Tween.TweenComplete(const Item:TW3TweenElement);
@@ -503,8 +519,9 @@ begin
       LObj := FValues[index];
       if LObj.State=tsPaused then
       begin
-        FValues[index].StartTime := TimeCode;
-        FValues[Index].State := tsRunning;
+        LObj.StartTime := TimeCode;
+        LObj.State := tsRunning;
+        TweenResumed(LObj);
       end;
     end;
   end;
@@ -520,8 +537,9 @@ begin
       begin
         if Tween.state=tsPaused then
         begin
+          Tween.State := tsRunning;
           Tween.StartTime := TimeCode;
-          Tween.State := tsPaused;
+          TweenResumed(Tween);
         end;
       end;
     end;
@@ -539,7 +557,16 @@ begin
       for LObj in Objs do
       begin
         if LObj<>NIl then
-        Resume(LObj);
+        begin
+
+          if LObj.State=tsPaused then
+          begin
+            LObj.state := tsRunning;
+            LObj.StartTime := TimeCode;
+            TweenResumed(LObj);
+          end;
+
+        end;
       end;
     end;
   end;
@@ -553,7 +580,16 @@ begin
   begin
     for LId in Ids do
     begin
-      Resume(ObjectOf(Lid));
+      var LObj := ObjectOf(Lid);
+      if LObj<>NIL then
+      Begin
+        if LObj.State = tsPaused then
+        begin
+          LObj.State := tsRunning;
+          LObj.StartTime := TimeCode;
+          TweenResumed(LObj);
+        end;
+      end;
     end;
   end;
 end;
@@ -569,7 +605,16 @@ begin
       for LObj in FValues do
       begin
         if LObj<>NIl then
-        Resume(LObj);
+        begin
+
+          if LObj.state=tsPaused then
+          begin
+            LObj.State := tsRunning;
+            LObj.StartTime := TimeCode;
+            TweenResumed(LObj);
+          end;
+
+        end;
       end;
     end;
   end;
@@ -585,7 +630,10 @@ begin
     begin
       LObj := FValues[index];
       if LObj.State=tsRunning then
-      FValues[Index].State := tsPaused;
+      begin
+        LObj.State := tsPaused;
+        TweenPaused(LObj);
+      end;
     end;
   end;
 end;
@@ -599,7 +647,10 @@ begin
       if FValues.IndexOf(Tween)>=0 then
       begin
         if Tween.state=tsRunning then
-        Tween.State := tsPaused;
+        begin
+          Tween.State := tsPaused;
+          TweenPaused(Tween);
+        end;
       end;
     end;
   end;
@@ -616,7 +667,13 @@ begin
       for LObj in Objs do
       begin
         if LObj<>NIl then
-        Pause(LObj);
+        begin
+          if LObj.State = tsRunning then
+          begin
+            LObj.State := tsPaused;
+            TweenPaused(LObj);
+          end;
+        end;
       end;
     end;
   end;
@@ -630,7 +687,15 @@ begin
   begin
     for LId in Ids do
     begin
-      Pause(ObjectOf(Lid));
+      var LObj := ObjectOf(LId);
+      if LObj<>NIL then
+      begin
+        if LObj.State = tsRunning then
+        begin
+          LObj.State := tsPaused;
+          TweenPaused(LObj);
+        end;
+      end;
     end;
   end;
 end;
@@ -645,7 +710,11 @@ begin
     Begin
       for LObj in FValues do
       begin
-        Pause(LObj);
+        if LObj.State = tsRunning then
+        begin
+          LObj.State := tsPaused;
+          TweenPaused(LObj);
+        end;
       end;
     end;
   end;

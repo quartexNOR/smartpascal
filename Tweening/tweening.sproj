@@ -2,7 +2,7 @@
   <Project version="2" subversion="2">
     <Name>tweening</Name>
     <Created>T00:00:00.000</Created>
-    <Modified>2015-12-31T02:10:31.933</Modified>
+    <Modified>2015-12-31T02:28:57.582</Modified>
     <Version>
       <Major>0</Major>
       <Minor>0</Minor>
@@ -232,18 +232,18 @@ end.]]>
       <File type="unit">
         <Name>system.animation.tween</Name>
         <Created>2015-12-30T23:24:44.918Z</Created>
-        <Modified>2015-12-31T02:10:31.933</Modified>
+        <Modified>2015-12-31T02:28:54.843</Modified>
         <Filename>system.animation.tween.pas</Filename>
       </File>
     </Files>
     <Target>Browser</Target>
     <Statistics>
-      <BackgroundCompilations>2584</BackgroundCompilations>
-      <EditTime>00:36:18.873</EditTime>
-      <CompileTime>00:01:19.717</CompileTime>
-      <TotalTime>02:38:04.908</TotalTime>
-      <DesigningTime>00:31:46.834</DesigningTime>
-      <RunningTime>00:06:51.056</RunningTime>
+      <BackgroundCompilations>3157</BackgroundCompilations>
+      <EditTime>00:44:07.602</EditTime>
+      <CompileTime>00:01:24.390</CompileTime>
+      <TotalTime>02:54:13.648</TotalTime>
+      <DesigningTime>00:47:55.489</DesigningTime>
+      <RunningTime>00:07:25.734</RunningTime>
     </Statistics>
   </Project>
 </SMART>
