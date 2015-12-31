@@ -47,7 +47,7 @@ type
     procedure   HandleTweenDone(sender:TObject);virtual;
     procedure   HandleTweenStart(sender:TObject);virtual;
     procedure   HandleTweenUpdated(Sender:TObject);virtual;
-    property    Core:TW3Tween read FTween;
+    property    Core:TW3Tween read Ftween;
   public
     Property    Busy:Boolean read ( FTween.active );
 
@@ -92,13 +92,13 @@ type
 
   TPropertyBinding = class(TObject)
   protected
-    procedure   HandleElementUpdated(item:TW3TweenElement);
+    procedure   HandleElementUpdated(item:TTweenElement);
   public
     property    Effect:TCustomControlEffect;
-    Property    Tween:TW3TweenElement;
+    Property    Tween:TTweenElement;
     property    BindingType:TPropertyBindingtype;
     Constructor Create(aEffect:TCustomControlEffect;
-                aTween:TW3TweenElement;
+                aTween:TTweenElement;
                 aBindingtype:TPropertyBindingtype);
   end;
 
@@ -107,7 +107,7 @@ type
     FBindings:  Array of TPropertyBinding;
   public
     procedure DoSetupTween;override;
-    function Bind(PropertyName:String;BindingType:TPropertyBindingtype):TPropertyBinding;
+    function Bind(PropertyName:String;&Type:TPropertyBindingtype):TPropertyBinding;
   end;
 
 implementation
@@ -117,13 +117,12 @@ begin
   var Binding := Bind('left',TPropertyBindingtype.pbAttribute);
 end;
 
-function TWidgetEffect.Bind(PropertyName:String;BindingType:TPropertyBindingtype):TPropertyBinding;
+function TWidgetEffect.Bind(PropertyName:String;&Type:TPropertyBindingtype):TPropertyBinding;
 var
-  Ltween: TW3TweenElement;
+  Ltween: TTweenElement;
 begin
   Ltween := Core.Add(PropertyName);
-  result := TpropertyBinding.Create(self, Ltween, BindingType);
-  FBindings.add(result);
+  result := TpropertyBinding.Create(self, Ltween, &Type);
 end;
 
 
@@ -133,7 +132,7 @@ end;
 
 
 Constructor TPropertyBinding.Create(aEffect:TCustomControlEffect;
-            aTween:TW3TweenElement;
+            aTween:TTweenElement;
             aBindingtype:TPropertyBindingtype);
 begin
   inherited Create;
@@ -143,7 +142,7 @@ begin
   Tween.OnUpdated := HandleElementUpdated;
 end;
 
-procedure TPropertyBinding.HandleElementUpdated(item:TW3TweenElement);
+procedure TPropertyBinding.HandleElementUpdated(item:TTweenElement);
 begin
   case Bindingtype of
   pbStyle:      w3_setStyle(Effect.Control.Handle,item.id,item.value);
@@ -157,7 +156,7 @@ end;
 
 procedure TMoveYEffect.DoSetupTween;
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   Core.OnUpdated := NIL;
 
@@ -167,7 +166,7 @@ begin
   LObj.Duration := Duration;
   LObj.AnimationType := ttCubeIn;
   LObj.Behavior := tbSingle;
-  LObj.OnUpdated := procedure (item:TW3TweenElement)
+  LObj.OnUpdated := procedure (item:TTweenElement)
     begin
       Control.Top := round ( Item.Value );
     end;
@@ -184,21 +183,17 @@ end;
 
 procedure TMoveXEffect.DoSetupTween;
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   Core.OnUpdated := NIL;
 
   LObj := Core.Add("xpos");
-
-  Core.SyncRefresh := false;
-  Core.Interval := 10;
-
   LObj.StartValue := FromX;
   LObj.Distance := Distance ;
   LObj.Duration := Duration;
-  LObj.AnimationType := ttQuartInOut;
+  LObj.AnimationType := ttSineInOut;
   LObj.Behavior := tbSingle;
-  LObj.OnUpdated := procedure (item:TW3TweenElement)
+  LObj.OnUpdated := procedure (item:TTweenElement)
     begin
       Control.Left := round ( Item.Value );
     end;
@@ -230,6 +225,7 @@ begin
   FTween.OnFinished := HandleTweenDone;
   FTween.OnStarted := HandleTweenStart;
   FTween.OnUpdated := HandleTweenUpdated;
+  Ftween.SyncRefresh := true;
 end;
 
 Destructor TCustomTweenEffect.Destroy;

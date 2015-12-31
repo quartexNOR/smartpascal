@@ -31,45 +31,80 @@ type
     ttExpoInOut
     );
 
-  TW3TweenBehavior = (
+  TTweenBehavior = (
     tbSingle,         // Execute once and then stops
     tbRepeat,         // Repeats the tween sequence
     tbOscillate      // Executes between A and B in oscillating manner
     );
 
-  TW3TweenData    = class;
-  TW3TweenElement = class;
-  TW3Tween        = class;
+  TTweenData    = class;
+  TTweenElement = class;
+  TW3TweenEase  = class;
+  TW3Tween      = class;
+
+  TW3TweenEase = class
+  public
+    class function  Linear(t,b,c,d:float):float;
+
+    class function  QuadIn(t, b, c, d:float):float;
+    class function  QuadOut(t, b, c, d:float):float;
+    class function  QuadInOut(t, b, c, d:float):float;
+
+    class function  CubeIn(t, b, c, d:float):float;
+    class function  CubeOut(t, b, c, d:float):float;
+    class function  CubeInOut(t, b, c, d:float):float;
+
+    class function  QuartIn(t, b, c, d:float):float;
+    class function  QuartOut(t, b, c, d:float):float;
+    class function  QuartInOut(t, b, c, d:float):float;
+
+    class function  QuintIn(t, b, c, d:float):float;
+    class function  QuintOut(t, b, c, d:float):float;
+    class function  QuintInOut(t, b, c, d:float):float;
+
+    class function  SineIn(t, b, c, d:float):float;
+    class function  SineOut(t, b, c, d:float):float;
+    class function  SineInOut(t, b, c, d:float):float;
+
+    class function  ExpoIn(t, b, c, d:float):float;
+    class function  ExpoOut(t, b, c, d:float):float;
+    class function  ExpoInOut(t, b, c, d:float):float;
+  end;
 
 
-  TW3TweenItemUpdatedEvent = procedure (Item:TW3TweenElement);
+  TW3TweenItemUpdatedEvent = procedure (Item:TTweenElement);
   TW3TweenUpdatedEvent = procedure (Sender:TObject);
   TW3TweenStartedEvent = procedure (sender:TObject);
   TW3TweenFinishedEvent = procedure (sender:TObject);
   TW3TweenFinishedPartialEvent = procedure (sender:TObject);
 
-  TW3TweenState = (tsIdle,tsRunning,tsPaused,tsDone);
+  TTweenState = (tsIdle,tsRunning,tsPaused,tsDone);
 
-  TW3TweenData = class
+  TTweenData = class
+  private
+    FEntry:     TProcedureRef;
+    FAnimType:  TW3TweenAnimationType;
+    procedure   SetAnimType(Value:TW3TweenAnimationType);
   public
     Property    Id: String;
     Property    StartTime: TDateTime;
     Property    StartValue: Float;
     Property    Distance: Float;
     Property    Duration: Float;
-    Property    AnimationType: TW3TweenAnimationType;
-    Property    Behavior: TW3TweenBehavior;
+    Property    AnimationType: TW3TweenAnimationType
+                read FAnimType write SetAnimtype;
+
+    Property    Behavior: TTweenBehavior;
 
     function    Expired: Boolean;virtual;
     Procedure   Reset;virtual;
   end;
 
-  TW3TweenElement = class(TW3TweenData)
+  TTweenElement = class(TTweenData)
   public
-    Property    State:TW3TweenState;
+    Property    State:TTweenState;
     Property    Value:Float;
 
-    Property    OnStarted:TNotifyEvent;
     Property    OnFinished:TNotifyEvent;
     Property    OnUpdated:TW3TweenItemUpdatedEvent;
 
@@ -79,66 +114,36 @@ type
     Constructor Create;virtual;
   end;
 
-  (* Exception class for general TTween errors *)
-  EW3TweenError = class(EW3Exception);
-
   TW3Tween = class
   private
     FTimer:     TW3Timer;
-    FValues:    Array of TW3TweenElement;
+    FValues:    Array of TTweenElement;
     FActive:    Boolean;
     FPartial:   Boolean;
     FInterval:  Integer;
-    FQRLUT:     Array[TW3TweenAnimationType] of function (t, b, c, d:float):float;
-    procedure   SetInterval(const Value:Integer);
   protected
     Procedure   HandleSyncUpdate;virtual;
     procedure   HandleUpdateTimer(Sender:TObject);virtual;
-    function    Update(const Item:TW3TweenElement):Float;virtual;
-  protected
-    procedure   TweenStarted(const Item:TW3TweenElement);virtual;
-    procedure   TweenComplete(const Item:TW3TweenElement);virtual;
-  protected
-    function    Linear(t,b,c,d:float):float;
-    function    QuadIn(t, b, c, d:float):float;
-    function    QuadOut(t, b, c, d:float):float;
-    function    QuadInOut(t, b, c, d:float):float;
-    function    CubeIn(t, b, c, d:float):float;
-    function    CubeOut(t, b, c, d:float):float;
-    function    CubeInOut(t, b, c, d:float):float;
-    function    QuartIn(t, b, c, d:float):float;
-    function    QuartOut(t, b, c, d:float):float;
-    function    QuartInOut(t, b, c, d:float):float;
-    function    QuintIn(t, b, c, d:float):float;
-    function    QuintOut(t, b, c, d:float):float;
-    function    QuintInOut(t, b, c, d:float):float;
-    function    SineIn(t, b, c, d:float):float;
-    function    SineOut(t, b, c, d:float):float;
-    function    SineInOut(t, b, c, d:float):float;
-    function    ExpoIn(t, b, c, d:float):float;
-    function    ExpoOut(t, b, c, d:float):float;
-    function    ExpoInOut(t, b, c, d:float):float;
-
+    function    Update(const Item:TTweenElement):Float;virtual;
   public
-    function    ObjectOf(const Id:String):TW3TweenElement;
+
+    function    ObjectOf(const Id:String):TTweenElement;
     function    IndexOf(Id:String):Integer;
 
     Property    Active:Boolean read ( FActive );
-    Property    Item[const index:Integer]:TW3TweenElement read (FValues[index]);
-    property    Tween[const Id:String]:TW3TweenElement read ObjectOf;default;
+    Property    Item[const index:Integer]:TTweenElement read (FValues[index]);
+    property    Tween[const Id:String]:TTweenElement read ObjectOf;default;
     property    Count:Integer read ( FValues.Length );
-    Property    Interval:Integer read FInterval write SetInterval;
+    Property    Interval:Integer read FInterval write ( TInteger.EnsureRange(Value,1,10000) );
 
     Property    SyncRefresh:Boolean;
     Property    IgnoreOscillate:Boolean;
 
-    function    Add(Id:String):TW3TweenElement;overload;
+    function    Add(Id:String):TTweenElement;overload;
 
     Function    Add(Id:String;const aStartValue,aDistance,aDuration:float;
                 const aAnimationType:TW3TweenAnimationType;
-                const aBehavior:TW3TweenBehavior):TW3TweenElement;overload;
-
-    function    Add(const Instance:TW3TweenElement):TW3TweenElement;overload;
+                const aBehavior:TTweenBehavior):TTweenElement;overload;
 
     Procedure   Delete(index:Integer);overload;
     procedure   Delete(Id:String);overload;
@@ -148,23 +153,21 @@ type
 
     procedure   Execute(Finished:TProcedureRef);overload;
     procedure   Execute;overload;
-    procedure   Execute(const TweenObjects:Array of TW3TweenElement);overload;
+    procedure   Execute(const TweenObjects:Array of TTweenElement);overload;
 
     Procedure   Pause(const Index:Integer);overload;
-    procedure   Pause(const Tween:TW3TweenElement);overload;
-    procedure   Pause(const Objs:Array of TW3TweenElement);overload;
+    procedure   Pause(const Tween:TTweenElement);overload;
+    procedure   Pause(const Objs:Array of TTweenElement);overload;
     procedure   Pause(const Ids:Array of String);overload;
     procedure   Pause;overload;
 
     Procedure   Resume(const index:Integer);overload;
-    procedure   Resume(const Tween:TW3TweenElement);overload;
-    procedure   Resume(const Objs:Array of TW3TweenElement);overload;
+    procedure   Resume(const Tween:TTweenElement);overload;
+    procedure   Resume(const Objs:Array of TTweenElement);overload;
     procedure   Resume(const Ids:Array of String);overload;
     procedure   Resume;overload;
 
     procedure   Cancel;overload;
-
-    class function TimeCode:float;
 
     Constructor Create;virtual;
     Destructor  Destroy;Override;
@@ -176,27 +179,23 @@ type
     Property    OnStarted:TW3TweenStartedEvent;
   end;
 
+
+function GetTimeCode:float;
+function Round100(const Value:float):float;
+
 implementation
 
+Function GetTimeCode:float;
+begin
+  asm
+    @result = Date.now();
+  end;
+end;
 
-Resourcestring
-CNT_TWEEN_EXEC_EXISTS_ID =
-"Execute failed, a tween-object with id [%s] already exists error";
-
-CNT_TWEEN_EXEC_FAILED_ID =
-"Execute failed, element does not have a valid id error";
-
-CNT_TWEEN_EXEC_BUSY =
-"Execute failed, tween already active error";
-
-CNT_ERR_TWEEN_ELEMENT_EMPTY_ID =
-"Failed to add tween-element, invalid [empty] id error";
-
-CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID =
-"Failed to add tween-element, [%s] already exists in the collection error";
-
-CNT_ERR_TWEEN_ELEMENT_EXISTS =
-"Failed to add tween-element [%s], element already exists in collection error";
+function Round100(const Value:float):float;
+begin
+  result := Round( Value * 100) / 100;
+end;
 
 //############################################################################
 // TW3Tween
@@ -206,34 +205,11 @@ Constructor TW3Tween.Create;
 begin
   inherited Create;
   FTimer := TW3Timer.Create;
-
-  FInterval := 10;
+  Interval := 10;
   IgnoreOscillate := true;
-  SyncRefresh := false;
-
-  // Build Lookup-Table for faster access
-  FQRLUT[ttlinear] := @Linear;
-  FQRLUT[ttQuadIn] := @QuadIn;
-  FQRLUT[ttQuadOut] := @QuadOut;
-  FQRLUT[ttQuadInOut] := @QuadInOut;
-  FQRLUT[ttCubeIn] := @CubeIn;
-  FQRLUT[ttCubeOut] := @CubeOut;
-  FQRLUT[ttCubeInOut] := @CubeInOut;
-  FQRLUT[ttQuartIn] := @QuartIn;
-  FQRLUT[ttQuartOut] := @QuartOut;
-  FQRLUT[ttQuartInOut] := @QuartInOut;
-  FQRLUT[ttQuintIn] := @QuintIn;
-  FQRLUT[ttQuintOut] := @QuintOut;
-  FQRLUT[ttQuintInOut] := @QuintInOut;
-  FQRLUT[ttSineIn] := @SineIn;
-  FQRLUT[ttSineOut] := @SineOut;
-  FQRLUT[ttSineInOut] := @SineInOut;
-  FQRLUT[ttExpoIn] := @ExpoIn;
-  FQRLUT[ttExpoOut] := @ExpoOut;
-  FQRLUT[ttExpoInOut] := @ExpoInOut;
 end;
 
-Destructor TW3Tween.Destroy;
+Destructor  TW3Tween.Destroy;
 begin
   Cancel;
   Clear;
@@ -250,37 +226,41 @@ begin
   end;
 end;
 
-class function TW3Tween.TimeCode:float;
-begin
-  asm
-    @result = Date.now();
-  end;
-end;
-
-procedure TW3Tween.SetInterval(Const Value:Integer);
-begin
-  FInterval := TInteger.EnsureRange(Value,1,10000);
-end;
-
-procedure TW3Tween.TweenComplete(const Item:TW3TweenElement);
-begin
-  if assigned(Item.OnFinished) then
-  Item.OnFinished(Item);
-end;
-
-procedure TW3Tween.TweenStarted(const Item:TW3TweenElement);
-begin
-  if assigned(Item.OnStarted) then
-  Item.OnStarted(Item);
-end;
-
-function TW3Tween.Update(const Item:TW3TweenElement):Float;
+function TW3Tween.Update(const Item:TTweenElement):Float;
 var
   LTotal: float;
+
+  function PerformX(t, b, c, d:float):float;
+  begin
+    result := 0.0;
+    case Item.AnimationType of
+    ttlinear:       result := TW3TweenEase.Linear(t,b,c,d);
+    ttQuadIn:       result := TW3TweenEase.QuadIn(t,b,c,d);
+    ttQuadOut:      result := TW3TweenEase.QuadOut(t,b,c,d);
+    ttQuadInOut:    result := TW3TweenEase.QuadInOut(t,b,c,d);
+    ttCubeIn:       result := TW3TweenEase.CubeIn(t,b,c,d);
+    ttCubeOut:      result := TW3TweenEase.CubeOut(t,b,c,d);
+    ttCubeInOut:    result := TW3TweenEase.CubeInOut(t,b,c,d);
+    ttQuartIn:      result := TW3TweenEase.QuartIn(t,b,c,d);
+    ttQuartOut:     result := TW3TweenEase.QuartOut(t,b,c,d);
+    ttQuartInOut:   result := TW3TweenEase.QuartInOut(t,b,c,d);
+    ttQuintIn:      result := TW3TweenEase.QuintIn(t,b,c,d);
+    ttQuintOut:     result := TW3TweenEase.QuintOut(t,b,c,d);
+    ttQuintInOut:   result := TW3TweenEase.QuintInOut(t,b,c,d);
+    ttSineIn:       result := TW3TweenEase.SineIn(t,b,c,d);
+    ttSineOut:      result := TW3TweenEase.SineOut(t,b,c,d);
+    ttSineInOut:    result := TW3TweenEase.SineInOut(t,b,c,d);
+    ttExpoIn:       result := TW3TweenEase.ExpoInOut(t,b,c,d);
+    ttExpoOut:      result := TW3TweenEase.ExpoInOut(t,b,c,d);
+    ttExpoInOut:    result := TW3TweenEase.ExpoInOut(t,b,c,d);
+    end;
+  end;
+
 begin
+
   if not Item.Expired then
   begin
-    LTotal := FQRLUT[item.AnimationType](TimeCode-Item.StartTime,
+    LTotal := PerformX(GetTimeCode-Item.StartTime,
                       Item.StartValue,
                       Item.Distance,
                       Item.Duration);
@@ -291,8 +271,8 @@ begin
   end else
   if Item.behavior = tbRepeat then
   begin
-    Item.StartTime := TimeCode;
-    LTotal := FQRLUT[item.AnimationType](TimeCode-Item.StartTime,
+    Item.StartTime := GetTimeCode;
+    LTotal := PerformX(GetTimeCode-Item.StartTime,
                       Item.StartValue,
                       Item.Distance,
                       Item.Duration);
@@ -301,20 +281,20 @@ begin
   begin
     Item.StartValue := Item.StartValue + Item.Distance;
     Item.Distance := -Item.Distance;
-    Item.StartTime := TimeCode;
-    LTotal := FQRLUT[item.AnimationType](TimeCode-Item.StartTime,
+    Item.StartTime := GetTimeCode;
+    LTotal := PerformX(GetTimeCode-Item.StartTime,
                       Item.StartValue,
                       Item.Distance,
                       Item.Duration);
     Item.State := tsDone;
   end;
 
-  result := Round( LTotal * 100) / 100;
+  result := Round100(LTotal);
 end;
 
 procedure TW3Tween.HandleUpdateTimer(Sender:TObject);
 var
-  LItem:  TW3TweenElement;
+  LItem:  TTweenElement;
   LCount: Integer;
   LDone:  Integer;
 begin
@@ -332,9 +312,8 @@ begin
     (* The start time-code is set in the first update *)
     if LItem.State=tsIdle then
     begin
+      LItem.StartTime := GetTimeCode;
       LItem.State := tsRunning;
-      TweenStarted(LItem);
-      LItem.StartTime := TimeCode;
     end;
 
     // Animation paused? Continue with next
@@ -363,7 +342,8 @@ begin
       if not Litem.State = tsDone then
       begin
         LItem.State := tsDone;
-        TweenComplete(LItem);
+        if assigned(LItem.OnFinished) then
+        LItem.OnFinished(LItem);
       end;
     end;
 
@@ -388,6 +368,7 @@ begin
   (* If all tweens have expired, stop the animation *)
   If LCount = FValues.Length then
   begin
+    //Writeln('Stopping at ' + LCount.toString + ' tweens done');
     Cancel;
   end;
 end;
@@ -399,9 +380,9 @@ begin
   W3_RequestAnimationFrame(HandleSyncUpdate);
 end;
 
-procedure TW3Tween.Execute(Const TweenObjects:Array of TW3TweenElement);
+procedure TW3Tween.Execute(Const TweenObjects:Array of TTweenElement);
 var
-  LItem:  TW3TweenElement;
+  LItem:  TTweenElement;
   LId:    String;
 begin
   if not Active then
@@ -416,16 +397,18 @@ begin
 
           if self.IndexOf(LId)<0 then
           FValues.add(LItem) else
-          Raise EW3TweenError.CreateFmt(CNT_TWEEN_EXEC_EXISTS_ID,[LId]);
+          Raise EW3Exception.CreateFmt
+          ('Execute failed, a tween-object with id [%s] already exists in collection error',[LId]);
         end else
-        Raise EW3TweenError.Create(CNT_TWEEN_EXEC_FAILED_ID);
+        Raise EW3Exception.Create
+        ('Execute failed, could not inject tween object, element missing qualified id error');
       end;
     end;
 
     Execute;
 
   end else
-  raise EW3TweenError.Create(CNT_TWEEN_EXEC_BUSY);
+  raise exception.Create('Tween already executing error');
 end;
 
 procedure TW3Tween.Execute(Finished:TProcedureRef);
@@ -449,7 +432,7 @@ begin
     true:
       begin
         // Initiate loop in 100ms
-        W3_SetTimeOut( procedure ()
+        W3_Callback( procedure ()
           begin
             W3_RequestAnimationFrame( HandleSyncUpdate );
           end, 100);
@@ -467,13 +450,13 @@ begin
     OnStarted(self);
 
   end else
-  raise EW3TweenError.Create(CNT_TWEEN_EXEC_BUSY);
+  raise exception.Create('Tween already executing error');
 end;
 
 procedure TW3Tween.Delete(const TweenIds:Array of String);
 var
   Lid:  String;
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
   LIndex: Integer;
 begin
   if tweenIds.length>0 then
@@ -494,7 +477,7 @@ end;
 
 Procedure TW3Tween.Resume(const index:Integer);
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -503,14 +486,14 @@ begin
       LObj := FValues[index];
       if LObj.State=tsPaused then
       begin
-        FValues[index].StartTime := TimeCode;
+        FValues[index].StartTime := GetTimeCode;
         FValues[Index].State := tsRunning;
       end;
     end;
   end;
 end;
 
-procedure TW3Tween.Resume(const Tween:TW3TweenElement);
+procedure TW3Tween.Resume(const Tween:TTweenElement);
 begin
   if Active then
   Begin
@@ -520,7 +503,7 @@ begin
       begin
         if Tween.state=tsPaused then
         begin
-          Tween.StartTime := TimeCode;
+          Tween.StartTime := GetTimeCode;
           Tween.State := tsPaused;
         end;
       end;
@@ -528,9 +511,9 @@ begin
   end;
 end;
 
-procedure TW3Tween.Resume(const Objs:Array of TW3TweenElement);
+procedure TW3Tween.Resume(const Objs:Array of TTweenElement);
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -560,7 +543,7 @@ end;
 
 procedure TW3Tween.Resume;
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -577,7 +560,7 @@ end;
 
 Procedure TW3Tween.Pause(const Index:Integer);
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -590,7 +573,7 @@ begin
   end;
 end;
 
-procedure TW3Tween.Pause(const Tween:TW3TweenElement);
+procedure TW3Tween.Pause(const Tween:TTweenElement);
 begin
   if Active then
   Begin
@@ -605,9 +588,9 @@ begin
   end;
 end;
 
-procedure TW3Tween.Pause(const Objs:Array of TW3TweenElement);
+procedure TW3Tween.Pause(const Objs:Array of TTweenElement);
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -637,7 +620,7 @@ end;
 
 procedure TW3Tween.Pause;
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   if Active then
   begin
@@ -669,7 +652,7 @@ end;
 
 Procedure TW3Tween.Delete(index:Integer);
 var
-  LObj: TW3TweenElement;
+  LObj: TTweenElement;
 begin
   LObj:=FValues[index];
   FValues.Delete(Index,1);
@@ -681,66 +664,46 @@ begin
   Delete(FValues.indexOf(ObjectOf(Id)));
 end;
 
-function TW3Tween.Add(const Instance:TW3TweenElement):TW3TweenElement;
-begin
-  result := Instance;
-  if Instance<>NIL then
-  begin
-    if FValues.IndexOf(Instance)<0 then
-    begin
-      var id := Instance.id.trim.lowercase;
-      if id.length>0 then
-      begin
-        if IndexOf(id)>=0 then
-        begin
-          FValues.Add(Instance);
-        end else
-        Raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
-      end else
-      Raise EW3TweenError.Create(CNT_ERR_TWEEN_ELEMENT_EMPTY_ID);
-    end else
-    Raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_EXISTS,[Instance.Id]);
-  end;
-end;
-
-function TW3Tween.Add(Id:String):TW3TweenElement;
+function TW3Tween.Add(Id:String):TTweenElement;
 begin
   Id := id.trim.lowercase;
   if id.length>0 then
   begin
     if IndexOf(Id)<0 then
     begin
-      result := TW3TweenElement.Create;
+      result := TTweenElement.Create;
       result.Id := Id;
       FValues.add(result);
     end else
-    raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
+    raise EW3Exception.CreateFmt
+    ('A tween-object with id [%s] already exists in collection error',[Id]);
   end else
-  raise EW3TweenError.Create(CNT_ERR_TWEEN_ELEMENT_EMPTY_ID);
+  raise EW3Exception.Create('Invalid tween-object id [empty] error');
 end;
 
 Function TW3Tween.Add(Id:String;const aStartValue,aDistance,aDuration:float;
           const aAnimationType:TW3TweenAnimationType;
-          const aBehavior:TW3TweenBehavior):TW3TweenElement;
+          const aBehavior:TTweenBehavior):TTweenElement;
 begin
   Id := id.trim.lowercase;
   if id.length>0 then
   begin
     if IndexOf(Id)<0 then
     begin
-      result := TW3TweenElement.Create;
+      result := TTweenElement.Create;
       result.StartValue := aStartValue;
       result.Distance := aDistance;
       result.Duration := aDuration;
       result.AnimationType := aAnimationtype;
       result.Behavior := aBehavior;
-      result.StartTime := TimeCode;
+      result.StartTime := GetTimeCode;
       result.Id := Id;
       FValues.add(result);
     end else
-    raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
+    raise EW3Exception.CreateFmt
+    ('A tween-object with id [%s] already exists in collection error',[Id]);
   end else
-  raise EW3TweenError.Create(CNT_ERR_TWEEN_ELEMENT_EMPTY_ID);
+  raise EW3Exception.Create('Invalid tween-object id [empty] error');
 end;
 
 function TW3Tween.IndexOf(Id:String):Integer;
@@ -762,7 +725,7 @@ begin
   end;
 end;
 
-function TW3Tween.ObjectOf(const Id:String):TW3TweenElement;
+function TW3Tween.ObjectOf(const Id:String):TTweenElement;
 var
   LIndex: Integer;
 begin
@@ -772,18 +735,101 @@ begin
   result := NIL;
 end;
 
+//############################################################################
+// TTweenData
+//############################################################################
+
+
+procedure TTweenData.SetAnimType(Value:TW3TweenAnimationType);
+begin
+  FAnimType := Value;
+
+  self.
+
+  case value of
+  ttlinear:       asm (@self) end;
+  ttQuadIn:       result := TW3TweenEase.QuadIn(t,b,c,d);
+  ttQuadOut:      result := TW3TweenEase.QuadOut(t,b,c,d);
+  ttQuadInOut:    result := TW3TweenEase.QuadInOut(t,b,c,d);
+  ttCubeIn:       result := TW3TweenEase.CubeIn(t,b,c,d);
+  ttCubeOut:      result := TW3TweenEase.CubeOut(t,b,c,d);
+  ttCubeInOut:    result := TW3TweenEase.CubeInOut(t,b,c,d);
+  ttQuartIn:      result := TW3TweenEase.QuartIn(t,b,c,d);
+  ttQuartOut:     result := TW3TweenEase.QuartOut(t,b,c,d);
+  ttQuartInOut:   result := TW3TweenEase.QuartInOut(t,b,c,d);
+  ttQuintIn:      result := TW3TweenEase.QuintIn(t,b,c,d);
+  ttQuintOut:     result := TW3TweenEase.QuintOut(t,b,c,d);
+  ttQuintInOut:   result := TW3TweenEase.QuintInOut(t,b,c,d);
+  ttSineIn:       result := TW3TweenEase.SineIn(t,b,c,d);
+  ttSineOut:      result := TW3TweenEase.SineOut(t,b,c,d);
+  ttSineInOut:    result := TW3TweenEase.SineInOut(t,b,c,d);
+  ttExpoIn:       result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  ttExpoOut:      result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  ttExpoInOut:    result := TW3TweenEase.ExpoInOut(t,b,c,d);
+  end;
+end;
+
+  asm
+    console.log( @TW3TweenEase.linear );
+  end;
+
+
+
+function TTweenData.Expired: Boolean;
+begin
+  result := StartTime + Duration < GetTimeCode;
+end;
+
+Procedure TTweenData.Reset;
+begin
+  StartTime := 0;
+  StartValue := 0;
+  Distance := 0;
+  Duration := 0;
+  Animationtype := ttlinear;
+  Behavior := tbSingle;
+end;
+
+//############################################################################
+// TTweenElement
+//############################################################################
+
+Constructor TTweenElement.Create;
+begin
+  inherited Create;
+  State := tsIdle;
+end;
+
+Procedure TTweenElement.Reset;
+begin
+  inherited Reset;
+  State := tsIdle;
+end;
+
+procedure TTweenElement.Update(const aValue:Float);
+begin
+  Value := aValue;
+  if assigned(OnUpdated) then
+  OnUpdated(self);
+end;
+
+//#############################################################################
+//  TW3TweenEase
+//#############################################################################
 {$HINTS OFF}
-function TW3Tween.ExpoIn(t, b, c, d:float):float;
+
+
+class function TW3TweenEase.ExpoIn(t, b, c, d:float):float;
 begin
   result := c * power(2,10 * (t/d-1))+b;
 end;
 
-function TW3Tween.ExpoOut(t, b, c, d:float):float;
+class function TW3TweenEase.ExpoOut(t, b, c, d:float):float;
 begin
   result := c * (-power(2,-10 * t/d)+1)+b;
 end;
 
-function TW3Tween.ExpoInOut(t, b, c, d:float):float;
+class function TW3TweenEase.ExpoInOut(t, b, c, d:float):float;
 begin
   t := t / ( d / 2);
   if (t<1) then
@@ -796,35 +842,37 @@ begin
   end;
 end;
 
-function TW3Tween.SineIn(t, b, c, d:float):float;
+
+class function TW3TweenEase.SineIn(t, b, c, d:float):float;
 begin
   result := -c * cos(t/d * (PI / 2)) + c + b;
 end;
 
-function TW3Tween.SineOut(t, b, c, d:float):float;
+class function TW3TweenEase.SineOut(t, b, c, d:float):float;
 begin
   result := c * cos(t/d * (PI / 2)) + b;
 end;
 
-function TW3Tween.SineInOut(t, b, c, d:float):float;
+class function TW3TweenEase.SineInOut(t, b, c, d:float):float;
 begin
   result := -c / 2 * (cos( PI * t / d) -1) + b;
 end;
 
-function TW3Tween.QuintIn(t, b, c, d:float):float;
+
+class function TW3TweenEase.QuintIn(t, b, c, d:float):float;
 begin
   t := t / d;
   result := c*t*t*t*t*t+b
 end;
 
-function TW3Tween.QuintOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuintOut(t, b, c, d:float):float;
 begin
   t := t / d;
   t := t -1;
   result := c * (t*t*t*t*t+1) + b;
 end;
 
-function TW3Tween.QuintInOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuintInOut(t, b, c, d:float):float;
 begin
   t := t / (d / 2);
   if (t<1) then
@@ -837,20 +885,21 @@ begin
   end;
 end;
 
-function TW3Tween.QuartIn(t, b, c, d:float):float;
+
+class function TW3TweenEase.QuartIn(t, b, c, d:float):float;
 begin
   t := t / d;
   result := c * t * t * t * t + b;
 end;
 
-function TW3Tween.QuartOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuartOut(t, b, c, d:float):float;
 begin
   t := t / d;
   t := t - 1;
   result := -c * (t * t * t * t - 1) + b;
 end;
 
-function TW3Tween.QuartInOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuartInOut(t, b, c, d:float):float;
 begin
   t := t / (d/2);
   if (t<1) then
@@ -863,7 +912,7 @@ begin
   end;
 end;
 
-function TW3Tween.CubeInOut(t, b, c, d:float):float;
+class function TW3TweenEase.CubeInOut(t, b, c, d:float):float;
 begin
   t := t / (d / 2);
   if ( t < 1) then
@@ -876,20 +925,20 @@ begin
   end;
 end;
 
-function TW3Tween.CubeOut(t, b, c, d:float):float;
+class function TW3TweenEase.CubeOut(t, b, c, d:float):float;
 begin
   t := t / d;
   t := t - 1;
   result := c * (t * t * t + 1) + b;
 end;
 
-function TW3Tween.CubeIn(t, b, c, d:float):float;
+class function TW3TweenEase.CubeIn(t, b, c, d:float):float;
 begin
   t := t / d;
   result := c * t * t * t + b;
 end;
 
-function TW3Tween.QuadInOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuadInOut(t, b, c, d:float):float;
 begin
   t := t / (d / 2);
   if (t<1) then
@@ -903,64 +952,21 @@ begin
   end;
 end;
 
-function TW3Tween.QuadOut(t, b, c, d:float):float;
+class function TW3TweenEase.QuadOut(t, b, c, d:float):float;
 begin
   t := t / d;
   result := -c * t * (t - 2) + b;
 end;
 
-function TW3Tween.QuadIn(t, b, c, d:float):float;
+class function TW3TweenEase.QuadIn(t, b, c, d:float):float;
 begin
   t := t / d;
   result := c * t * t + b;
 end;
 
-function TW3Tween.Linear(t,b,c,d:float):float;
+class function TW3TweenEase.Linear(t,b,c,d:float):float;
 begin
   result := c * t / d + b;
 end;
 {$HINTS ON}
-
-//############################################################################
-// TW3TweenData
-//############################################################################
-
-function TW3TweenData.Expired: Boolean;
-begin
-  result := StartTime + Duration < TW3Tween.TimeCode;
-end;
-
-Procedure TW3TweenData.Reset;
-begin
-  StartTime := 0;
-  StartValue := 0;
-  Distance := 0;
-  Duration := 0;
-  Animationtype := ttlinear;
-  Behavior := tbSingle;
-end;
-
-//############################################################################
-// TW3TweenElement
-//############################################################################
-
-Constructor TW3TweenElement.Create;
-begin
-  inherited Create;
-  State := tsIdle;
-end;
-
-Procedure TW3TweenElement.Reset;
-begin
-  inherited Reset;
-  State := tsIdle;
-end;
-
-procedure TW3TweenElement.Update(const aValue:Float);
-begin
-  Value := aValue;
-  if assigned(OnUpdated) then
-  OnUpdated(self);
-end;
-
 end.
