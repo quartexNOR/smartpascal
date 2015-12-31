@@ -206,7 +206,7 @@ end;
 
 procedure TMoveXEffect.DoTearDownTween;
 begin
-  Core.Delete("xpos");
+  //Core.Delete("xpos");
 end;
 
 //#############################################################################

@@ -1,19 +1,19 @@
 <SMART>
   <state>
     <editor>
-      <tab filename="Form1" topline="13" col="17" row="40" splitview="1" designview="1" splitter="0.632222222222222" />
-      <tab filename="system.animation.effects" fullname="system.animation.effects.pas" topline="302" col="21" row="309" />
-      <tab filename="system.animation.tween" fullname="system.animation.tween.pas" topline="567" col="43" row="584" />
+      <tab filename="Form1" topline="13" col="31" row="43" splitview="1" designview="1" splitter="0.632465543644717" />
+      <tab filename="system.animation.effects" fullname="system.animation.effects.pas" topline="183" col="5" row="209" />
+      <tab filename="system.animation.tween" fullname="system.animation.tween.pas" topline="1" col="64" row="32" />
       <activetab>system.animation.tween</activetab>
       <breakpoints />
     </editor>
     <Statistics>
-      <BackgroundCompilations>3157</BackgroundCompilations>
-      <EditTime>00:44:07.602</EditTime>
-      <CompileTime>00:01:25.479</CompileTime>
-      <TotalTime>02:54:13.648</TotalTime>
-      <DesigningTime>00:47:55.489</DesigningTime>
-      <RunningTime>00:07:29.302</RunningTime>
+      <BackgroundCompilations>3996</BackgroundCompilations>
+      <EditTime>00:56:24.008</EditTime>
+      <CompileTime>00:01:46.060</CompileTime>
+      <TotalTime>03:22:31.809</TotalTime>
+      <DesigningTime>01:08:41.549</DesigningTime>
+      <RunningTime>00:08:45.668</RunningTime>
     </Statistics>
   </state>
 </SMART>

@@ -6666,12 +6666,13 @@ var TForm1 = {
          effect.FromX = TW3MovableControl.GetLeft(Self.W3Panel1);
          effect.Distance = 300;
          TCustomEffect.Execute$5$(effect,function (sender$9) {
-            TObject.Free(effect);
+            WriteLn("Effect finished!");
+            TObject.Free($As(sender$9,TMoveXEffect));
          });
       });
    }
    /// procedure TForm1.InitializeObject()
-   ///  [line: 47, column: 18, file: Form1]
+   ///  [line: 48, column: 18, file: Form1]
    ,InitializeObject:function(Self) {
       TW3CustomControl.InitializeObject(Self);
       TW3CustomForm.setCaption(Self,"W3Form");
@@ -6691,7 +6692,7 @@ var TForm1 = {
       TW3Component.SetName(Self.W3Panel1,"W3Panel1");
    }
    /// procedure TForm1.Resize()
-   ///  [line: 53, column: 18, file: Form1]
+   ///  [line: 54, column: 18, file: Form1]
    ,Resize:function(Self) {
       TW3MovableControl.Resize(Self);
    }
@@ -6734,12 +6735,12 @@ var TW3TweenData = {
       $.Id = "";
    }
    /// function TW3TweenData.Expired() : Boolean
-   ///  [line: 997, column: 23, file: system.animation.tween]
+   ///  [line: 1024, column: 23, file: system.animation.tween]
    ,Expired:function(Self) {
       return Self.StartTime+Self.Duration<TW3Tween.TimeCode(TW3Tween);
    }
    /// procedure TW3TweenData.Reset()
-   ///  [line: 1002, column: 24, file: system.animation.tween]
+   ///  [line: 1029, column: 24, file: system.animation.tween]
    ,Reset$1:function(Self) {
       Self.StartTime = 0;
       Self.StartValue = 0;
@@ -6766,20 +6767,20 @@ var TW3TweenElement = {
       $.State = 0;
    }
    /// constructor TW3TweenElement.Create()
-   ///  [line: 1016, column: 29, file: system.animation.tween]
+   ///  [line: 1043, column: 29, file: system.animation.tween]
    ,Create$59:function(Self) {
       TObject.Create(Self);
       Self.State = 0;
       return Self
    }
    /// procedure TW3TweenElement.Reset()
-   ///  [line: 1022, column: 27, file: system.animation.tween]
+   ///  [line: 1049, column: 27, file: system.animation.tween]
    ,Reset$1:function(Self) {
       TW3TweenData.Reset$1(Self);
       Self.State = 0;
    }
    /// procedure TW3TweenElement.Update(const aValue: Float)
-   ///  [line: 1028, column: 27, file: system.animation.tween]
+   ///  [line: 1055, column: 27, file: system.animation.tween]
    ,Update$3:function(Self, aValue$59) {
       Self.Value = aValue$59;
       if (Self.OnUpdated) {
@@ -6807,17 +6808,18 @@ var TW3Tween = {
       $.OnPartialFinished = null;
       $.IgnoreOscillate = $.SyncRefresh = $.FActive = $.FPartial = false;
       $.FInterval = 0;
+      $.FNameLUT = undefined;
       $.FQRLUT = [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
       $.FTimer = null;
       $.FValues = [];
    }
    /// anonymous TSourceMethodSymbol
-   ///  [line: 130, column: 37, file: system.animation.tween]
+   ///  [line: 131, column: 37, file: system.animation.tween]
    ,a$50:function(Self) {
       return Self.FActive;
    }
    /// function TW3Tween.Add(Id: String) : TW3TweenElement
-   ///  [line: 775, column: 19, file: system.animation.tween]
+   ///  [line: 802, column: 19, file: system.animation.tween]
    ,Add$3:function(Self, Id$2) {
       var Result = null;
       Id$2 = (Trim$_String_(Id$2)).toLowerCase();
@@ -6825,6 +6827,7 @@ var TW3Tween = {
          if (TW3Tween.IndexOf$3(Self,Id$2)<0) {
             Result = TW3TweenElement.Create$59($New(TW3TweenElement));
             Result.Id = Id$2;
+            Self.FNameLUT[Id$2] = Result;
             Self.FValues.push(Result);
          } else {
             throw EW3Exception.CreateFmt($New(EW3TweenError),$R[4],[Id$2]);
@@ -6835,7 +6838,7 @@ var TW3Tween = {
       return Result
    }
    /// procedure TW3Tween.Cancel()
-   ///  [line: 723, column: 20, file: system.animation.tween]
+   ///  [line: 739, column: 20, file: system.animation.tween]
    ,Cancel:function(Self) {
       if (TW3Tween.a$50(Self)) {
          try {
@@ -6850,19 +6853,27 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.Clear()
-   ///  [line: 248, column: 20, file: system.animation.tween]
+   ///  [line: 251, column: 20, file: system.animation.tween]
    ,Clear$5:function(Self) {
+      var LIndex = 0,
+         LObj = null;
       while (Self.FValues.length>0) {
-         TObject.Free(Self.FValues[Self.FValues.length-1]);
-         Self.FValues.splice((Self.FValues.length-1),1)
-         ;
+         LIndex = Self.FValues.length-1;
+         LObj = Self.FValues[LIndex];
+         if (LObj!==null) {
+            Self.FValues.splice(LIndex,1)
+            ;
+            TObject.Free(LObj);
+         }
       }
+      Self.FNameLUT = TVariant.CreateObject();
    }
    /// constructor TW3Tween.Create()
-   ///  [line: 209, column: 22, file: system.animation.tween]
+   ///  [line: 210, column: 22, file: system.animation.tween]
    ,Create$60:function(Self) {
       TObject.Create(Self);
       Self.FTimer = TW3Timer.Create$61($New(TW3Timer));
+      Self.FNameLUT = TVariant.CreateObject();
       Self.FInterval = 10;
       Self.IgnoreOscillate = true;
       Self.SyncRefresh = false;
@@ -6888,7 +6899,7 @@ var TW3Tween = {
       return Self
    }
    /// function TW3Tween.CubeIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 955, column: 19, file: system.animation.tween]
+   ///  [line: 982, column: 19, file: system.animation.tween]
    ,CubeIn:function(Self, t$2, b$19, c$1, d$1) {
       var Result = 0;
       t$2/=d$1;
@@ -6896,7 +6907,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.CubeInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 935, column: 19, file: system.animation.tween]
+   ///  [line: 962, column: 19, file: system.animation.tween]
    ,CubeInOut:function(Self, t$3, b$20, c$2, d$2) {
       var Result = 0;
       t$3*=2/d$2;
@@ -6909,7 +6920,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.CubeOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 948, column: 19, file: system.animation.tween]
+   ///  [line: 975, column: 19, file: system.animation.tween]
    ,CubeOut:function(Self, t$4, b$21, c$3, d$3) {
       var Result = 0;
       t$4/=d$3;
@@ -6918,29 +6929,35 @@ var TW3Tween = {
       return Result
    }
    /// procedure TW3Tween.Delete(Id: String)
-   ///  [line: 748, column: 20, file: system.animation.tween]
+   ///  [line: 774, column: 20, file: system.animation.tween]
    ,Delete$2:function(Self, Id$3) {
       TW3Tween.Delete$1(Self,Self.FValues.indexOf(TW3Tween.ObjectOf(Self,Id$3)));
    }
    /// procedure TW3Tween.Delete(index: Integer)
-   ///  [line: 739, column: 20, file: system.animation.tween]
+   ///  [line: 755, column: 20, file: system.animation.tween]
    ,Delete$1:function(Self, index$1) {
-      var LObj = null;
-      LObj = Self.FValues[index$1];
-      Self.FValues.splice(index$1,1)
-      ;
-      TObject.Free(LObj);
+      var LObj$1 = null;
+      var LId = "";
+      if (index$1>=0&&index$1<Self.FValues.length) {
+         LObj$1 = Self.FValues[index$1];
+         LId = LObj$1.Id;
+         Self.FValues.splice(index$1,1)
+         ;
+         
+      delete (Self).FNameLUT[LId];
+    TObject.Free(LObj$1);
+      }
    }
    /// destructor TW3Tween.Destroy()
-   ///  [line: 240, column: 21, file: system.animation.tween]
+   ///  [line: 243, column: 21, file: system.animation.tween]
    ,Destroy:function(Self) {
+      TObject.Free(Self.FTimer);
       TW3Tween.Cancel(Self);
       TW3Tween.Clear$5(Self);
-      TObject.Free(Self.FTimer);
       TObject.Destroy(Self);
    }
    /// procedure TW3Tween.Execute()
-   ///  [line: 457, column: 20, file: system.animation.tween]
+   ///  [line: 470, column: 20, file: system.animation.tween]
    ,Execute$3:function(Self) {
       if (TW3Tween.a$50(Self)) {
          throw Exception.Create($New(EW3TweenError),$R[2]);
@@ -6962,12 +6979,12 @@ var TW3Tween = {
       }
    }
    /// function TW3Tween.ExpoIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 845, column: 19, file: system.animation.tween]
+   ///  [line: 872, column: 19, file: system.animation.tween]
    ,ExpoIn:function(Self, t$5, b$22, c$4, d$4) {
       return c$4*Math.pow(2,10*(t$5/d$4-1))+b$22;
    }
    /// function TW3Tween.ExpoInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 855, column: 19, file: system.animation.tween]
+   ///  [line: 882, column: 19, file: system.animation.tween]
    ,ExpoInOut:function(Self, t$6, b$23, c$5, d$5) {
       var Result = 0;
       t$6*=2/d$5;
@@ -6980,12 +6997,12 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.ExpoOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 850, column: 19, file: system.animation.tween]
+   ///  [line: 877, column: 19, file: system.animation.tween]
    ,ExpoOut:function(Self, t$7, b$24, c$6, d$6) {
       return c$6*((-Math.pow(2,-10*t$7/d$6))+1)+b$24;
    }
    /// procedure TW3Tween.HandleSyncUpdate()
-   ///  [line: 411, column: 20, file: system.animation.tween]
+   ///  [line: 420, column: 20, file: system.animation.tween]
    ,HandleSyncUpdate:function(Self) {
       TW3Tween.HandleUpdateTimer(Self,null);
       if (TW3Tween.a$50(Self)) {
@@ -6993,7 +7010,7 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.HandleUpdateTimer(Sender: TObject)
-   ///  [line: 331, column: 20, file: system.animation.tween]
+   ///  [line: 340, column: 20, file: system.animation.tween]
    ,HandleUpdateTimer:function(Self, Sender$10) {
       var LItem = null;
       var LCount = 0;
@@ -7055,7 +7072,7 @@ var TW3Tween = {
       }
    }
    /// function TW3Tween.IndexOf(Id: String) : Integer
-   ///  [line: 815, column: 19, file: system.animation.tween]
+   ///  [line: 844, column: 19, file: system.animation.tween]
    ,IndexOf$3:function(Self, Id$4) {
       var Result = 0;
       var x$49 = 0;
@@ -7073,27 +7090,24 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.Linear(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 987, column: 19, file: system.animation.tween]
+   ///  [line: 1014, column: 19, file: system.animation.tween]
    ,Linear:function(Self, t$8, b$25, c$7, d$7) {
       return c$7*t$8/d$7+b$25;
    }
    /// function TW3Tween.ObjectOf(const Id: String) : TW3TweenElement
-   ///  [line: 834, column: 19, file: system.animation.tween]
+   ///  [line: 863, column: 19, file: system.animation.tween]
    ,ObjectOf:function(Self, Id$5) {
       var Result = null;
-      var LIndex = 0;
-      LIndex = TW3Tween.IndexOf$3(Self,Id$5);
-      if (LIndex>=0) {
-         Result = Self.FValues[LIndex];
-      } else {
-         Result = null;
-      }
-      return Result
+      var ref;
+      ref = Self.FNameLUT[(Trim$_String_(Id$5)).toLocaleLowerCase()];
+      
+    Result = ref;
+  return Result
    }
    /// procedure TW3Tween.Pause()
-   ///  [line: 703, column: 20, file: system.animation.tween]
+   ///  [line: 719, column: 20, file: system.animation.tween]
    ,Pause$4:function(Self) {
-      var LObj$1 = null;
+      var LObj$2 = null;
       var a$96 = 0;
       if (TW3Tween.a$50(Self)) {
          if (Self.FValues.length>0) {
@@ -7101,17 +7115,17 @@ var TW3Tween = {
             a$97 = Self.FValues;
             var $temp28;
             for(a$96=0,$temp28=a$97.length;a$96<$temp28;a$96++) {
-               LObj$1 = a$97[a$96];
-               if (LObj$1.State==1) {
-                  LObj$1.State = 2;
-                  TW3Tween.TweenPaused(Self,LObj$1);
+               LObj$2 = a$97[a$96];
+               if (LObj$2.State==1) {
+                  LObj$2.State = 2;
+                  TW3Tween.TweenPaused(Self,LObj$2);
                }
             }
          }
       }
    }
    /// function TW3Tween.QuadIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 981, column: 19, file: system.animation.tween]
+   ///  [line: 1008, column: 19, file: system.animation.tween]
    ,QuadIn:function(Self, t$9, b$26, c$8, d$8) {
       var Result = 0;
       t$9/=d$8;
@@ -7119,7 +7133,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuadInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 961, column: 19, file: system.animation.tween]
+   ///  [line: 988, column: 19, file: system.animation.tween]
    ,QuadInOut:function(Self, t$10, b$27, c$9, d$9) {
       var Result = 0;
       t$10*=2/d$9;
@@ -7133,7 +7147,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuadOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 975, column: 19, file: system.animation.tween]
+   ///  [line: 1002, column: 19, file: system.animation.tween]
    ,QuadOut:function(Self, t$11, b$28, c$10, d$10) {
       var Result = 0;
       t$11/=d$10;
@@ -7141,7 +7155,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuartIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 909, column: 19, file: system.animation.tween]
+   ///  [line: 936, column: 19, file: system.animation.tween]
    ,QuartIn:function(Self, t$12, b$29, c$11, d$11) {
       var Result = 0;
       t$12/=d$11;
@@ -7149,7 +7163,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuartInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 922, column: 19, file: system.animation.tween]
+   ///  [line: 949, column: 19, file: system.animation.tween]
    ,QuartInOut:function(Self, t$13, b$30, c$12, d$12) {
       var Result = 0;
       t$13*=2/d$12;
@@ -7162,7 +7176,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuartOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 915, column: 19, file: system.animation.tween]
+   ///  [line: 942, column: 19, file: system.animation.tween]
    ,QuartOut:function(Self, t$14, b$31, c$13, d$13) {
       var Result = 0;
       t$14/=d$13;
@@ -7171,7 +7185,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuintIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 883, column: 19, file: system.animation.tween]
+   ///  [line: 910, column: 19, file: system.animation.tween]
    ,QuintIn:function(Self, t$15, b$32, c$14, d$14) {
       var Result = 0;
       t$15/=d$14;
@@ -7179,7 +7193,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuintInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 896, column: 19, file: system.animation.tween]
+   ///  [line: 923, column: 19, file: system.animation.tween]
    ,QuintInOut:function(Self, t$16, b$33, c$15, d$15) {
       var Result = 0;
       t$16*=2/d$15;
@@ -7192,7 +7206,7 @@ var TW3Tween = {
       return Result
    }
    /// function TW3Tween.QuintOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 889, column: 19, file: system.animation.tween]
+   ///  [line: 916, column: 19, file: system.animation.tween]
    ,QuintOut:function(Self, t$17, b$34, c$16, d$16) {
       var Result = 0;
       t$17/=d$16;
@@ -7201,9 +7215,9 @@ var TW3Tween = {
       return Result
    }
    /// procedure TW3Tween.Resume()
-   ///  [line: 597, column: 20, file: system.animation.tween]
+   ///  [line: 613, column: 20, file: system.animation.tween]
    ,Resume$4:function(Self) {
-      var LObj$2 = null;
+      var LObj$3 = null;
       var a$98 = 0;
       if (TW3Tween.a$50(Self)) {
          if (Self.FValues.length>0) {
@@ -7211,12 +7225,12 @@ var TW3Tween = {
             a$99 = Self.FValues;
             var $temp29;
             for(a$98=0,$temp29=a$99.length;a$98<$temp29;a$98++) {
-               LObj$2 = a$99[a$98];
-               if (LObj$2!==null) {
-                  if (LObj$2.State==2) {
-                     LObj$2.State = 1;
-                     LObj$2.StartTime = TW3Tween.TimeCode(Self.ClassType);
-                     TW3Tween.TweenResumed(Self,LObj$2);
+               LObj$3 = a$99[a$98];
+               if (LObj$3!==null) {
+                  if (LObj$3.State==2) {
+                     LObj$3.State = 1;
+                     LObj$3.StartTime = TW3Tween.TimeCode(Self.ClassType);
+                     TW3Tween.TweenResumed(Self,LObj$3);
                   }
                }
             }
@@ -7224,27 +7238,27 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.SetInterval(const Value: Integer)
-   ///  [line: 270, column: 20, file: system.animation.tween]
+   ///  [line: 279, column: 20, file: system.animation.tween]
    ,SetInterval:function(Self, Value$6) {
       Self.FInterval = TInteger.EnsureRange(Value$6,1,10000);
    }
    /// function TW3Tween.SineIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 868, column: 19, file: system.animation.tween]
+   ///  [line: 895, column: 19, file: system.animation.tween]
    ,SineIn:function(Self, t$18, b$35, c$17, d$17) {
       return (-c$17)*Math.cos(t$18/d$17*1.5707963267949)+c$17+b$35;
    }
    /// function TW3Tween.SineInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 878, column: 19, file: system.animation.tween]
+   ///  [line: 905, column: 19, file: system.animation.tween]
    ,SineInOut:function(Self, t$19, b$36, c$18, d$18) {
       return (-c$18)/2*(Math.cos(3.14159265358979*t$19/d$18)-1)+b$36;
    }
    /// function TW3Tween.SineOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 873, column: 19, file: system.animation.tween]
+   ///  [line: 900, column: 19, file: system.animation.tween]
    ,SineOut:function(Self, t$20, b$37, c$19, d$19) {
       return c$19*Math.cos(t$20/d$19*1.5707963267949)+b$37;
    }
    /// function TW3Tween.TimeCode() : Float
-   ///  [line: 257, column: 25, file: system.animation.tween]
+   ///  [line: 266, column: 25, file: system.animation.tween]
    ,TimeCode:function(Self) {
       var Result = 0;
       
@@ -7252,35 +7266,35 @@ var TW3Tween = {
   return Result
    }
    /// procedure TW3Tween.TweenComplete(const Item: TW3TweenElement)
-   ///  [line: 281, column: 20, file: system.animation.tween]
+   ///  [line: 290, column: 20, file: system.animation.tween]
    ,TweenComplete:function(Self, Item$1) {
       if (Item$1.OnFinished) {
          Item$1.OnFinished(Item$1);
       }
    }
    /// procedure TW3Tween.TweenPaused(const Item: TW3TweenElement)
-   ///  [line: 275, column: 20, file: system.animation.tween]
+   ///  [line: 284, column: 20, file: system.animation.tween]
    ,TweenPaused:function(Self, Item$2) {
       if (Item$2.OnPaused) {
          Item$2.OnPaused(Item$2);
       }
    }
    /// procedure TW3Tween.TweenResumed(const Item: TW3TweenElement)
-   ///  [line: 264, column: 20, file: system.animation.tween]
+   ///  [line: 273, column: 20, file: system.animation.tween]
    ,TweenResumed:function(Self, Item$3) {
       if (Item$3.OnResumed) {
          Item$3.OnResumed(Item$3);
       }
    }
    /// procedure TW3Tween.TweenStarted(const Item: TW3TweenElement)
-   ///  [line: 287, column: 20, file: system.animation.tween]
+   ///  [line: 296, column: 20, file: system.animation.tween]
    ,TweenStarted:function(Self, Item$4) {
       if (Item$4.OnStarted) {
          Item$4.OnStarted(Item$4);
       }
    }
    /// function TW3Tween.Update(const Item: TW3TweenElement) : Float
-   ///  [line: 293, column: 19, file: system.animation.tween]
+   ///  [line: 302, column: 19, file: system.animation.tween]
    ,Update$4:function(Self, Item$5) {
       var Result = 0;
       var LTotal = 0;
@@ -7651,24 +7665,24 @@ var TMoveXEffect = {
    /// procedure TMoveXEffect.DoSetupTween()
    ///  [line: 185, column: 24, file: system.animation.effects]
    ,DoSetupTween:function(Self) {
-      var LObj$3 = null;
+      var LObj$4 = null;
       Self.FTween.OnUpdated = null;
-      LObj$3 = TW3Tween.Add$3(Self.FTween,"xpos");
+      LObj$4 = TW3Tween.Add$3(Self.FTween,"xpos");
       Self.FTween.SyncRefresh = false;
       TW3Tween.SetInterval(Self.FTween,10);
-      LObj$3.StartValue = Self.FromX;
-      LObj$3.Distance = Self.Distance;
-      LObj$3.Duration = Self.Duration;
-      LObj$3.AnimationType = 9;
-      LObj$3.Behavior = 0;
-      LObj$3.OnUpdated = function (item$1) {
+      LObj$4.StartValue = Self.FromX;
+      LObj$4.Distance = Self.Distance;
+      LObj$4.Duration = Self.Duration;
+      LObj$4.AnimationType = 9;
+      LObj$4.Behavior = 0;
+      LObj$4.OnUpdated = function (item$1) {
          TW3MovableControl.SetLeft(Self.FControl,Math.round(item$1.Value));
       };
    }
    /// procedure TMoveXEffect.DoTearDownTween()
    ///  [line: 207, column: 24, file: system.animation.effects]
    ,DoTearDownTween:function(Self) {
-      TW3Tween.Delete$2(Self.FTween,"xpos");
+      /* null */
    }
    ,Destroy:TCustomTweenEffect.Destroy
    ,Cancel$1:TCustomTweenEffect.Cancel$1

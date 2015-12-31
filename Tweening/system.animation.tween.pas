@@ -92,6 +92,7 @@ type
     FPartial:   Boolean;
     FInterval:  Integer;
     FQRLUT:     Array[TW3TweenAnimationType] of function (t, b, c, d:float):float;
+    FNameLUT:   Variant; // USES JS BASED INDEX
     procedure   SetInterval(const Value:Integer);
   protected
     Procedure   HandleSyncUpdate;virtual;
@@ -211,6 +212,8 @@ begin
   inherited Create;
   FTimer := TW3Timer.Create;
 
+  FNameLUT := TVariant.CreateObject;
+
   FInterval := 10;
   IgnoreOscillate := true;
   SyncRefresh := false;
@@ -239,19 +242,25 @@ end;
 
 Destructor TW3Tween.Destroy;
 begin
+  FTimer.free;
   Cancel;
   Clear;
-  FTimer.free;
   inherited;
 end;
 
 procedure TW3Tween.Clear;
 begin
-  While FValues.length>0 do
+  While FValues.Count>0 do
   begin
-    FValues[FValues.length-1].free;
-    Fvalues.Delete(FValues.length-1,1);
+    var LIndex := FValues.Count-1;
+    var LObj := FValues[LIndex];
+    if LObj<>NIL then
+    begin
+      FValues.delete(LIndex,1);
+      LObj.free;
+    end;
   end;
+  FNameLUT := TVariant.CreateObject;
 end;
 
 class function TW3Tween.TimeCode:float;
@@ -431,7 +440,11 @@ begin
         begin
 
           if self.IndexOf(LId)<0 then
-          FValues.add(LItem) else
+          begin
+            // Add to LUT
+            FNameLUT[LItem.Id] := LItem;
+            FValues.add(LItem);
+          end else
           Raise EW3TweenError.CreateFmt(CNT_TWEEN_EXEC_EXISTS_ID,[LId]);
         end else
         Raise EW3TweenError.Create(CNT_TWEEN_EXEC_FAILED_ID);
@@ -501,7 +514,10 @@ begin
       if LObj<>NIL then
       begin
         LIndex := FValues.IndexOf(LObj);
-        FValues.delete(LIndex,1);
+        FValues.Delete(LIndex,1);
+        asm
+          delete (@self).FNameLut[@LId];
+        end;
         LObj.free;
       end;
     end;
@@ -739,10 +755,20 @@ end;
 Procedure TW3Tween.Delete(index:Integer);
 var
   LObj: TW3TweenElement;
+  LId:  String;
 begin
-  LObj:=FValues[index];
-  FValues.Delete(Index,1);
-  LObj.free;
+  if (index>=0) and (index<FValues.count) then
+  begin
+    LObj:=FValues[index];
+    LId := LObj.id;
+    FValues.Delete(Index,1);
+
+    asm
+      delete (@self).FNameLUT[@LId];
+    end;
+
+    LObj.free;
+  end;
 end;
 
 procedure TW3Tween.Delete(Id:String);
@@ -762,6 +788,7 @@ begin
       begin
         if IndexOf(id)>=0 then
         begin
+          FNameLUT[Instance.Id] := Instance;
           FValues.Add(Instance);
         end else
         Raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
@@ -781,6 +808,7 @@ begin
     begin
       result := TW3TweenElement.Create;
       result.Id := Id;
+      FNameLUT[Id] := result;
       FValues.add(result);
     end else
     raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
@@ -805,6 +833,7 @@ begin
       result.Behavior := aBehavior;
       result.StartTime := TimeCode;
       result.Id := Id;
+      FNameLUT[Id] := result;
       FValues.add(result);
     end else
     raise EW3TweenError.CreateFmt(CNT_ERR_TWEEN_ELEMENT_DUPLICATE_ID,[Id]);
@@ -832,13 +861,11 @@ begin
 end;
 
 function TW3Tween.ObjectOf(const Id:String):TW3TweenElement;
-var
-  LIndex: Integer;
 begin
-  LIndex := IndexOf(Id);
-  if LIndex>=0 then
-  result := FValues[LIndex] else
-  result := NIL;
+  var ref := FNameLUT[id.trim.tolower];
+  asm
+    @result = @ref;
+  end;
 end;
 
 {$HINTS OFF}
