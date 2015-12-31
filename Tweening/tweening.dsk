@@ -2,18 +2,18 @@
   <state>
     <editor>
       <tab filename="Form1" topline="13" col="17" row="40" splitview="1" designview="1" splitter="0.632222222222222" />
-      <tab filename="system.animation.effects" topline="98" col="58" row="125" />
-      <tab filename="system.animation.tween" topline="409" col="22" row="428" />
-      <activetab>system.animation.effects</activetab>
+      <tab filename="system.animation.effects" topline="179" col="22" row="194" />
+      <tab filename="system.animation.tween" topline="252" col="20" row="268" />
+      <activetab>system.animation.tween</activetab>
       <breakpoints />
     </editor>
     <Statistics>
-      <BackgroundCompilations>728</BackgroundCompilations>
-      <EditTime>00:10:01.516</EditTime>
-      <CompileTime>00:00:22.121</CompileTime>
-      <TotalTime>00:33:13.971</TotalTime>
-      <DesigningTime>00:16:46.065</DesigningTime>
-      <RunningTime>00:01:49.733</RunningTime>
+      <BackgroundCompilations>2574</BackgroundCompilations>
+      <EditTime>00:36:13.389</EditTime>
+      <CompileTime>00:01:18.666</CompileTime>
+      <TotalTime>02:37:30.920</TotalTime>
+      <DesigningTime>00:31:40.485</DesigningTime>
+      <RunningTime>00:06:47.354</RunningTime>
     </Statistics>
   </state>
 </SMART>

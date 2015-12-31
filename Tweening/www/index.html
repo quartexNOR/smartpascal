@@ -25,6 +25,12 @@
 	provides a good preloading mechanism for instance. */
 
 	function bootstrap() { var $R = [
+	"Execute failed, a tween-object with id [%s] already exists error",
+	"Execute failed, element does not have a valid id error",
+	"Execute failed, tween already active error",
+	"Failed to add tween-element, invalid [empty] id error",
+	"Failed to add tween-element, [%s] already exists in the collection error",
+	"Failed to add tween-element [%s], element already exists in collection error",
 	"Method %s in class %s threw exception [%s]",
 	"Procedure %s threw exception [%s]",
 	"Internal tag-object is null error",
@@ -251,6 +257,14 @@ function $Event0(i,f) {
 	var li=i,lf=f;
 	return function() {
 		return lf.call(li,li)
+	}
+}
+function $Event(i,f) {
+	var li=i,lf=f;
+	return function(){
+		var arg=Array.prototype.slice.call(arguments);
+		arg.unshift(li);
+		return lf.apply(li,arg)
 	}
 }
 function $Div(a,b) { var r=a/b; return (r>=0)?Math.floor(r):Math.ceil(r) }
@@ -820,7 +834,7 @@ var TW3OwnedObject = {
       if (TW3OwnedObject.AcceptParent$(Self,AOwner)) {
          Self.FOwner = AOwner;
       } else {
-         throw EW3Exception.CreateFmt($New(EW3OwnedObject),$R[0],["constructor", TObject.ClassName(Self.ClassType), "Unsuitable owner object-type error"]);
+         throw EW3Exception.CreateFmt($New(EW3OwnedObject),$R[6],["constructor", TObject.ClassName(Self.ClassType), "Unsuitable owner object-type error"]);
       }
       return Self
    }
@@ -1322,14 +1336,14 @@ var TW3CustomApplication = {
          return;
       }
       if (Self.FFormChangeActive) {
-         throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "A form transition is already active error"]);
+         throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "A form transition is already active error"]);
       }
       if (aForm===null) {
-         throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
+         throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
       }
       mIndex = Self.FForms.indexOf(aForm);
       if (mIndex<0) {
-         throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "Form not registered error"]);
+         throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.GotoFormByRef", TObject.ClassName(Self.ClassType), "Form not registered error"]);
       }
       if (aForm===Self.FCurrentForm) {
          return;
@@ -1429,7 +1443,7 @@ var TW3CustomApplication = {
                Self.FForms.push(aForm$1);
             } catch ($e) {
                var e$1 = $W($e);
-               throw EW3Exception.CreateFmt($New(EW3Exception),$R[0],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), e$1.FMessage]);
+               throw EW3Exception.CreateFmt($New(EW3Exception),$R[6],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), e$1.FMessage]);
             }
             w3_RequestAnimationFrame($Event0(aForm$1,TW3MovableControl.AdjustToParentBox));
             if (isMainForm) {
@@ -1438,10 +1452,10 @@ var TW3CustomApplication = {
                TW3MovableControl.SetVisible(aForm$1,false);
             }
          } else {
-            throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), "Form already registered"]);
+            throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), "Form already registered"]);
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
+         throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.RegisterFormInstance", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
       }
    }
    /// procedure TW3CustomApplication.RunApp()
@@ -1496,16 +1510,16 @@ var TW3CustomApplication = {
                      TObject.Free(aForm$2);
                   } catch ($e) {
                      var e$2 = $W($e);
-                     throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), e$2.FMessage]);
+                     throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), e$2.FMessage]);
                   }
                } else {
-                  throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Main form cannot be removed error"]);
+                  throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Main form cannot be removed error"]);
                }
             } else {
-               throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Form is not registered"]);
+               throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Form is not registered"]);
             }
          } else {
-            throw EW3Exception.CreateFmt($New(EW3Application),$R[0],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
+            throw EW3Exception.CreateFmt($New(EW3Application),$R[6],["TW3CustomApplication.UnRegisterFormInstance", TObject.ClassName(Self.ClassType), "Form parameter is NIL error"]);
          }
       }
    }
@@ -1669,10 +1683,10 @@ var TW3TagObj = {
    ///  [line: 1245, column: 21, file: SmartCL.Components]
    ,InsertInto:function(Self, OwnerHandle) {
       if (!OwnerHandle) {
-         EW3TagObj.RaiseCntErrMethod("TW3TagObj.InsertInto",Self,$R[9]);
+         EW3TagObj.RaiseCntErrMethod("TW3TagObj.InsertInto",Self,$R[15]);
       }
       if (!Self.FHandle) {
-         EW3TagObj.RaiseCntErrMethod("TW3TagObj.InsertInto",Self,$R[2]);
+         EW3TagObj.RaiseCntErrMethod("TW3TagObj.InsertInto",Self,$R[8]);
       }
       try {
          if (Self.FOwner$1) {
@@ -1703,10 +1717,10 @@ var TW3TagObj = {
          return;
       }
       if (!Self.FOwner$1) {
-         EW3TagObj.RaiseCntErrMethod("TW3TagObj.RemoveFrom",Self,$R[9]);
+         EW3TagObj.RaiseCntErrMethod("TW3TagObj.RemoveFrom",Self,$R[15]);
       }
       if (!Self.FHandle) {
-         EW3TagObj.RaiseCntErrMethod("TW3TagObj.RemoveFrom",Self,$R[2]);
+         EW3TagObj.RaiseCntErrMethod("TW3TagObj.RemoveFrom",Self,$R[8]);
       }
       try {
          w3_RemoveElementByRef(Self.FHandle,Self.FOwner$1);
@@ -3881,7 +3895,7 @@ var TW3Display = {
             TW3MovableControl.SetBounds$2(aForm$3,dx$7,dy$7,TW3MovableControl.GetWidth(Self.FView),TW3MovableControl.GetHeight(Self.FView));
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3Screen),$R[0],["PositionFormInView", TObject.ClassName(Self.ClassType), "Form parameter was NIL error"]);
+         throw EW3Exception.CreateFmt($New(EW3Screen),$R[6],["PositionFormInView", TObject.ClassName(Self.ClassType), "Form parameter was NIL error"]);
       }
    }
    /// procedure TW3Display.ReSize()
@@ -4484,7 +4498,7 @@ var TW3CustomFont = {
             mText$2 = w3_getStyleAsStr(mRef$6,"color");
             Result.v = StrToColor(mText$2);
          } else {
-            throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.GetColor", TObject.ClassName(Self.ClassType), $R[4]]);
+            throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.GetColor", TObject.ClassName(Self.ClassType), $R[10]]);
          }
       } finally {return Result.v}
    }
@@ -4497,7 +4511,7 @@ var TW3CustomFont = {
       if (mHandle) {
          Result = w3_getStyleAsStr(mHandle,"font-family");
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.GetName", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.GetName", TObject.ClassName(Self.ClassType), $R[10]]);
       }
       return Result
    }
@@ -4510,7 +4524,7 @@ var TW3CustomFont = {
       if (mRef$7) {
          Result = w3_getStyleAsInt(mRef$7,"font-size");
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.GetSize", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.GetSize", TObject.ClassName(Self.ClassType), $R[10]]);
       }
       return Result
    }
@@ -4523,7 +4537,7 @@ var TW3CustomFont = {
       if (mRef$8) {
          Result = w3_getStyleAsStr(mRef$8,"font-weight");
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.GetWeight", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.GetWeight", TObject.ClassName(Self.ClassType), $R[10]]);
       }
       return Result
    }
@@ -4538,7 +4552,7 @@ var TW3CustomFont = {
             Self.FOnChange(Self);
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.SetColor", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.SetColor", TObject.ClassName(Self.ClassType), $R[10]]);
       }
    }
    /// procedure TW3CustomFont.SetName(aNewName: String)
@@ -4552,7 +4566,7 @@ var TW3CustomFont = {
             Self.FOnChange(Self);
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.SetName", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.SetName", TObject.ClassName(Self.ClassType), $R[10]]);
       }
    }
    /// procedure TW3CustomFont.SetSize(aNewSize: Integer)
@@ -4566,7 +4580,7 @@ var TW3CustomFont = {
             Self.FOnChange(Self);
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.SetSize", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.SetSize", TObject.ClassName(Self.ClassType), $R[10]]);
       }
    }
    /// procedure TW3CustomFont.SetWeight(aNewWeight: String)
@@ -4580,7 +4594,7 @@ var TW3CustomFont = {
             Self.FOnChange(Self);
          }
       } else {
-         throw EW3Exception.CreateFmt($New(EW3FontError),$R[0],["TW3CustomFont.SetWeight", TObject.ClassName(Self.ClassType), $R[4]]);
+         throw EW3Exception.CreateFmt($New(EW3FontError),$R[6],["TW3CustomFont.SetWeight", TObject.ClassName(Self.ClassType), $R[10]]);
       }
    }
    ,Destroy:TObject.Destroy
@@ -4762,7 +4776,7 @@ var TW3AttrAccess = {
          }
       } catch ($e) {
          var e$6 = $W($e);
-         throw EW3Exception.CreateFmt($New(EW3Exception),$R[13],[e$6.FMessage]);
+         throw EW3Exception.CreateFmt($New(EW3Exception),$R[19],[e$6.FMessage]);
       }
       return Result
    }
@@ -4775,7 +4789,7 @@ var TW3AttrAccess = {
          Self.FHandle$5.setAttribute(mName$2,aValue$54);
       } catch ($e) {
          var e$7 = $W($e);
-         throw EW3Exception.CreateFmt($New(EW3Exception),$R[14],[e$7.FMessage]);
+         throw EW3Exception.CreateFmt($New(EW3Exception),$R[20],[e$7.FMessage]);
       }
    }
    /// constructor TW3AttrAccess.Create(const aHandle: THandle)
@@ -4785,7 +4799,7 @@ var TW3AttrAccess = {
       if (TControlHandleHelper$Valid(aHandle)) {
          Self.FHandle$5 = aHandle;
       } else {
-         throw Exception.Create($New(Exception),$R[12]);
+         throw Exception.Create($New(Exception),$R[18]);
       }
       return Self
    }
@@ -4970,7 +4984,7 @@ var EW3TagObj = {
    /// procedure EW3TagObj.RaiseCntErrMethod(methName: String; instance: TObject; msg: String)
    ///  [line: 792, column: 27, file: SmartCL.Components]
    ,RaiseCntErrMethod:function(methName, instance, msg) {
-      throw EW3Exception.CreateFmt($New(EW3TagObj),$R[0],[methName, (instance!==null)?TObject.ClassName(instance.ClassType):"nil", msg]);
+      throw EW3Exception.CreateFmt($New(EW3TagObj),$R[6],[methName, (instance!==null)?TObject.ClassName(instance.ClassType):"nil", msg]);
    }
    ,Destroy:Exception.Destroy
 };
@@ -5663,7 +5677,7 @@ var TW3Border = {
          mKey$2 = "padding-"+Self.FEdgeName;
          w3_setStyle(mRef$22,mKey$2,TInteger.ToPxStr(aValue$55));
       } else {
-         throw EW3Exception.CreateFmt($New(EW3TagObj),$R[0],["TW3Border.SetPadding", TObject.ClassName(Self.ClassType), $R[15]]);
+         throw EW3Exception.CreateFmt($New(EW3TagObj),$R[6],["TW3Border.SetPadding", TObject.ClassName(Self.ClassType), $R[21]]);
       }
    }
    /// procedure TW3Border.SetWidth(aValue: Integer)
@@ -5676,7 +5690,7 @@ var TW3Border = {
          mKey$3 = "border-"+Self.FEdgeName+"-width";
          w3_setStyle(mRef$23,mKey$3,TInteger.ToPxStr(aValue$56));
       } else {
-         throw EW3Exception.CreateFmt($New(EW3TagObj),$R[0],["TW3Border.SetWidth", TObject.ClassName(Self.ClassType), $R[15]]);
+         throw EW3Exception.CreateFmt($New(EW3TagObj),$R[6],["TW3Border.SetWidth", TObject.ClassName(Self.ClassType), $R[21]]);
       }
    }
    ,Destroy:TObject.Destroy
@@ -6731,10 +6745,10 @@ var TForm1 = {
    ,InitializeForm$:function($){return $.ClassType.InitializeForm($)}
 };
 /// TW3TweenState enumeration
-///  [line: 81, column: 3, file: system.animation.tween]
+///  [line: 51, column: 3, file: system.animation.tween]
 var TW3TweenState = [ "tsIdle", "tsRunning", "tsPaused", "tsDone" ];
 /// TW3TweenData = class (TObject)
-///  [line: 83, column: 3, file: system.animation.tween]
+///  [line: 53, column: 3, file: system.animation.tween]
 var TW3TweenData = {
    $ClassName:"TW3TweenData",$Parent:TObject
    ,$Init:function ($) {
@@ -6746,12 +6760,12 @@ var TW3TweenData = {
       $.Id = "";
    }
    /// function TW3TweenData.Expired() : Boolean
-   ///  [line: 735, column: 23, file: system.animation.tween]
+   ///  [line: 928, column: 23, file: system.animation.tween]
    ,Expired:function(Self) {
-      return Self.StartTime+Self.Duration<GetTimeCode();
+      return Self.StartTime+Self.Duration<TW3Tween.TimeCode(TW3Tween);
    }
    /// procedure TW3TweenData.Reset()
-   ///  [line: 740, column: 24, file: system.animation.tween]
+   ///  [line: 933, column: 24, file: system.animation.tween]
    ,Reset$1:function(Self) {
       Self.StartTime = 0;
       Self.StartValue = 0;
@@ -6764,31 +6778,32 @@ var TW3TweenData = {
    ,Reset$1$:function($){return $.ClassType.Reset$1($)}
 };
 /// TW3TweenElement = class (TW3TweenData)
-///  [line: 97, column: 3, file: system.animation.tween]
+///  [line: 67, column: 3, file: system.animation.tween]
 var TW3TweenElement = {
    $ClassName:"TW3TweenElement",$Parent:TW3TweenData
    ,$Init:function ($) {
       TW3TweenData.$Init($);
-      $.Value = 0;
-      $.OnFinished = null;
       $.OnUpdated = null;
+      $.Value = 0;
+      $.OnStarted = null;
+      $.OnFinished = null;
       $.State = 0;
    }
    /// constructor TW3TweenElement.Create()
-   ///  [line: 754, column: 29, file: system.animation.tween]
+   ///  [line: 947, column: 29, file: system.animation.tween]
    ,Create$59:function(Self) {
       TObject.Create(Self);
       Self.State = 0;
       return Self
    }
    /// procedure TW3TweenElement.Reset()
-   ///  [line: 760, column: 27, file: system.animation.tween]
+   ///  [line: 953, column: 27, file: system.animation.tween]
    ,Reset$1:function(Self) {
       TW3TweenData.Reset$1(Self);
       Self.State = 0;
    }
    /// procedure TW3TweenElement.Update(const aValue: Float)
-   ///  [line: 766, column: 27, file: system.animation.tween]
+   ///  [line: 959, column: 27, file: system.animation.tween]
    ,Update$3:function(Self, aValue$59) {
       Self.Value = aValue$59;
       if (Self.OnUpdated) {
@@ -6798,168 +6813,6 @@ var TW3TweenElement = {
    ,Destroy:TObject.Destroy
    ,Reset$1$:function($){return $.ClassType.Reset$1($)}
 };
-/// TW3TweenEase = class (TObject)
-///  [line: 45, column: 3, file: system.animation.tween]
-var TW3TweenEase = {
-   $ClassName:"TW3TweenEase",$Parent:TObject
-   ,$Init:function ($) {
-      TObject.$Init($);
-   }
-   /// function TW3TweenEase.CubeIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 892, column: 29, file: system.animation.tween]
-   ,CubeIn:function(Self, t$2, b$19, c$1, d$1) {
-      var Result = 0;
-      t$2/=d$1;
-      Result = c$1*t$2*t$2*t$2+b$19;
-      return Result
-   }
-   /// function TW3TweenEase.CubeInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 872, column: 29, file: system.animation.tween]
-   ,CubeInOut:function(Self, t$3, b$20, c$2, d$2) {
-      var Result = 0;
-      t$3*=2/d$2;
-      if (t$3<1) {
-         Result = c$2/2*t$3*t$3*t$3+b$20;
-      } else {
-         t$3-=2;
-         Result = c$2/2*(t$3*t$3*t$3+2)+b$20;
-      }
-      return Result
-   }
-   /// function TW3TweenEase.CubeOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 885, column: 29, file: system.animation.tween]
-   ,CubeOut:function(Self, t$4, b$21, c$3, d$3) {
-      var Result = 0;
-      t$4/=d$3;
-      t$4-=1;
-      Result = c$3*(t$4*t$4*t$4+1)+b$21;
-      return Result
-   }
-   /// function TW3TweenEase.ExpoInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 789, column: 29, file: system.animation.tween]
-   ,ExpoInOut:function(Self, t$5, b$22, c$4, d$4) {
-      var Result = 0;
-      t$5*=2/d$4;
-      if (t$5<1) {
-         Result = c$4/2*Math.pow(2,10*(t$5-1))+b$22;
-      } else {
-         t$5-=1;
-         Result = c$4/2*(Math.pow(2,-10*t$5)+2)+b$22;
-      }
-      return Result
-   }
-   /// function TW3TweenEase.Linear(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 924, column: 29, file: system.animation.tween]
-   ,Linear:function(Self, t$6, b$23, c$5, d$5) {
-      return c$5*t$6/d$5+b$23;
-   }
-   /// function TW3TweenEase.QuadIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 918, column: 29, file: system.animation.tween]
-   ,QuadIn:function(Self, t$7, b$24, c$6, d$6) {
-      var Result = 0;
-      t$7/=d$6;
-      Result = c$6*t$7*t$7+b$24;
-      return Result
-   }
-   /// function TW3TweenEase.QuadInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 898, column: 29, file: system.animation.tween]
-   ,QuadInOut:function(Self, t$8, b$25, c$7, d$7) {
-      var Result = 0;
-      t$8*=2/d$7;
-      if (t$8<1) {
-         Result = c$7/2*t$8*t$8+b$25;
-         return Result;
-      } else {
-         t$8-=1;
-         Result = (-c$7)/2*(t$8*(t$8-2)-1)+b$25;
-      }
-      return Result
-   }
-   /// function TW3TweenEase.QuadOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 912, column: 29, file: system.animation.tween]
-   ,QuadOut:function(Self, t$9, b$26, c$8, d$8) {
-      var Result = 0;
-      t$9/=d$8;
-      Result = (-c$8)*t$9*(t$9-2)+b$26;
-      return Result
-   }
-   /// function TW3TweenEase.QuartIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 846, column: 29, file: system.animation.tween]
-   ,QuartIn:function(Self, t$10, b$27, c$9, d$9) {
-      var Result = 0;
-      t$10/=d$9;
-      Result = c$9*t$10*t$10*t$10*t$10+b$27;
-      return Result
-   }
-   /// function TW3TweenEase.QuartInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 859, column: 29, file: system.animation.tween]
-   ,QuartInOut:function(Self, t$11, b$28, c$10, d$10) {
-      var Result = 0;
-      t$11*=2/d$10;
-      if (t$11<1) {
-         Result = c$10/2*t$11*t$11*t$11*t$11+b$28;
-      } else {
-         t$11-=2;
-         Result = (-c$10)/2*(t$11*t$11*t$11*t$11-2)+b$28;
-      }
-      return Result
-   }
-   /// function TW3TweenEase.QuartOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 852, column: 29, file: system.animation.tween]
-   ,QuartOut:function(Self, t$12, b$29, c$11, d$11) {
-      var Result = 0;
-      t$12/=d$11;
-      t$12-=1;
-      Result = (-c$11)*(t$12*t$12*t$12*t$12-1)+b$29;
-      return Result
-   }
-   /// function TW3TweenEase.QuintIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 819, column: 29, file: system.animation.tween]
-   ,QuintIn:function(Self, t$13, b$30, c$12, d$12) {
-      var Result = 0;
-      t$13/=d$12;
-      Result = c$12*t$13*t$13*t$13*t$13*t$13+b$30;
-      return Result
-   }
-   /// function TW3TweenEase.QuintInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 832, column: 29, file: system.animation.tween]
-   ,QuintInOut:function(Self, t$14, b$31, c$13, d$13) {
-      var Result = 0;
-      t$14*=2/d$13;
-      if (t$14<1) {
-         Result = c$13/2*t$14*t$14*t$14*t$14*t$14+b$31;
-      } else {
-         t$14-=2;
-         Result = c$13/2*(t$14*t$14*t$14*t$14*t$14+2)+b$31;
-      }
-      return Result
-   }
-   /// function TW3TweenEase.QuintOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 825, column: 29, file: system.animation.tween]
-   ,QuintOut:function(Self, t$15, b$32, c$14, d$14) {
-      var Result = 0;
-      t$15/=d$14;
-      t$15-=1;
-      Result = c$14*(t$15*t$15*t$15*t$15*t$15+1)+b$32;
-      return Result
-   }
-   /// function TW3TweenEase.SineIn(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 803, column: 29, file: system.animation.tween]
-   ,SineIn:function(Self, t$16, b$33, c$15, d$15) {
-      return (-c$15)*Math.cos(t$16/d$15*1.5707963267949)+c$15+b$33;
-   }
-   /// function TW3TweenEase.SineInOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 813, column: 29, file: system.animation.tween]
-   ,SineInOut:function(Self, t$17, b$34, c$16, d$16) {
-      return (-c$16)/2*(Math.cos(3.14159265358979*t$17/d$16)-1)+b$34;
-   }
-   /// function TW3TweenEase.SineOut(t: Float; b: Float; c: Float; d: Float) : Float
-   ///  [line: 808, column: 29, file: system.animation.tween]
-   ,SineOut:function(Self, t$18, b$35, c$17, d$17) {
-      return c$17*Math.cos(t$18/d$17*1.5707963267949)+b$35;
-   }
-   ,Destroy:TObject.Destroy
-};
 /// TW3TweenBehavior enumeration
 ///  [line: 34, column: 3, file: system.animation.tween]
 var TW3TweenBehavior = [ "tbSingle", "tbRepeat", "tbOscillate" ];
@@ -6967,7 +6820,7 @@ var TW3TweenBehavior = [ "tbSingle", "tbRepeat", "tbOscillate" ];
 ///  [line: 12, column: 3, file: system.animation.tween]
 var TW3TweenAnimationType = [ "ttlinear", "ttQuadIn", "ttQuadOut", "ttQuadInOut", "ttCubeIn", "ttCubeOut", "ttCubeInOut", "ttQuartIn", "ttQuartOut", "ttQuartInOut", "ttQuintIn", "ttQuintOut", "ttQuintInOut", "ttSineIn", "ttSineOut", "ttSineInOut", "ttExpoIn", "ttExpoOut", "ttExpoInOut" ];
 /// TW3Tween = class (TObject)
-///  [line: 111, column: 3, file: system.animation.tween]
+///  [line: 85, column: 3, file: system.animation.tween]
 var TW3Tween = {
    $ClassName:"TW3Tween",$Parent:TObject
    ,$Init:function ($) {
@@ -6978,21 +6831,17 @@ var TW3Tween = {
       $.OnPartialFinished = null;
       $.IgnoreOscillate = $.SyncRefresh = $.FActive = $.FPartial = false;
       $.FInterval = 0;
+      $.FQRLUT = [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
       $.FTimer = null;
       $.FValues = [];
    }
    /// anonymous TSourceMethodSymbol
-   ///  [line: 131, column: 55, file: system.animation.tween]
-   ,a$50:function(Self, Value$6) {
-      TInteger.EnsureRange(Value$6,1,10000);
-   }
-   /// anonymous TSourceMethodSymbol
-   ///  [line: 127, column: 37, file: system.animation.tween]
-   ,a$47:function(Self) {
+   ///  [line: 126, column: 37, file: system.animation.tween]
+   ,a$48:function(Self) {
       return Self.FActive;
    }
    /// function TW3Tween.Add(Id: String) : TW3TweenElement
-   ///  [line: 660, column: 19, file: system.animation.tween]
+   ///  [line: 706, column: 19, file: system.animation.tween]
    ,Add$3:function(Self, Id$2) {
       var Result = null;
       Id$2 = (Trim$_String_(Id$2)).toLowerCase();
@@ -7002,17 +6851,17 @@ var TW3Tween = {
             Result.Id = Id$2;
             Self.FValues.push(Result);
          } else {
-            throw EW3Exception.CreateFmt($New(EW3Exception),"A tween-object with id [%s] already exists in collection error",[Id$2]);
+            throw EW3Exception.CreateFmt($New(EW3TweenError),$R[4],[Id$2]);
          }
       } else {
-         throw Exception.Create($New(EW3Exception),"Invalid tween-object id [empty] error");
+         throw Exception.Create($New(EW3TweenError),$R[3]);
       }
       return Result
    }
    /// procedure TW3Tween.Cancel()
-   ///  [line: 630, column: 20, file: system.animation.tween]
+   ///  [line: 654, column: 20, file: system.animation.tween]
    ,Cancel:function(Self) {
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          try {
             TW3Timer.SetEnabled$2(Self.FTimer,false);
             Self.FTimer.OnTime = null;
@@ -7025,7 +6874,7 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.Clear()
-   ///  [line: 214, column: 20, file: system.animation.tween]
+   ///  [line: 244, column: 20, file: system.animation.tween]
    ,Clear$5:function(Self) {
       while (Self.FValues.length>0) {
          TObject.Free(Self.FValues[Self.FValues.length-1]);
@@ -7034,21 +6883,71 @@ var TW3Tween = {
       }
    }
    /// constructor TW3Tween.Create()
-   ///  [line: 198, column: 22, file: system.animation.tween]
+   ///  [line: 205, column: 22, file: system.animation.tween]
    ,Create$60:function(Self) {
       TObject.Create(Self);
       Self.FTimer = TW3Timer.Create$61($New(TW3Timer));
-      TW3Tween.a$50(Self,10);
+      Self.FInterval = 10;
       Self.IgnoreOscillate = true;
+      Self.SyncRefresh = false;
+      Self.FQRLUT[0] = $Event(Self,TW3Tween.Linear);
+      Self.FQRLUT[1] = $Event(Self,TW3Tween.QuadIn);
+      Self.FQRLUT[2] = $Event(Self,TW3Tween.QuadOut);
+      Self.FQRLUT[3] = $Event(Self,TW3Tween.QuadInOut);
+      Self.FQRLUT[4] = $Event(Self,TW3Tween.CubeIn);
+      Self.FQRLUT[5] = $Event(Self,TW3Tween.CubeOut);
+      Self.FQRLUT[6] = $Event(Self,TW3Tween.CubeInOut);
+      Self.FQRLUT[7] = $Event(Self,TW3Tween.QuartIn);
+      Self.FQRLUT[8] = $Event(Self,TW3Tween.QuartOut);
+      Self.FQRLUT[9] = $Event(Self,TW3Tween.QuartInOut);
+      Self.FQRLUT[10] = $Event(Self,TW3Tween.QuintIn);
+      Self.FQRLUT[11] = $Event(Self,TW3Tween.QuintOut);
+      Self.FQRLUT[12] = $Event(Self,TW3Tween.QuintInOut);
+      Self.FQRLUT[13] = $Event(Self,TW3Tween.SineIn);
+      Self.FQRLUT[14] = $Event(Self,TW3Tween.SineOut);
+      Self.FQRLUT[15] = $Event(Self,TW3Tween.SineInOut);
+      Self.FQRLUT[16] = $Event(Self,TW3Tween.ExpoIn);
+      Self.FQRLUT[17] = $Event(Self,TW3Tween.ExpoOut);
+      Self.FQRLUT[18] = $Event(Self,TW3Tween.ExpoInOut);
       return Self
    }
+   /// function TW3Tween.CubeIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 886, column: 19, file: system.animation.tween]
+   ,CubeIn:function(Self, t$2, b$19, c$1, d$1) {
+      var Result = 0;
+      t$2/=d$1;
+      Result = c$1*t$2*t$2*t$2+b$19;
+      return Result
+   }
+   /// function TW3Tween.CubeInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 866, column: 19, file: system.animation.tween]
+   ,CubeInOut:function(Self, t$3, b$20, c$2, d$2) {
+      var Result = 0;
+      t$3*=2/d$2;
+      if (t$3<1) {
+         Result = c$2/2*t$3*t$3*t$3+b$20;
+      } else {
+         t$3-=2;
+         Result = c$2/2*(t$3*t$3*t$3+2)+b$20;
+      }
+      return Result
+   }
+   /// function TW3Tween.CubeOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 879, column: 19, file: system.animation.tween]
+   ,CubeOut:function(Self, t$4, b$21, c$3, d$3) {
+      var Result = 0;
+      t$4/=d$3;
+      t$4-=1;
+      Result = c$3*(t$4*t$4*t$4+1)+b$21;
+      return Result
+   }
    /// procedure TW3Tween.Delete(Id: String)
-   ///  [line: 655, column: 20, file: system.animation.tween]
+   ///  [line: 679, column: 20, file: system.animation.tween]
    ,Delete$2:function(Self, Id$3) {
       TW3Tween.Delete$1(Self,Self.FValues.indexOf(TW3Tween.ObjectOf(Self,Id$3)));
    }
    /// procedure TW3Tween.Delete(index: Integer)
-   ///  [line: 646, column: 20, file: system.animation.tween]
+   ///  [line: 670, column: 20, file: system.animation.tween]
    ,Delete$1:function(Self, index$1) {
       var LObj = null;
       LObj = Self.FValues[index$1];
@@ -7057,7 +6956,7 @@ var TW3Tween = {
       TObject.Free(LObj);
    }
    /// destructor TW3Tween.Destroy()
-   ///  [line: 206, column: 22, file: system.animation.tween]
+   ///  [line: 236, column: 21, file: system.animation.tween]
    ,Destroy:function(Self) {
       TW3Tween.Cancel(Self);
       TW3Tween.Clear$5(Self);
@@ -7065,10 +6964,10 @@ var TW3Tween = {
       TObject.Destroy(Self);
    }
    /// procedure TW3Tween.Execute()
-   ///  [line: 417, column: 20, file: system.animation.tween]
+   ///  [line: 441, column: 20, file: system.animation.tween]
    ,Execute$3:function(Self) {
-      if (TW3Tween.a$47(Self)) {
-         throw Exception.Create($New(Exception),"Tween already executing error");
+      if (TW3Tween.a$48(Self)) {
+         throw Exception.Create($New(EW3TweenError),$R[2]);
       } else {
          Self.FPartial = false;
          if (Self.SyncRefresh) {
@@ -7086,16 +6985,39 @@ var TW3Tween = {
          }
       }
    }
+   /// function TW3Tween.ExpoIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 776, column: 19, file: system.animation.tween]
+   ,ExpoIn:function(Self, t$5, b$22, c$4, d$4) {
+      return c$4*Math.pow(2,10*(t$5/d$4-1))+b$22;
+   }
+   /// function TW3Tween.ExpoInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 786, column: 19, file: system.animation.tween]
+   ,ExpoInOut:function(Self, t$6, b$23, c$5, d$5) {
+      var Result = 0;
+      t$6*=2/d$5;
+      if (t$6<1) {
+         Result = c$5/2*Math.pow(2,10*(t$6-1))+b$23;
+      } else {
+         t$6-=1;
+         Result = c$5/2*(Math.pow(2,-10*t$6)+2)+b$23;
+      }
+      return Result
+   }
+   /// function TW3Tween.ExpoOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 781, column: 19, file: system.animation.tween]
+   ,ExpoOut:function(Self, t$7, b$24, c$6, d$6) {
+      return c$6*((-Math.pow(2,-10*t$7/d$6))+1)+b$24;
+   }
    /// procedure TW3Tween.HandleSyncUpdate()
-   ///  [line: 369, column: 20, file: system.animation.tween]
+   ///  [line: 395, column: 20, file: system.animation.tween]
    ,HandleSyncUpdate:function(Self) {
       TW3Tween.HandleUpdateTimer(Self,null);
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          w3_RequestAnimationFrame($Event0(Self,TW3Tween.HandleSyncUpdate));
       }
    }
    /// procedure TW3Tween.HandleUpdateTimer(Sender: TObject)
-   ///  [line: 288, column: 20, file: system.animation.tween]
+   ///  [line: 315, column: 20, file: system.animation.tween]
    ,HandleUpdateTimer:function(Self, Sender$10) {
       var LItem = null;
       var LCount = 0;
@@ -7113,8 +7035,9 @@ var TW3Tween = {
       for(a$92=0,$temp26=a$93.length;a$92<$temp26;a$92++) {
          LItem = a$93[a$92];
          if (!LItem.State) {
-            LItem.StartTime = GetTimeCode();
             LItem.State = 1;
+            TW3Tween.TweenStarted(Self,LItem);
+            LItem.StartTime = TW3Tween.TimeCode(Self.ClassType);
          }
          if (LItem.State==2) {
             continue;
@@ -7134,9 +7057,7 @@ var TW3Tween = {
          if (TW3TweenData.Expired(LItem)) {
             if ((~LItem.State)==3) {
                LItem.State = 3;
-               if (LItem.OnFinished) {
-                  LItem.OnFinished(LItem);
-               }
+               TW3Tween.TweenComplete(Self,LItem);
             }
          }
       }
@@ -7158,7 +7079,7 @@ var TW3Tween = {
       }
    }
    /// function TW3Tween.IndexOf(Id: String) : Integer
-   ///  [line: 702, column: 19, file: system.animation.tween]
+   ///  [line: 746, column: 19, file: system.animation.tween]
    ,IndexOf$3:function(Self, Id$4) {
       var Result = 0;
       var x$49 = 0;
@@ -7175,8 +7096,13 @@ var TW3Tween = {
       }
       return Result
    }
+   /// function TW3Tween.Linear(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 918, column: 19, file: system.animation.tween]
+   ,Linear:function(Self, t$8, b$25, c$7, d$7) {
+      return c$7*t$8/d$7+b$25;
+   }
    /// function TW3Tween.ObjectOf(const Id: String) : TW3TweenElement
-   ///  [line: 721, column: 19, file: system.animation.tween]
+   ///  [line: 765, column: 19, file: system.animation.tween]
    ,ObjectOf:function(Self, Id$5) {
       var Result = null;
       var LIndex = 0;
@@ -7189,11 +7115,11 @@ var TW3Tween = {
       return Result
    }
    /// procedure TW3Tween.Pause()
-   ///  [line: 614, column: 20, file: system.animation.tween]
+   ///  [line: 638, column: 20, file: system.animation.tween]
    ,Pause$4:function(Self) {
       var LObj$1 = null;
       var a$94 = 0;
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          if (Self.FValues.length>0) {
             var a$95 = [];
             a$95 = Self.FValues;
@@ -7206,9 +7132,9 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.Pause(const Tween: TW3TweenElement)
-   ///  [line: 569, column: 20, file: system.animation.tween]
+   ///  [line: 593, column: 20, file: system.animation.tween]
    ,Pause$1:function(Self, Tween$2) {
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          if (Tween$2!==null) {
             if (Self.FValues.indexOf(Tween$2)>=0) {
                if (Tween$2.State==1) {
@@ -7218,12 +7144,102 @@ var TW3Tween = {
          }
       }
    }
+   /// function TW3Tween.QuadIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 912, column: 19, file: system.animation.tween]
+   ,QuadIn:function(Self, t$9, b$26, c$8, d$8) {
+      var Result = 0;
+      t$9/=d$8;
+      Result = c$8*t$9*t$9+b$26;
+      return Result
+   }
+   /// function TW3Tween.QuadInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 892, column: 19, file: system.animation.tween]
+   ,QuadInOut:function(Self, t$10, b$27, c$9, d$9) {
+      var Result = 0;
+      t$10*=2/d$9;
+      if (t$10<1) {
+         Result = c$9/2*t$10*t$10+b$27;
+         return Result;
+      } else {
+         t$10-=1;
+         Result = (-c$9)/2*(t$10*(t$10-2)-1)+b$27;
+      }
+      return Result
+   }
+   /// function TW3Tween.QuadOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 906, column: 19, file: system.animation.tween]
+   ,QuadOut:function(Self, t$11, b$28, c$10, d$10) {
+      var Result = 0;
+      t$11/=d$10;
+      Result = (-c$10)*t$11*(t$11-2)+b$28;
+      return Result
+   }
+   /// function TW3Tween.QuartIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 840, column: 19, file: system.animation.tween]
+   ,QuartIn:function(Self, t$12, b$29, c$11, d$11) {
+      var Result = 0;
+      t$12/=d$11;
+      Result = c$11*t$12*t$12*t$12*t$12+b$29;
+      return Result
+   }
+   /// function TW3Tween.QuartInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 853, column: 19, file: system.animation.tween]
+   ,QuartInOut:function(Self, t$13, b$30, c$12, d$12) {
+      var Result = 0;
+      t$13*=2/d$12;
+      if (t$13<1) {
+         Result = c$12/2*t$13*t$13*t$13*t$13+b$30;
+      } else {
+         t$13-=2;
+         Result = (-c$12)/2*(t$13*t$13*t$13*t$13-2)+b$30;
+      }
+      return Result
+   }
+   /// function TW3Tween.QuartOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 846, column: 19, file: system.animation.tween]
+   ,QuartOut:function(Self, t$14, b$31, c$13, d$13) {
+      var Result = 0;
+      t$14/=d$13;
+      t$14-=1;
+      Result = (-c$13)*(t$14*t$14*t$14*t$14-1)+b$31;
+      return Result
+   }
+   /// function TW3Tween.QuintIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 814, column: 19, file: system.animation.tween]
+   ,QuintIn:function(Self, t$15, b$32, c$14, d$14) {
+      var Result = 0;
+      t$15/=d$14;
+      Result = c$14*t$15*t$15*t$15*t$15*t$15+b$32;
+      return Result
+   }
+   /// function TW3Tween.QuintInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 827, column: 19, file: system.animation.tween]
+   ,QuintInOut:function(Self, t$16, b$33, c$15, d$15) {
+      var Result = 0;
+      t$16*=2/d$15;
+      if (t$16<1) {
+         Result = c$15/2*t$16*t$16*t$16*t$16*t$16+b$33;
+      } else {
+         t$16-=2;
+         Result = c$15/2*(t$16*t$16*t$16*t$16*t$16+2)+b$33;
+      }
+      return Result
+   }
+   /// function TW3Tween.QuintOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 820, column: 19, file: system.animation.tween]
+   ,QuintOut:function(Self, t$17, b$34, c$16, d$16) {
+      var Result = 0;
+      t$17/=d$16;
+      t$17-=1;
+      Result = c$16*(t$17*t$17*t$17*t$17*t$17+1)+b$34;
+      return Result
+   }
    /// procedure TW3Tween.Resume()
-   ///  [line: 537, column: 20, file: system.animation.tween]
+   ///  [line: 561, column: 20, file: system.animation.tween]
    ,Resume$4:function(Self) {
       var LObj$2 = null;
       var a$96 = 0;
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          if (Self.FValues.length>0) {
             var a$97 = [];
             a$97 = Self.FValues;
@@ -7238,116 +7254,95 @@ var TW3Tween = {
       }
    }
    /// procedure TW3Tween.Resume(const Tween: TW3TweenElement)
-   ///  [line: 489, column: 20, file: system.animation.tween]
+   ///  [line: 513, column: 20, file: system.animation.tween]
    ,Resume$1:function(Self, Tween$3) {
-      if (TW3Tween.a$47(Self)) {
+      if (TW3Tween.a$48(Self)) {
          if (Tween$3!==null) {
             if (Self.FValues.indexOf(Tween$3)>=0) {
                if (Tween$3.State==2) {
-                  Tween$3.StartTime = GetTimeCode();
+                  Tween$3.StartTime = TW3Tween.TimeCode(Self.ClassType);
                   Tween$3.State = 2;
                }
             }
          }
       }
    }
+   /// procedure TW3Tween.SetInterval(const Value: Integer)
+   ///  [line: 260, column: 20, file: system.animation.tween]
+   ,SetInterval:function(Self, Value$6) {
+      Self.FInterval = TInteger.EnsureRange(Value$6,1,10000);
+   }
+   /// function TW3Tween.SineIn(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 799, column: 19, file: system.animation.tween]
+   ,SineIn:function(Self, t$18, b$35, c$17, d$17) {
+      return (-c$17)*Math.cos(t$18/d$17*1.5707963267949)+c$17+b$35;
+   }
+   /// function TW3Tween.SineInOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 809, column: 19, file: system.animation.tween]
+   ,SineInOut:function(Self, t$19, b$36, c$18, d$18) {
+      return (-c$18)/2*(Math.cos(3.14159265358979*t$19/d$18)-1)+b$36;
+   }
+   /// function TW3Tween.SineOut(t: Float; b: Float; c: Float; d: Float) : Float
+   ///  [line: 804, column: 19, file: system.animation.tween]
+   ,SineOut:function(Self, t$20, b$37, c$19, d$19) {
+      return c$19*Math.cos(t$20/d$19*1.5707963267949)+b$37;
+   }
+   /// function TW3Tween.TimeCode() : Float
+   ///  [line: 253, column: 25, file: system.animation.tween]
+   ,TimeCode:function(Self) {
+      var Result = 0;
+      
+    Result = Date.now();
+  return Result
+   }
+   /// procedure TW3Tween.TweenComplete(const Item: TW3TweenElement)
+   ///  [line: 265, column: 20, file: system.animation.tween]
+   ,TweenComplete:function(Self, Item$1) {
+      if (Item$1.OnFinished) {
+         Item$1.OnFinished(Item$1);
+      }
+   }
+   /// procedure TW3Tween.TweenStarted(const Item: TW3TweenElement)
+   ///  [line: 271, column: 20, file: system.animation.tween]
+   ,TweenStarted:function(Self, Item$2) {
+      if (Item$2.OnStarted) {
+         Item$2.OnStarted(Item$2);
+      }
+   }
    /// function TW3Tween.Update(const Item: TW3TweenElement) : Float
-   ///  [line: 223, column: 19, file: system.animation.tween]
-   ,Update$4:function(Self, Item$1) {
+   ///  [line: 277, column: 19, file: system.animation.tween]
+   ,Update$4:function(Self, Item$3) {
       var Result = 0;
       var LTotal = 0;
-      function PerformX(t$19, b$36, c$18, d$18) {
-         var Result = 0;
-         switch (Item$1.AnimationType) {
-            case 0 :
-               Result = TW3TweenEase.Linear(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 1 :
-               Result = TW3TweenEase.QuadIn(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 2 :
-               Result = TW3TweenEase.QuadOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 3 :
-               Result = TW3TweenEase.QuadInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 4 :
-               Result = TW3TweenEase.CubeIn(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 5 :
-               Result = TW3TweenEase.CubeOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 6 :
-               Result = TW3TweenEase.CubeInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 7 :
-               Result = TW3TweenEase.QuartIn(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 8 :
-               Result = TW3TweenEase.QuartOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 9 :
-               Result = TW3TweenEase.QuartInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 10 :
-               Result = TW3TweenEase.QuintIn(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 11 :
-               Result = TW3TweenEase.QuintOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 12 :
-               Result = TW3TweenEase.QuintInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 13 :
-               Result = TW3TweenEase.SineIn(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 14 :
-               Result = TW3TweenEase.SineOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 15 :
-               Result = TW3TweenEase.SineInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 16 :
-               Result = TW3TweenEase.ExpoInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 17 :
-               Result = TW3TweenEase.ExpoInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-            case 18 :
-               Result = TW3TweenEase.ExpoInOut(TW3TweenEase,t$19,b$36,c$18,d$18);
-               break;
-         }
-         return Result
-      };
-      if (TW3TweenData.Expired(Item$1)) {
-         if (!Item$1.Behavior) {
-            LTotal = Item$1.StartValue+Item$1.Distance;
-         } else if (Item$1.Behavior==1) {
-            Item$1.StartTime = GetTimeCode();
-            LTotal = PerformX(GetTimeCode()-Item$1.StartTime,Item$1.StartValue,Item$1.Distance,Item$1.Duration);
-         } else if (Item$1.Behavior==2) {
-            Item$1.StartValue+=Item$1.Distance;
-            Item$1.Distance = -Item$1.Distance;
-            Item$1.StartTime = GetTimeCode();
-            LTotal = PerformX(GetTimeCode()-Item$1.StartTime,Item$1.StartValue,Item$1.Distance,Item$1.Duration);
-            Item$1.State = 3;
+      if (TW3TweenData.Expired(Item$3)) {
+         if (!Item$3.Behavior) {
+            LTotal = Item$3.StartValue+Item$3.Distance;
+         } else if (Item$3.Behavior==1) {
+            Item$3.StartTime = TW3Tween.TimeCode(Self.ClassType);
+            LTotal = Self.FQRLUT[Item$3.AnimationType](TW3Tween.TimeCode(Self.ClassType)-Item$3.StartTime,Item$3.StartValue,Item$3.Distance,Item$3.Duration);
+         } else if (Item$3.Behavior==2) {
+            Item$3.StartValue+=Item$3.Distance;
+            Item$3.Distance = -Item$3.Distance;
+            Item$3.StartTime = TW3Tween.TimeCode(Self.ClassType);
+            LTotal = Self.FQRLUT[Item$3.AnimationType](TW3Tween.TimeCode(Self.ClassType)-Item$3.StartTime,Item$3.StartValue,Item$3.Distance,Item$3.Duration);
+            Item$3.State = 3;
          }
       } else {
-         LTotal = PerformX(GetTimeCode()-Item$1.StartTime,Item$1.StartValue,Item$1.Distance,Item$1.Duration);
+         LTotal = Self.FQRLUT[Item$3.AnimationType](TW3Tween.TimeCode(Self.ClassType)-Item$3.StartTime,Item$3.StartValue,Item$3.Distance,Item$3.Duration);
       }
-      Result = Round100(LTotal);
+      Result = Math.round(LTotal*100)/100;
       return Result
    }
    ,Destroy$:function($){return $.ClassType.Destroy($)}
 };
-function Round100(Value$7) {
-   return Math.round(Value$7*100)/100;
-};
-function GetTimeCode() {
-   var Result = 0;
-   
-    Result = Date.now();
-  return Result
+/// EW3TweenError = class (EW3Exception)
+///  [line: 83, column: 3, file: system.animation.tween]
+var EW3TweenError = {
+   $ClassName:"EW3TweenError",$Parent:EW3Exception
+   ,$Init:function ($) {
+      EW3Exception.$Init($);
+   }
+   ,Destroy:Exception.Destroy
 };
 /// TW3Timer = class (TObject)
 ///  [line: 61, column: 3, file: SmartCL.Time]
@@ -7497,12 +7492,12 @@ var TCustomEffect = {
       $.OnEffectStarted = null;
    }
    /// procedure TCustomEffect.Cancel()
-   ///  [line: 332, column: 25, file: system.animation.effects]
+   ///  [line: 335, column: 25, file: system.animation.effects]
    ,Cancel$1:function(Self) {
       TCustomEffect.DoCancel$(Self);
    }
    /// procedure TCustomEffect.Execute(OnReady: TNotifyEvent)
-   ///  [line: 319, column: 25, file: system.animation.effects]
+   ///  [line: 322, column: 25, file: system.animation.effects]
    ,Execute$5:function(Self, OnReady$1) {
       if (TCustomEffect.DoGetActive$(Self)) {
          TCustomEffect.Cancel$1$(Self);
@@ -7510,12 +7505,12 @@ var TCustomEffect = {
       TCustomEffect.DoExecute$(Self);
    }
    /// procedure TCustomEffect.Pause()
-   ///  [line: 327, column: 25, file: system.animation.effects]
+   ///  [line: 330, column: 25, file: system.animation.effects]
    ,Pause$5:function(Self) {
       TCustomEffect.DoPause$(Self);
    }
    /// procedure TCustomEffect.Resume()
-   ///  [line: 337, column: 25, file: system.animation.effects]
+   ///  [line: 340, column: 25, file: system.animation.effects]
    ,Resume$5:function(Self) {
       TCustomEffect.DoResume$(Self);
    }
@@ -7539,65 +7534,64 @@ var TCustomTweenEffect = {
       $.FTween = null;
    }
    /// procedure TCustomTweenEffect.Cancel()
-   ///  [line: 300, column: 30, file: system.animation.effects]
+   ///  [line: 303, column: 30, file: system.animation.effects]
    ,Cancel$1:function(Self) {
       TW3Tween.Cancel(Self.FTween);
    }
    /// constructor TCustomTweenEffect.Create()
-   ///  [line: 222, column: 32, file: system.animation.effects]
+   ///  [line: 226, column: 32, file: system.animation.effects]
    ,Create$63:function(Self) {
       TObject.Create(Self);
       Self.FTween = TW3Tween.Create$60($New(TW3Tween));
       Self.FTween.OnFinished = $Event1(Self,TCustomTweenEffect.HandleTweenDone);
       Self.FTween.OnStarted = $Event1(Self,TCustomTweenEffect.HandleTweenStart);
       Self.FTween.OnUpdated = $Event1(Self,TCustomTweenEffect.HandleTweenUpdated);
-      Self.FTween.SyncRefresh = true;
       return Self
    }
    /// destructor TCustomTweenEffect.Destroy()
-   ///  [line: 232, column: 31, file: system.animation.effects]
+   ///  [line: 235, column: 31, file: system.animation.effects]
    ,Destroy:function(Self) {
       TObject.Free(Self.FTween);
       TObject.Destroy(Self);
    }
    /// procedure TCustomTweenEffect.DoCancel()
-   ///  [line: 280, column: 30, file: system.animation.effects]
+   ///  [line: 283, column: 30, file: system.animation.effects]
    ,DoCancel:function(Self) {
       TW3Tween.Cancel(Self.FTween);
    }
    /// procedure TCustomTweenEffect.DoExecute()
-   ///  [line: 274, column: 30, file: system.animation.effects]
+   ///  [line: 277, column: 30, file: system.animation.effects]
    ,DoExecute:function(Self) {
       TCustomTweenEffect.DoSetupTween$(Self);
       TW3Tween.Execute$3(Self.FTween);
    }
    /// function TCustomTweenEffect.DoGetActive() : Boolean
-   ///  [line: 295, column: 29, file: system.animation.effects]
+   ///  [line: 298, column: 29, file: system.animation.effects]
    ,DoGetActive:function(Self) {
-      return TW3Tween.a$47(Self.FTween);
+      return TW3Tween.a$48(Self.FTween);
    }
    /// procedure TCustomTweenEffect.DoPause()
-   ///  [line: 285, column: 30, file: system.animation.effects]
+   ///  [line: 288, column: 30, file: system.animation.effects]
    ,DoPause:function(Self) {
       TW3Tween.Pause$4(Self.FTween);
    }
    /// procedure TCustomTweenEffect.DoResume()
-   ///  [line: 290, column: 30, file: system.animation.effects]
+   ///  [line: 293, column: 30, file: system.animation.effects]
    ,DoResume:function(Self) {
       TW3Tween.Resume$4(Self.FTween);
    }
    /// procedure TCustomTweenEffect.DoSetupTween()
-   ///  [line: 242, column: 30, file: system.animation.effects]
+   ///  [line: 245, column: 30, file: system.animation.effects]
    ,DoSetupTween:function(Self) {
       /* null */
    }
    /// procedure TCustomTweenEffect.DoTearDownTween()
-   ///  [line: 238, column: 30, file: system.animation.effects]
+   ///  [line: 241, column: 30, file: system.animation.effects]
    ,DoTearDownTween:function(Self) {
       /* null */
    }
    /// procedure TCustomTweenEffect.Execute(OnReady: TNotifyEvent)
-   ///  [line: 265, column: 30, file: system.animation.effects]
+   ///  [line: 268, column: 30, file: system.animation.effects]
    ,Execute$5:function(Self, OnReady$2) {
       if (OnReady$2) {
          Self.OnEffectDone = OnReady$2;
@@ -7605,7 +7599,7 @@ var TCustomTweenEffect = {
       TCustomEffect.DoExecute$(Self);
    }
    /// procedure TCustomTweenEffect.HandleTweenDone(sender: TObject)
-   ///  [line: 252, column: 30, file: system.animation.effects]
+   ///  [line: 255, column: 30, file: system.animation.effects]
    ,HandleTweenDone:function(Self, sender$10) {
       TCustomTweenEffect.DoTearDownTween$(Self);
       if (Self.OnEffectDone) {
@@ -7613,24 +7607,24 @@ var TCustomTweenEffect = {
       }
    }
    /// procedure TCustomTweenEffect.HandleTweenStart(sender: TObject)
-   ///  [line: 246, column: 30, file: system.animation.effects]
+   ///  [line: 249, column: 30, file: system.animation.effects]
    ,HandleTweenStart:function(Self, sender$11) {
       if (Self.OnEffectStarted) {
          Self.OnEffectStarted(Self);
       }
    }
    /// procedure TCustomTweenEffect.HandleTweenUpdated(Sender: TObject)
-   ///  [line: 261, column: 30, file: system.animation.effects]
+   ///  [line: 264, column: 30, file: system.animation.effects]
    ,HandleTweenUpdated:function(Self, Sender$12) {
       /* null */
    }
    /// procedure TCustomTweenEffect.Pause()
-   ///  [line: 305, column: 30, file: system.animation.effects]
+   ///  [line: 308, column: 30, file: system.animation.effects]
    ,Pause$5:function(Self) {
       TW3Tween.Pause$4(Self.FTween);
    }
    /// procedure TCustomTweenEffect.Resume()
-   ///  [line: 310, column: 30, file: system.animation.effects]
+   ///  [line: 313, column: 30, file: system.animation.effects]
    ,Resume$5:function(Self) {
       TW3Tween.Resume$4(Self.FTween);
    }
@@ -7656,7 +7650,7 @@ var TCustomControlEffect = {
       $.FControl = null;
    }
    /// constructor TCustomControlEffect.Create(aControl: TW3MovableControl)
-   ///  [line: 212, column: 34, file: system.animation.effects]
+   ///  [line: 216, column: 34, file: system.animation.effects]
    ,Create$64:function(Self, aControl$2) {
       TCustomTweenEffect.Create$63(Self);
       Self.FControl = aControl$2;
@@ -7690,6 +7684,8 @@ var TMoveXEffect = {
       var LObj$3 = null;
       Self.FTween.OnUpdated = null;
       LObj$3 = TW3Tween.Add$3(Self.FTween,"xpos");
+      Self.FTween.SyncRefresh = false;
+      TW3Tween.SetInterval(Self.FTween,10);
       LObj$3.StartValue = Self.FromX;
       LObj$3.Distance = Self.Distance;
       LObj$3.Duration = Self.Duration;
@@ -7700,7 +7696,7 @@ var TMoveXEffect = {
       };
    }
    /// procedure TMoveXEffect.DoTearDownTween()
-   ///  [line: 203, column: 24, file: system.animation.effects]
+   ///  [line: 207, column: 24, file: system.animation.effects]
    ,DoTearDownTween:function(Self) {
       TW3Tween.Delete$2(Self.FTween,"xpos");
    }
