@@ -1,0 +1,21 @@
+var
+  LContext: TParserContext;
+  LParser:  TSimpleTextParser;
+  LMode:    TTextModel;
+  x:        integer;
+begin
+  // Setup context
+  LContext := TParserContext.Create;
+  LContext.Buffer.LoadFromString(w3Memo1.Text);
+
+  // setup parser
+  LParser := TSimpleTextParser.Create(LContext);
+  LParser.Parse;
+
+  // Keep a reference to the model
+  LModel := TTextModel(LContext.Model);
+
+  for x:=0 to LModel.Count-1 do
+  begin
+    Writeln( LModel.Sentences[x].ToString );
+  end;
