@@ -1,0 +1,263 @@
+<SMART>
+  <Project version="2" subversion="2">
+    <Name>parsedemo</Name>
+    <Created>T00:00:00.000</Created>
+    <Modified>2016-01-13T10:34:54.718</Modified>
+    <Version>
+      <Major>0</Major>
+      <Minor>0</Minor>
+      <Revision>0</Revision>
+    </Version>
+    <VendorSpecific>
+      <Apple>
+        <FormatDetection>1</FormatDetection>
+        <StatusBarStyle>black</StatusBarStyle>
+        <WebAppCapable>1</WebAppCapable>
+      </Apple>
+      <ChromeApp>
+        <Kiosk>0</Kiosk>
+        <KioskOnly>1</KioskOnly>
+        <OfflineEnabled>1</OfflineEnabled>
+      </ChromeApp>
+      <Cordova>
+        <WidgetID></WidgetID>
+        <AllowIntent>http://*/*&#13;&#10;https://*/*&#13;&#10;tel:*&#13;&#10;sms:*&#13;&#10;mailto:*&#13;&#10;geo:*</AllowIntent>
+      </Cordova>
+    </VendorSpecific>
+    <Options>
+      <Compiler>
+        <Assertions>1</Assertions>
+        <Optimize>1</Optimize>
+        <HintsLevel>1</HintsLevel>
+      </Compiler>
+      <Codegen>
+        <Obfuscation>0</Obfuscation>
+        <RangeChecking>0</RangeChecking>
+        <InstanceChecking>0</InstanceChecking>
+        <ConditionChecking>0</ConditionChecking>
+        <LoopChecking>0</LoopChecking>
+        <InlineMagics>1</InlineMagics>
+        <IgnorePublishedInImplementation>0</IgnorePublishedInImplementation>
+        <EmitSourceLocation>0</EmitSourceLocation>
+        <EmitRTTI>0</EmitRTTI>
+        <Devirtualize>1</Devirtualize>
+        <MainBody>1</MainBody>
+        <CodePacking>0</CodePacking>
+        <SmartLinking>1</SmartLinking>
+        <Verbosity>1</Verbosity>
+      </Codegen>
+      <ConditionalDefines>
+        <HandleExceptions>1</HandleExceptions>
+        <AutoRefresh>0</AutoRefresh>
+        <LegacySupportForIE>0</LegacySupportForIE>
+      </ConditionalDefines>
+      <Linker>
+        <SourceMap>0</SourceMap>
+        <CompressCSS>0</CompressCSS>
+        <GenerateAppCacheManifest>1</GenerateAppCacheManifest>
+        <GenerateChromeAppManifest>0</GenerateChromeAppManifest>
+        <GenerateFireFoxManifest>0</GenerateFireFoxManifest>
+        <GenerateWebAppManifest>1</GenerateWebAppManifest>
+        <GenerateWidgetPackageConfigXML>0</GenerateWidgetPackageConfigXML>
+        <GenerateCordovaConfigXML>0</GenerateCordovaConfigXML>
+        <ExternalCSS>1</ExternalCSS>
+        <Theme>iOS.css</Theme>
+        <CustomTheme>0</CustomTheme>
+        <EmbedJavaScript>1</EmbedJavaScript>
+      </Linker>
+      <Output>
+        <JavaScriptFileName>main.js</JavaScriptFileName>
+        <HtmlFileName>index.html</HtmlFileName>
+        <OutputFilePath>www\</OutputFilePath>
+      </Output>
+      <Import />
+      <Execute>
+        <ServeManifest>0</ServeManifest>
+        <Server>1</Server>
+        <CustomFile></CustomFile>
+        <LoadCustomFile>0</LoadCustomFile>
+        <PauseAfterExecution>0</PauseAfterExecution>
+        <ExecuteType>0</ExecuteType>
+      </Execute>
+    </Options>
+    <Files>
+      <File type="main">
+        <Name>parsedemo</Name>
+        <Created>2016-01-12T13:52:42.232Z</Created>
+        <Modified>2016-01-13T10:33:50.062</Modified>
+        <Source>
+          <![CDATA[uses SmartCL.System, Unit1;
+
+{$IFDEF SMART_INTERNAL_HANDLE_EXCEPTIONS}
+try
+{$ENDIF}
+  var Application := TApplication.Create;
+  Application.RunApp;
+{$IFDEF SMART_INTERNAL_HANDLE_EXCEPTIONS}
+except
+  on e: Exception do
+    ShowMessage(e.Message);
+end;
+{$ENDIF}
+]]>
+        </Source>
+      </File>
+      <File type="unit">
+        <Name>Unit1</Name>
+        <Created>2016-01-12T13:52:42.232Z</Created>
+        <Modified>2016-01-12T13:52:42.232</Modified>
+        <Source>
+          <![CDATA[unit Unit1;
+
+interface
+
+uses
+  Pseudo.CreateForms, // auto-generated unit that creates forms during startup
+  System.Types, SmartCL.System, SmartCL.Components, SmartCL.Forms, 
+  SmartCL.Application, Form1;
+
+type
+  TApplication  = class(TW3CustomApplication)
+  end;
+
+implementation
+
+end.]]>
+        </Source>
+      </File>
+      <File type="form">
+        <Name>Form1</Name>
+        <Created>2016-01-12T13:52:42.232Z</Created>
+        <Modified>2016-01-13T10:34:54.203</Modified>
+        <Source>
+          <![CDATA[unit Form1;
+
+interface
+
+uses 
+  SmartCL.System, SmartCL.Graphics, SmartCL.Components, SmartCL.Forms, 
+  SmartCL.Fonts, SmartCL.Borders, SmartCL.Application, SmartCL.Controls.Button,
+  SmartCL.Controls.Memo;
+
+type
+
+  TCmdParser = class(TObject)
+  end;
+
+
+  TForm1 = class(TW3Form)
+  private
+    {$I 'Form1:intf'}
+  protected
+    procedure InitializeForm; override;
+    procedure InitializeObject; override;
+    procedure Resize; override;
+
+    procedure StartParse;
+
+  end;
+
+implementation
+
+uses
+  system.text.parser,
+  system.text.wordparser;
+
+{ TForm1 }
+
+procedure TForm1.InitializeForm;
+begin
+  inherited;
+  // this is a good place to initialize components
+  w3Button1.onClick := procedure (sender:Tobject)
+    begin
+      StartParse;
+    end;
+end;
+
+procedure TForm1.InitializeObject;
+begin
+  inherited;
+  {$I 'Form1:impl'}
+end;
+
+
+procedure TForm1.StartParse;
+var
+  LContext: TParserContext;
+  LParser:  TSimpleTextParser;
+  LModel:   TTextModel;
+  x:        integer;
+begin
+  // Setup context
+  LContext := TParserContext.Create;
+  LContext.Buffer.LoadFromString(w3Memo1.Text);
+
+  // setup parser
+  LParser := TSimpleTextParser.Create(LContext);
+  LParser.Parse;
+
+  // Keep a reference to the model
+  LModel := TTextModel(LContext.Model);
+
+  for x:=0 to LModel.Count-1 do
+  begin
+    Writeln( LModel.Sentences[x].ToString );
+  end;
+
+end;
+ 
+procedure TForm1.Resize;
+begin
+  inherited;
+end;
+ 
+initialization
+  Forms.RegisterForm({$I %FILE%}, TForm1);
+end.]]>
+        </Source>
+        <Design>
+          <![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Form version="2" subversion="2">
+  <Created>2016-01-12T13:52:42.232</Created>
+  <Modified>2016-01-12T14:52:45.817</Modified>
+  <object type="TW3Form">
+    <Caption>W3Form</Caption>
+    <Name>Form1</Name>
+    <object type="TW3Button">
+      <Caption>W3Button</Caption>
+      <Width>152</Width>
+      <Top>16</Top>
+      <Left>24</Left>
+      <Height>48</Height>
+      <Name>W3Button1</Name>
+    </object>
+    <object type="TW3Memo">
+      <Text>This is a nice little text. Its for our word parser; and that is cool!</Text>
+      <Width>378</Width>
+      <Top>72</Top>
+      <Left>24</Left>
+      <Height>225</Height>
+      <Name>W3Memo1</Name>
+    </object>
+  </object>
+</Form>]]>
+        </Design>
+        <AutoCreate>
+          <IsAutoCreate>1</IsAutoCreate>
+          <IsMainForm>1</IsMainForm>
+          <Order>1</Order>
+        </AutoCreate>
+      </File>
+    </Files>
+    <Target>Browser</Target>
+    <Statistics>
+      <BackgroundCompilations>5478</BackgroundCompilations>
+      <EditTime>01:13:16.168</EditTime>
+      <CompileTime>00:00:42.409</CompileTime>
+      <TotalTime>03:07:23.633</TotalTime>
+      <DesigningTime>00:12:35.124</DesigningTime>
+      <RunningTime>00:08:14.981</RunningTime>
+    </Statistics>
+  </Project>
+</SMART>
