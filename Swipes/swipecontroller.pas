@@ -4,6 +4,7 @@ interface
 
 uses 
   system.types,
+  system.controller,
   system.dateutils,
   SmartCL.System,
   SmartCL.Components;
@@ -17,6 +18,8 @@ type
     sdDown,
     sdUp
     );
+
+  TSwipeControllerOptions = set of (coStrictTarget);
 
   TSwipeControllerEvent = Procedure (sender:TObject;
     const Direction:TSwipeControllerDirection);
@@ -55,10 +58,11 @@ type
     FTouchHandleStart:  THandle;
     FTouchHandleMove:   THandle;
     FTouchHandleUp:     THandle;
-    procedure SetupGestures;
-    procedure RemoveGestures;
+    procedure   SetupGestures;
+    procedure   RemoveGestures;
   public
-    Property    Latency:Integer;
+    property    Options:TSwipeControllerOptions;
+    property    Latency:Integer;
     property    HRange:TSwipeRange read FHRange;
     property    VRange:TSwipeRange read FVRange;
     Property    Owner:TW3TagObj read FControl;
@@ -107,6 +111,7 @@ begin
   FVRange:=TSwipeRange.Create(20,40); // [min]---Y---[max]
   FInfo := TSwipeControllerInfo.Create;
   Latency := 35;
+  Options := [coStrictTarget];
 
   if assigned(AOwner) then
     Attach(Aowner);
@@ -165,6 +170,14 @@ begin
   FTouchHandleStart:=FControl.Handle.addEventListener
     ('touchstart', procedure (e:variant)
     begin
+
+      (* Exclude hitting child elements? *)
+      if (coStrictTarget in Options) then
+      begin
+        if (e.target <> FControl.handle) then
+        exit;
+      end;
+
       e.preventDefault;
       var t := e.touches[0];
       FInfo.sx:=t.screenX;
@@ -174,6 +187,14 @@ begin
   FTouchHandleMove:=FControl.Handle.addEventListener
     ('touchmove', procedure (e:variant)
     begin
+
+      (* Exclude hitting child elements? *)
+      if (coStrictTarget in Options) then
+      begin
+        if (e.target <> FControl.handle) then
+        exit;
+      end;
+
       e.preventDefault;
       if (e.touches) then
       Begin
@@ -192,6 +213,14 @@ begin
     var
       mTicks: Integer;
     begin
+
+      (* Exclude hitting child elements? *)
+      if (coStrictTarget in Options) then
+      begin
+        if (e.target <> FControl.handle) then
+        exit;
+      end;
+
       e.preventDefault;
       FDirection:=sdNone;
 
