@@ -1,0 +1,27 @@
+<SMART>
+  <state>
+    <editor>
+      <tab filename="Form1" topline="146" col="65" row="161" splitview="1" designview="1" splitter="0.611068991660349" />
+      <tab filename="System.Objects" fullname="..\..\..\RTL\System\System.Objects.pas" topline="34" col="1" row="1" />
+      <tab filename="SmartCL.Events" fullname="..\..\..\RTL\SmartCL\SmartCL.Events.pas" topline="91" col="20" row="21" />
+      <tab filename="System.Events" fullname="..\..\..\RTL\System\System.Events.pas" topline="1" col="29" row="34" />
+      <tab filename="Unit1" topline="1" col="1" row="1" />
+      <tab filename="scrollproj" topline="1" col="40" row="13" />
+      <activetab>Form1</activetab>
+      <breakpoints>
+        <bkpt>
+          <unit>Form1</unit>
+          <line>316</line>
+        </bkpt>
+      </breakpoints>
+    </editor>
+    <Statistics>
+      <BackgroundCompilations>23088</BackgroundCompilations>
+      <EditTime>07:37:46.061</EditTime>
+      <CompileTime>00:14:47.306</CompileTime>
+      <TotalTime>06:47:19.753</TotalTime>
+      <DesigningTime>20:42:25.561</DesigningTime>
+      <RunningTime>19:33:00.660</RunningTime>
+    </Statistics>
+  </state>
+</SMART>

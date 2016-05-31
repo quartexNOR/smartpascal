@@ -1,0 +1,598 @@
+/*
+ * iOS7 Theme for Smart Mobile Studio
+ * --
+ * Colors:
+ * --
+ * MainColor: #157efb
+ * --
+ */
+
+/* Apply to all elements */
+* {
+  margin: 0;
+	padding: 0;
+	border: 0;
+	outline: none;
+
+	/* Define "normal" boxing */
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+	    -ms-box-sizing: border-box;
+	     -o-box-sizing: border-box;
+	        box-sizing: border-box;
+
+
+	/* no tap highlight color */
+	-webkit-tap-highlight-color: transparent;
+	   -moz-tap-highlight-color: transparent;
+	    -ms-tap-highlight-color: transparent;
+	     -o-tap-highlight-color: transparent;
+	        tap-highlight-color: transparent;
+
+	/* no border style by default */
+  -webkit-border-style: none;
+	   -moz-border-style: none;
+	    -ms-border-style: none;
+	     -o-border-style: none;
+	        border-style: none;
+
+	/* Turn off font resizing */
+	-webkit-text-size-adjust: none;
+	   -moz-text-size-adjust: none;
+	    -ms-text-size-adjust: none;
+	        text-size-adjust: none;
+
+	-webkit-font-smoothing: always;
+	   -moz-font-smoothing: always;
+	    -ms-font-smoothing: always;
+	        font-smoothing: always;
+
+	/* do not allow to select anything by default */
+	-webkit-user-select: none;
+	        user-select: none;
+
+	font-family: "Helvetica Neue", Helvetica, Verdana, sans-serif;
+}
+
+:focus {
+    outline: 0;
+}
+
+html, body {
+	/* Android basics */
+	-webkit-touch-callout: none;
+
+	/* default to black screen */
+	background-color: #000000;
+
+	/* No overflow, means no scrolling */
+	overflow: hidden;
+}
+
+button { background: none; }
+
+ul {
+	background: e5e5e5;
+	cursor: default;
+	list-style: none;
+	font-size: small;
+}
+
+ul li {
+	border-bottom: 1px solid #cccccc;
+	background: #fff;
+	cursor: hand;
+
+	padding: 8px;
+}
+
+ul li:active {
+	color: #fff;
+	background-color: #157efb;
+}
+
+/**
+ * TW3CustomControl
+ * @purpose TW3CustomControl control style
+ * @status done
+ */
+.TW3CustomControl {
+	cursor: default;
+	background-color: #fff;
+}
+
+/**
+ * TW3ScrollContentIndicator
+ * @purpose TW3ScrollContentIndicator style
+ * @status done
+ */
+.TW3ScrollContentIndicator {
+	background-color: #0075d0;
+	border: solid 1px #9A9A9A;
+}
+
+/**
+ * TW3CustomForm
+ * @purpose TW3CustomForm control style
+ * @status done
+ */
+.TW3CustomForm,
+.TW3Form {
+	/* This forces the browsers that support it to
+		 use the GPU rather than CPU for movement */
+	-webkit-transform: translateZ(0);
+	   -moz-transform: translateZ(0);
+	    -ms-transform: translateZ(0);
+	     -o-transform: translateZ(0);
+
+	 background: #f8f8f8;
+}
+
+/**
+ * TW3BlockBox:
+ * In order to emulate modal dialogs we use
+ * a single DIV to cover the active form.
+ * This div prevents the user from clicking
+ * on the underlying controls - thus forcing
+ * the user to deal with the dialog, which is
+ * hosted as a child of the TW3BlockBox control
+ */
+
+.TW3BlockBox {
+	overflow: hidden;
+	-webkit-touch-callout: none;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+/**
+ * @purpose TW3AlertDialog control
+ * @status done
+ */
+.TW3AlertDialog {
+	color: #000;
+	font-size: medium;
+	background: rgba(255, 255, 255, 0.75);
+
+	border-radius: 5px;
+
+	z-index: 1000;
+	padding: 10px;
+
+	text-align: center;
+}
+
+/**
+ * @purpose TW3AlertDialog title & text
+ * @status done
+ * @todo It will be nice if there will be a style
+ *       for title separated from text
+ */
+.TW3AlertDialog .TW3LabelText {
+	color: #000;
+	font-size: medium;
+	font-weight: normal;
+}
+
+/**
+ * TW3Label
+ * @purpose TW3Label control style
+ * @status done
+ */
+.TW3Label, TW3LabelText {
+	opacity: 1.0;
+	font-size: small;
+	cursor: default;
+}
+
+.TW3Label:disabled,
+.TW3LabelText:disabled {
+	opacity: 0.5;
+}
+
+/**
+ * TW3Button
+ * @purpose TW3Button control style
+ * @status done
+ */
+.TW3Button,
+.TW3AlertButton {
+	color: #157efb;
+	font-size: large;
+	background: #ebebeb;
+
+	-webkit-text-size-adjust: auto;
+	   -moz-text-size-adjust: auto;
+	    -ms-text-size-adjust: auto;
+	     -o-text-size-adjust: auto;
+}
+
+.TW3Button:disabled { opacity: 0.50; }
+
+/**
+ * TW3EditBox
+ * TW3EditBox
+ * TW3ComboBox
+ * @purpose 
+ * @status done
+ */
+.TW3Memo,
+.TW3EditBox,
+.TW3ComboBox {
+	background: #fff;
+	border-radius: 0;
+	border: 1px solid #bfbfbf;
+	resize: none;
+	padding: 4px;
+	-webkit-user-select: auto;
+}
+
+.TW3EditBox:focus {
+	border: 1px solid #0075d0; 
+}
+
+/**
+ * TW3ToolButton
+ * @purpose TW3ToolButton control style
+ * @status done
+ */
+.TW3ToolButton {
+	font-size: large;
+	color: #157efb;
+
+	-webkit-text-size-adjust: auto;
+	   -moz-text-size-adjust: auto;
+	    -ms-text-size-adjust: auto;
+	     -o-text-size-adjust: auto;
+}
+
+.TW3ToolButton:disabled {
+	opacity: 0.5;
+	cursor: wait;
+}
+
+/**
+ * TW3Toolbar
+ * @purpose TW3Toolbar control
+ * @status done
+ */
+.TW3Toolbar {
+	cursor: default;
+	background: #e6e6e6;
+	padding: 10px;
+	border-bottom: 1px solid #b7b7b7;
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.025);
+}
+
+.TW3Toolbar button {
+	margin: 10px 0 0 0;
+	color: #157dfb;
+
+	border-left: 1px solid #157dfb;
+	border-top: 1px solid #157dfb;
+	border-bottom: 1px solid #157dfb;
+	border-right: 0;
+
+	padding: 5px;
+
+	font-size: small;
+	text-align: center;
+}
+
+.TW3Toolbar button:first-child { border-radius: 4px 0 0 4px; }
+.TW3Toolbar button:last-child {
+	border-right: 1px solid #157dfb;
+	border-radius: 0 4px 4px 0;
+}
+
+.TW3ToolbarButtonSelected {
+	color: #fff;
+	background-color: #157dfb;
+}
+
+.TW3ToolbarButton:disabled {
+	background-color: transparent; 
+}
+
+.ButtonDown {
+	border:2px inset;
+}
+
+/**
+ * TW3Panel
+ * @purpose TW3Panel control style
+ * @status done
+ */
+.TW3Panel {
+	cursor: inherited;
+	resize: none;
+	font-size: medium;
+	background-color: white;
+}
+
+/**
+ * TW3ToggleSwitch
+ * @purpose TW3ToggleSwitch control style
+ * @status done
+ */
+.TW3ToggleSwitch {
+	border-radius: 16px;
+	color: #fff;
+	background: #fff;
+	box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.25) inset;
+
+	font-size: small;
+
+	overflow: hidden;
+}
+
+.TW3ToggleOnLabel .TW3LabelText { color: #53d769; }
+
+.TW3ToggleOffLabel .TW3LabelText { color: #fff; }
+
+.TW3ToggleOnLabel,
+.TW3ToggleOffLabel {
+	text-align: center;
+	cursor: default;
+}
+
+.TW3ToggleOnLabel {
+	border-radius: 16px 0 0 16px;
+	background: #53d769;
+}
+
+.TW3ToggleOffLabel {
+	box-shadow: 0 0 2px 0 #e5e5e5 inset;
+}
+
+.TW3ToggleKnob {
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 0 2px 0 #e5e5e5 inset;
+}
+
+.TW3ToggleKnob:hover { }
+
+/**
+ * TW3ListBox
+ * @purpose TW3ListBox control style
+ * @status done
+ */
+.TW3Listbox {
+	background: #fff;
+	padding: 1px;
+	border: 1px solid #d8d8d8;
+	font-size: normal;
+}
+
+.TW3ListBoxItemSelected {
+	color: #fff;
+	font-size: small;
+	background: #157efb;
+}
+
+/**
+ * TW3HeaderControl
+ * @purpose Style for TW3HeaderControl
+ * @status done
+ */
+.TW3HeaderControl {
+	cursor: default;
+	color: #000;
+	background: #fff;
+}
+
+.TW3HeaderControl:disabled {
+	cursor: wait;
+	opacity: 0.5;
+}
+
+/**
+ * TW3ProgressBar
+ * @purpose ProgressBar
+ * @status done
+ */
+.TW3ProgressBar,
+.TW3ProgressMeter {
+	overflow: hidden;
+
+	-webkit-touch-callout: none;
+}
+
+.TW3ProgressBar {
+	background: #b5b6b7;
+}
+
+/**
+ * TW3ProgressMeter
+ * @purpose Content of ProgressBar
+ * @status done
+ */
+.TW3ProgressMeter { background: #157efb; }
+
+/**
+ * TW3Scrollbar
+ * @purpose Style for TW3Scrollbar
+ * @status done
+ */
+.TW3ScrollBar { }
+
+.TW3ScrollbarUpBtn,
+.TW3ScrollbarDownBtn,
+.TW3ScrollbarLeftBtn,
+.TW3ScrollbarRightBtn {
+	overflow: hidden;
+}
+
+.TW3ScrollbarUpBtn:active,
+.TW3ScrollbarDownBtn:active,
+.TW3ScrollbarLeftBtn:active,
+.TW3ScrollbarRightBtn:active { }
+
+.TW3ScrollbarDownBtn:hover,
+.TW3ScrollbarUpBtn:hover,
+.TW3ScrollbarLeftBtn:hover,
+.TW3ScrollbarRightBtn:hover {
+	cursor: pointer;
+}
+
+.TW3ScrollbarHandle {
+	background: rgba(0, 0, 0, 0.25);
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.TW3ScrollbarHandle:active {
+	background: rgba(0, 0, 0, 0.25);
+}
+
+.TW3ScrollbarHandsle:Hover {
+	cursor: pointer;
+}
+
+.TW3HorizontalScrollbar,
+.TW3VerticalScrollbar {
+	overflow: hidden;
+	-webkit-touch-callout: none;
+}
+
+.TW3HorizontalScrollbar,
+.TW3VerticalScrollbar {
+	padding: 0;
+}
+
+.TW3VerticalScrollbar:disabled,
+.TW3HorizontalScrollbar:disabled {
+	opacity: 0.5;
+	cursor: wait;
+}
+
+/* =============================================
+ * Page Animation: BACKSCROLL
+ * ============================================= */
+
+@-webkit-keyframes BACKSCROLL {
+	0% {
+		-webkit-transform: translateZ(0);
+		background-position: 0% 0%;
+	}
+	100% {
+		background-position: -557px 0%;
+		-webkit-transform: translateZ(0);
+	}
+}
+
+@-moz-keyframes BACKSCROLL {
+	0% {
+		-webkit-transform: translateZ(0);
+		background-position: 0% 0%;
+	}
+	100% {
+		background-position: -557px 0%;
+		-webkit-transform: translateZ(0);
+	}
+}
+
+/* =============================================
+ * Page Animation: MOVE-LEFT
+ * ============================================= */
+
+@-webkit-keyframes MOVE-LEFT {
+	0% {
+		-webkit-transform: translateX(100%);
+	}
+	100% {
+		-webkit-transform: translateX(0px);
+	}
+}
+
+@-webkit-keyframes MOVE-OUT-LEFT {
+	0% {
+		-webkit-transform: translateX(0%);
+	}
+	100% {
+		-webkit-transform: translateX(-100%);
+	}
+}
+
+@-moz-keyframes MOVE-LEFT {
+	0% {
+		-moz-transform: translateX(100%);
+	}
+	100% {
+		-moz-transform: translateX(0px);
+	}
+}
+
+@-moz-keyframes MOVE-OUT-LEFT {
+	0% {
+		-moz-transform: translateX(0%);
+	}
+	100% {
+		-moz-transform: translateX(-100%);
+	}
+}
+
+/* =============================================
+ * Page Animation: MOVE-Right
+ * ============================================= */
+
+@-webkit-keyframes MOVE-RIGHT {
+	0% {
+		-webkit-transform: translateX(-100%);
+	}
+	100% {
+		-webkit-transform: translateX(0%);
+		visibility: none;
+	}
+}
+
+@-webkit-keyframes MOVE-OUT-RIGHT {
+	0% {
+		-webkit-transform: translateX(0%);
+	}
+	100% {
+		-webkit-transform: translateX(100%);
+		visibility: none;
+	}
+}
+
+@-moz-keyframes MOVE-RIGHT {
+	0% {
+		-moz-transform: translateX(-100%);
+	}
+	100% {
+		-moz-transform: translateX(0%);
+	}
+}
+
+@-moz-keyframes MOVE-OUT-RIGHT {
+	0% {
+		-moz-transform: translateX(0%);
+	}
+	100% {
+		-moz-transform: translateX(100%);
+		visibility: none;
+	}
+}
+
+/* =============================================
+ * Page Animation: MOVE-Right
+ * ============================================= */
+
+@-webkit-keyframes ROTATE-FOREVER {
+	from {
+		-webkit-transform: none;
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+	}
+}
+
+@-moz-keyframes ROTATE-FOREVER {
+	from {
+		-moz-transform: none;
+	}
+	to {
+		-moz-transform: rotate(360deg);
+	}
+}
