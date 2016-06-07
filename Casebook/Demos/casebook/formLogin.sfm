@@ -1,0 +1,35 @@
+<SMART>
+  <Form version="2" subversion="1">
+    <Created>2014-08-18T00:44:02.478</Created>
+    <Modified>2014-09-04T23:07:26.944</Modified>
+    <object type="TW3Form">
+      <Caption>W3Form</Caption>
+      <Name>formLogin</Name>
+      <object type="TW3Label">
+        <Caption>CaseBook</Caption>
+        <Width>240</Width>
+        <Top>48</Top>
+        <Left>56</Left>
+        <Height>48</Height>
+        <Name>W3Label1</Name>
+      </object>
+      <object type="TW3Label">
+        <Caption>A smart mobile studio production</Caption>
+        <Width>272</Width>
+        <Top>120</Top>
+        <Left>56</Left>
+        <Height>32</Height>
+        <Name>W3Label2</Name>
+      </object>
+      <object type="TW3Button">
+        <Caption>Login</Caption>
+        <Width>128</Width>
+        <Top>176</Top>
+        <Left>80</Left>
+        <Height>32</Height>
+        <Name>W3Button1</Name>
+        <OnClick>W3Button1Click</OnClick>
+      </object>
+    </object>
+  </Form>
+</SMART>

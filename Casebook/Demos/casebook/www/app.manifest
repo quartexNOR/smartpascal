@@ -1,0 +1,15 @@
+CACHE MANIFEST
+# Offline cache version 0.0.1
+# id:42102
+
+CACHE:
+index.html
+res/app.css
+res/cloud_1.png
+res/cloud_2.png
+res/avatar01.jpg
+res/avatar02.jpg
+res/avatar03.png
+res/avatar04.jpg
+res/avatar05.png
+lib/iScroll.js

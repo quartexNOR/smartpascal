@@ -1,0 +1,24 @@
+<SMART>
+  <state>
+    <editor>
+      <tab filename="casebook" fullname="casebook.pas" topline="1" col="6" row="40" />
+      <tab filename="formLogin" fullname="formLogin.pas" topline="184" col="5" row="191" splitview="0" splitter="0.5" />
+      <tab filename="mainForm" fullname="mainForm.pas" topline="1" col="8" row="14" splitview="0" splitter="0.5" />
+      <tab filename="formProfile" fullname="formProfile.pas" topline="1" col="49" row="26" splitview="0" splitter="0.5" />
+      <tab filename="formAccount" fullname="formAccount.pas" topline="1" col="14" row="29" splitview="0" splitter="0.5" />
+      <tab filename="qtxlabel" fullname="..\..\qtxlabel.pas" topline="1" col="68" row="34" />
+      <tab filename="cbclasses" fullname="cbclasses.pas" topline="317" col="34" row="333" />
+      <tab filename="qtxheader" fullname="..\..\qtxheader.pas" topline="1" col="148" row="34" />
+      <tab filename="casebookApplication" fullname="casebookApplication.spr" topline="1" col="29" row="1" />
+      <tab filename="W3System" fullname="..\..\..\..\RTL\Deprecated\W3System.pas" topline="1" col="1025" row="2" />
+      <tab filename="W3EditBox" fullname="..\..\..\..\RTL\Deprecated\W3EditBox.pas" topline="1" col="16" row="2" />
+      <tab filename="qtxdataset" fullname="..\..\qtxdataset.pas" topline="1348" col="35" row="1025" />
+      <tab filename="qtxscrolltext" fullname="..\..\qtxscrolltext.pas" topline="77" col="99" row="11" />
+      <tab filename="qtxutils" fullname="..\..\qtxutils.pas" topline="968" col="974" row="107" />
+      <tab filename="iOS.css" topline="498" col="23" row="513" />
+      <tab filename="qtxEffects" fullname="..\..\qtxEffects.pas" topline="104" col="41" row="107" />
+      <tab filename="SmartCL.Effects" fullname="..\..\..\..\RTL\SmartCL\SmartCL.Effects.pas" topline="25" col="25" row="99" />
+      <breakpoints />
+    </editor>
+  </state>
+</SMART>
