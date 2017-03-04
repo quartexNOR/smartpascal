@@ -1,5 +1,6 @@
-The Smart Mobile Studio Desktop
+The Smart Mobile Studio Desktop (A.k.a Amibian.js)
 Written by Jon Lennart Aasenden, all rights reserved
+Amibian is copyright Gunnar Kristjansson.
 
 ** Requirements
 
@@ -15,10 +16,12 @@ must be backward compatible (that version uses CEF3 while the NG IDE uses CEF4).
 ** About
 
 The Smart Desktop is a quick and dirty implementation of the Amiga OS 4 Workbench.
-While appearance is one thing, it does have some redeeming factors:
+While appearance is one thing (which is easy under HTML), it does have some factors that requires
+a lot of coding to get right:
+
  - Implements a filesystem class over LocalStorage and Sessionstorage
- - Ships with UAE.js that runs actual 68k Amiga software
- - Ships with Webkit.js, which renders HTML offscreen
+ - Ships with UAE.js that runs actual 68k Amiga software (!)
+ - Ships with Webkit.js, which renders HTML offscreen and do complex compositing
  - Talks to the node.js backend server
  - Implements isolated focus handling (which is a bitch under HTML5)
  - Uses our layout library (a good demonstration) SmartCL.Layout.pas
@@ -45,7 +48,14 @@ the node.js backend.
 
 But the use doesnt end with testing. The desktop is being used as the foundation for Amibian, which
 is a popular Linux distro for ARM embedded boards. It is designed to emulate a real 1990's Amiga
-system.
+system. While the Smart Pascal side of things is important -- Ambian is equally important since this
+is ultimately a labour of love. We are huge Amiga fans and making a JS desktop in the shape of OS 4
+is both an ODE to the Amiga - and to libraries like CODEF, which is so inspiring to old hackers like
+ourselves.
+
+A special thanks to Gunnar Kristjansson for testing, and also Thomas Navarro Garcia!
+Both of them work on the binary Amibian distro, and they also help me create the JS version of Amibian.
+Which I believe is one of the first meta-desktops running purely on JavaScript technology (node.js being the backend).
 
 It is also used by "Symbiotic elements" as the foundation for their node.js based NAS systems.
 Where you log-in to your NAS through the browser to setup rules, work with files and do general
