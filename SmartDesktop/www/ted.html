@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+	<meta charset="utf-8">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Classic editor with custom styles</title>
+	<script src="lib/ckeditor/ckeditor.js"></script>
+</head>
+
+<body> 
+
+	<textarea cols="80" id="editor2" name="editor2" rows="10" >&lt;p&gt;This is some &lt;strong&gt;sample text&lt;/strong&gt;. You are using &lt;a href="http://ckeditor.com/"&gt;CKEditor&lt;/a&gt;.&lt;/p&gt;
+	</textarea>
+
+	<script>
+		CKEDITOR.replace( 'editor2', {
+			height: 260,
+			/* Default CKEditor styles are included as well to avoid copying default styles. */
+			contentsCss: [ 	'lib/ckeditor/contents.css', 
+							'lib/ckeditor/skins/moono-dark/editor.css'
+							]
+		} );
+	</script>
+</body>
+
+</html>
