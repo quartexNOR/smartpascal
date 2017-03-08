@@ -12,6 +12,7 @@ uses
 
 const
   CNT_SEPARATOR = '/';
+  CNT_FSOBJ_HEADER = $BABECAFE;
 
 type
 
@@ -22,21 +23,12 @@ type
 
   TW3VirtualFileType = (vftFile =$777, vftFolder = $888);
 
-  TW3VirtualFileData = record
-    fdType:     TW3VirtualFileType;
-    fdName:     string;
-    fdSize:     integer;
-    fdData:     variant;
-    fdChildren: array of TW3VirtualFileData;
-  end;
-
   TW3VirtualFileSystemObject = class(TObject)
   private
     FName:      string;
     FSize:      integer;
     FParent:    TW3VirtualFileSystemFolder;
   protected
-    FChildren:  TW3VirtualFileSystemObjectList;
     procedure   SetName(const NewName: string);
     procedure   SetSize(const NewSize: integer);
     function    GetPath: string;virtual;
@@ -44,15 +36,16 @@ type
     function    GetSize: integer;virtual;
 
     property    Size: integer read GetSize;
-    property    Files[Index: integer]: TW3VirtualFileSystemObject read ( FChildren[index] );
-    property    Count: integer read ( FChildren.length );
+  protected
+    procedure   WriteData(const Writer: TStreamWriter); virtual;
+    procedure   ReadData(const Reader: TStreamReader); virtual;
   public
     property    Path: string read GetPath;
     property    Parent: TW3VirtualFileSystemFolder read FParent;
     property    Name: string read GetName;
 
-    procedure   UnPack(const Data: TW3VirtualFileData); virtual; abstract;
-    function    Pack: TW3VirtualFileData; virtual; abstract;
+    procedure   LoadFromStream(const Stream: TStream);
+    procedure   SaveToStream(const Stream: TStream);
 
     constructor Create(const AOwner: TW3VirtualFileSystemFolder); virtual;
   end;
@@ -60,17 +53,21 @@ type
   TW3VirtualFileSystemObjectClass = class of TW3VirtualFileSystemObject;
 
   TW3VirtualFileSystemFolder = class(TW3VirtualFileSystemObject)
+  private
+    FChildren:  TW3VirtualFileSystemObjectList;
   protected
     function  GetLocalFileObj(const FileName: string): TW3VirtualFileSystemObject;
+
+  protected
+    procedure WriteData(const Writer: TStreamWriter); override;
+    procedure ReadData(const Reader: TStreamReader); override;
+
   public
-    Property  Files;
-    property  Count;
+    property  Files[Index: integer]: TW3VirtualFileSystemObject read ( FChildren[index] );
+    property  Count: integer read ( FChildren.length );
 
     function  GetDirList: TStrArray;
-
-    function  Pack: TW3VirtualFileData; override;
-    procedure UnPack(const Data: TW3VirtualFileData); override;
-
+    procedure Clear; virtual;
     function  FindFileObject(Filename: string): TW3VirtualFileSystemObject;
     function  GetValidPath(const Filename: string): boolean;
     function  FileExists(FileName: string): boolean;virtual;
@@ -79,16 +76,14 @@ type
   end;
 
   TW3VirtualFileSystemFile = class(TW3VirtualFileSystemObject)
-  private
-    FData:    Variant;
   protected
-    function  GetData: Variant;
-    procedure SetData(const value: Variant);
+    procedure WriteData(const Writer: TStreamWriter); override;
+    procedure ReadData(const Reader: TStreamReader); override;
   public
-    function  Pack: TW3VirtualFileData; override;
-    procedure UnPack(const Data: TW3VirtualFileData); override;
-    procedure WriteData(const Value: variant);virtual;
-    function  ReadData: variant;virtual;
+    function  FetchData: variant;
+    procedure PutData(const Value: variant);
+
+    property  Data: variant;
     property  Name;
   end;
 
@@ -96,8 +91,8 @@ type
   private
     FCurrent:   TW3VirtualFileSystemFolder;
   protected
-    function    GetPath: string;override;
-    function    GetCurrent: TW3VirtualFileSystemFolder;virtual;
+    function    GetPath: string; override;
+    function    GetCurrent: TW3VirtualFileSystemFolder; virtual;
   public
     Property    Files;
     Property    Count;
@@ -107,33 +102,33 @@ type
     function    ToStream: TStream;
     procedure   FromStream(const Stream: TStream);
 
-    function    ToJSON: string;
-    procedure   FromJSON(const JsonText: string);
-
     function    FileExists(FileName: string): boolean; override;
     function    MKDir(FileName: string): TW3VirtualFileSystemFolder; override;
     function    MKFile(FileName: string; const Data: Variant): TW3VirtualFileSystemFile; override;
+
+    class function ExtractFileName(aPath: string): string;
+    class function ExtractFileExt(aFilename: string): string;
+
     constructor Create; reintroduce; virtual;
   end;
 
 implementation
 
 
-function ExtractFileName(aPath: string): string;
+class function TW3VirtualFileSystem.ExtractFileName(aPath: string): string;
 var
   x:  Integer;
 begin
-  result:='';
-  aPath:=aPath.trim();
-  if (aPath.length>0) then
+  aPath := aPath.trim();
+  if aPath.length > 0 then
   begin
     if aPath[aPath.length]<>CNT_SEPARATOR then
     begin
 
       for x:=aPath.high downto aPath.low do
       begin
-        if aPath[x]<>CNT_SEPARATOR then
-        result:=(aPath[x] + result) else
+        if aPath[x] <> CNT_SEPARATOR then
+        result := (aPath[x] + result) else
         break;
       end;
 
@@ -141,15 +136,14 @@ begin
   end;
 end;
 
-function ExtractFileExt(aFilename:String):String;
+class function TW3VirtualFileSystem.ExtractFileExt(aFilename: string): string;
 var
   x:  integer;
 Begin
-  result:='';
-  afileName:=aFilename.trim();
+  afileName := aFilename.trim();
   if aFilename.length>0 then
   begin
-    for x:=aFilename.high downto aFilename.low do
+    for x := aFilename.high downto aFilename.low do
     begin
       if (aFilename[x]<>'.') then
       begin
@@ -172,7 +166,6 @@ Begin
   end;
 end;
 
-
 //############################################################################
 // TW3VirtualFileSystem
 //############################################################################
@@ -182,90 +175,22 @@ begin
   inherited Create(nil);
 end;
 
-function TW3VirtualFileSystem.ToJSON: string;
-begin
-  result := JSON.stringify( self.Pack() );
-end;
-
-procedure TW3VirtualFileSystem.FromJSON(const JsonText: string);
-var
-  LData: TW3VirtualFileData;
-begin
-  try
-    asm
-    @LData = JSON.parse(@JsonText);
-    end;
-    UnPack(LData);
-  except
-    on e: exception do
-      raise;
-  end;
-end;
-
 function TW3VirtualFileSystem.ToStream: TStream;
-const
-  CNT_SIGNATURE = $ABBA0004;
-var
-  LWriter: TStreamWriter;
-  LPacket: TW3VirtualFileData;
-  LText:  string;
-  LStream: TMemoryStream;
-  LBytes: TByteArray;
 begin
-  LStream := TMemoryStream.Create;
-
-  LPacket := self.Pack();
-  LText := JSON.stringify(LPacket);
-  LBytes := TDatatype.StringToBytes(LText);
-
-  LWriter := TStreamWriter.Create(LStream);
-  try
-    LWriter.WriteInteger(CNT_SIGNATURE);
-    LWriter.WriteInteger(LBytes.length);
-    if LBytes.length > 0 then
-      LWriter.Write(LBytes);
-  finally
-    LWriter.free;
-  end;
-
-  LStream.position:=0;
-  result := LStream;
+  result := TMemoryStream.Create;
+  SaveToStream(result);
+  result.Position := 0;
 end;
 
 procedure TW3VirtualFileSystem.FromStream(const Stream: TStream);
-const
-  CNT_SIGNATURE = $ABBA0004;
-var
-  LReader: TStreamReader;
-  LText: string;
-  LData: TW3VirtualFileData;
-  LSignature: integer;
-  LLen: integer;
-  LBytes: TByteArray;
 begin
+  Clear();
   if Stream <> nil then
   begin
-    Stream.Position := 0;
-    LReader := TStreamReader.Create(Stream);
     try
-      LSignature := LReader.ReadInteger();
-
-      if LSignature = CNT_SIGNATURE then
-      begin
-        LLen := LReader.ReadInteger();
-        if LLen > 0 then
-        begin
-          LBytes := LReader.Read(LLen);
-          LText := TDataType.BytesToString(LBytes);
-          asm
-            @LData = JSON.parse(@LText);
-          end;
-          UnPack(LData);
-        end;
-      end else
-      raise Exception.Create('Invalid filesystem signature error (' + IntToHex(LSignature,8) + ')');
+      LoadFromStream(Stream);
     finally
-      LReader.free;
+      Stream.free;
     end;
   end;
 end;
@@ -360,60 +285,45 @@ end;
 // TW3VirtualFileSystemFolder
 //############################################################################
 
-function TW3VirtualFileSystemFolder.Pack: TW3VirtualFileData;
-var
-  x:  Integer;
+procedure TW3VirtualFileSystemFolder.WriteData(const Writer: TStreamWriter);
 begin
-  result.fdName := Name;
-  result.fdSize := 0;
-  result.fdData := unassigned;
-  result.fdType := TW3VirtualFileType.vftFolder;
-  if Count>0 then
+  inherited WriteData(Writer);
+  Writer.WriteInteger(FChildren.Count);
+  for var x := 0 to FChildren.Count-1 do
   begin
-    for x:=0 to Count-1 do
-    begin
-      result.fdChildren.Add(Files[x].Pack);
-    end;
+    if FChildren[x] is TW3VirtualFileSystemFolder then
+    Writer.WriteInteger( ord(TW3VirtualFileType.vftFolder) ) else
+    Writer.WriteInteger( ord(TW3VirtualFileType.vftFile) );
+
+    FChildren[x].WriteData(Writer);
   end;
 end;
 
-procedure TW3VirtualFileSystemFolder.UnPack(const Data: TW3VirtualFileData);
+procedure TW3VirtualFileSystemFolder.ReadData(const Reader: TStreamReader);
 var
-  LCount:   integer;
-  LFolder:  TW3VirtualFileSystemFolder;
-  LFile:    TW3VirtualFileSystemFile;
-  LIndex:   integer;
+  LCount: integer;
+  LClassType: integer;
+  LChild: TW3VirtualFileSystemObject;
 begin
-  if Data.fdType = TW3VirtualFileType.vftFolder then
+  inherited ReadData(Reader);
+  LCount := Reader.ReadInteger();
+  if LCount > 0 then
   begin
-    SetName(Data.fdName);
-    SetSize(0);
-
-    LCount := Data.fdChildren.Count;
     while LCount > 0 do
     begin
-      LIndex := (Data.fdChildren.Count - LCount);
-      case Data.fdChildren[LIndex].fdType of
-      vftFolder:
-        begin
-          LFolder := TW3VirtualFileSystemFolder.Create(self);
-          LFolder.UnPack( Data.fdChildren[LIndex] );
-          FChildren.add(LFolder);
-          LFolder := nil;
-        end;
-      vftFile:
-        begin
-          LFile :=  TW3VirtualFileSystemFile.Create(self);
-          LFile.UnPack( Data.fdChildren[LIndex] );
-          FChildren.add(LFile);
-          LFile := nil;
-        end;
-      end;
+      LClassType := Reader.ReadInteger();
+
+      if LClassType = TW3VirtualFileType.vftFolder then
+      LChild := TW3VirtualFileSystemFolder.Create(self) else
+      LChild := TW3VirtualFileSystemFile.Create(self);
+
+      FChildren.add(LChild);
+
+      LChild.ReadData(Reader);
 
       dec(LCount);
     end;
-  end else
-  raise Exception.Create('Invalid filetype, expected folder not file error');
+  end;
 end;
 
 function TW3VirtualFileSystemFolder.GetDirList: TStrArray;
@@ -425,6 +335,18 @@ begin
     if (Files[x] is TW3VirtualFileSystemFolder) then
     result.add("[d] " + Files[x].Name) else
     result.add("[f] " + Files[x].Name);
+  end;
+end;
+
+procedure TW3VirtualFileSystemFolder.Clear;
+begin
+  try
+    for var x:=0 to FChildren.length -1 do
+    begin
+      FChildren[x].free;
+    end;
+  finally
+    FChildren.Clear();
   end;
 end;
 
@@ -461,9 +383,9 @@ begin
     exit;
 
     (* grab filename *)
-    mFile := ExtractFileName(Filename);
+    mFile := TW3VirtualFileSystem.ExtractFileName(Filename);
 
-    if ExtractFileExt(mFile).length>0 then
+    if TW3VirtualFileSystem.ExtractFileExt(mFile).length>0 then
     begin
       mItems := Filename.split(CNT_SEPARATOR);
       mItems.Delete(mItems.length-1,1);
@@ -543,7 +465,7 @@ begin
 
       (* Default data? *)
       if Data.Valid and Data.Defined then
-      result.WriteData(Data);
+      result.PutData(Data);
 
     end else
     raise exception.Create('File <' + name + '> already exists error');
@@ -577,58 +499,90 @@ end;
 // TW3VirtualFileSystemFile
 //############################################################################
 
-function TW3VirtualFileSystemFile.Pack: TW3VirtualFileData;
+procedure TW3VirtualFileSystemFile.WriteData(const Writer: TStreamWriter);
+var
+  LBytes: TByteArray;
 begin
-  result.fdType := TW3VirtualFileType.vftFile;
-  result.fdName := Name;
-  result.fdSize := Size;
-  result.fdData := ReadData();
-  result.fdChildren.Clear();
+  inherited WriteData(Writer);
+  LBytes := TDataType.VariantToBytes(Data);
+
+  Writer.WriteInteger(LBytes.length);
+  if LBytes.length > 0 then
+    Writer.Write(LBytes);
 end;
 
-procedure TW3VirtualFileSystemFile.UnPack(const Data: TW3VirtualFileData);
+procedure TW3VirtualFileSystemFile.ReadData(const Reader: TStreamReader);
+var
+  LBytes: TByteArray;
 begin
-  if Data.fdType = TW3VirtualFileType.vftFile then
+  inherited ReadData(Reader);
+  var LSize := Reader.ReadInteger();
+  if LSize > 0 then
   begin
-    SetName(Data.fdName);
-    SetSize(Data.fdSize);
-    SetData(Data.fdData);
-  end else
-  raise Exception.Create('Invalid filetype, expected file not folder error');
+    LBytes := Reader.Read(LSize);
+    Data := TDataType.BytesToVariant(LBytes);
+  end;
 end;
 
-procedure TW3VirtualFileSystemFile.WriteData(const Value: Variant);
+function TW3VirtualFileSystemFile.FetchData: variant;
 begin
-  SetData(Value);
+  result := Data;
 end;
 
-function TW3VirtualFileSystemFile.ReadData: Variant;
+procedure TW3VirtualFileSystemFile.PutData(const Value: variant);
 begin
-  result := GetData;
-end;
-
-function TW3VirtualFileSystemFile.GetData: Variant;
-begin
-  if FData.Valid and FData.Defined then
-  result := JSON.parse(FData) else
-  result := unassigned;
-end;
-
-procedure TW3VirtualFileSystemFile.SetData(const value: Variant);
-begin
-  if FData.Valid and FData.Defined then
-  FData := JSON.Stringify(Value) else
-  FData := unassigned;
+  Data := Value;
 end;
 
 //############################################################################
 // TW3VirtualFileSystemObject
 //############################################################################
 
-Constructor TW3VirtualFileSystemObject.Create(const AOwner: TW3VirtualFileSystemFolder);
+constructor TW3VirtualFileSystemObject.Create(const AOwner: TW3VirtualFileSystemFolder);
 begin
   inherited Create;
   FParent := AOwner;
+end;
+
+procedure TW3VirtualFileSystemObject.LoadFromStream(const Stream: TStream);
+var
+  LReader:  TStreamReader;
+begin
+  LReader := TStreamReader.Create(Stream);
+  try
+    ReadData(LReader);
+  finally
+    LReader.free;
+  end;
+end;
+
+procedure TW3VirtualFileSystemObject.SaveToStream(const Stream: TStream);
+var
+  LWriter: TStreamWriter;
+begin
+  LWriter := TStreamWriter.Create(Stream);
+  try
+    WriteData(LWriter);
+  finally
+    LWriter.free;
+  end;
+end;
+
+procedure TW3VirtualFileSystemObject.WriteData(const Writer: TStreamWriter);
+begin
+  Writer.WriteInteger(CNT_FSOBJ_HEADER);
+  Writer.WriteInteger(FSize);
+  Writer.WriteString(FName);
+end;
+
+procedure TW3VirtualFileSystemObject.ReadData(const Reader: TStreamReader);
+begin
+  if Reader.ReadInteger = CNT_FSOBJ_HEADER then
+  begin
+    FSize := Reader.ReadInteger();
+    FName := Reader.ReadString();
+  end else
+  raise Exception.Create('Expected filesystem object header error');
 end;
 
 function TW3VirtualFileSystemObject.GetPath: string;

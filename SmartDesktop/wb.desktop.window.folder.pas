@@ -27,8 +27,10 @@ uses
   wb.desktop.window,
   wb.desktop.iconView,
   wb.desktop.devices,
+  wb.desktop.datatypes,
 
-  SmartCl.MouseCapture,
+  SmartCL.System,
+  SmartCL.MouseCapture,
   SmartCL.MouseTouch,
   SmartCL.Layout,
   SmartCL.Time,
@@ -102,12 +104,12 @@ begin
     begin
       if OldItem <> nil then
       begin
-        TWbListItemIcon(OldItem).TagStyle.RemoveByName(FEffectName2);
+        //TWbListItemIcon(OldItem).TagStyle.RemoveByName(FEffectName2);
       end;
 
       if NewItem <> nil then
       begin
-        TWbListItemIcon(NewItem).TagStyle.Add(FEffectName2);
+        //TWbListItemIcon(NewItem).TagStyle.Add(FEffectName2);
       end;
     end;
 end;
@@ -144,9 +146,6 @@ begin
   LButton := FToolbar.Add();
   LButton.Caption := "Paste";
 
-  (* w3_setStyle(Handle, 'min-width',  '400px');
-  w3_setStyle(Handle, 'min-height', '300px');   *)
-
   TW3Dispatch.Execute(Invalidate, 100);
 end;
 
@@ -163,6 +162,10 @@ begin
   else
     self.Header.Title.Caption := FDevice.Name + ' [' + aPath + ']';
 
+  FView.Clear();
+  Cursor := TCursor.crProgress;
+  FView.enabled := false;
+
   LAccess := (FDevice as IWbFileSystem);
 
   LAccess.Dir(aPath, procedure (const Path: string; DirList: TStrArray)
@@ -171,27 +174,48 @@ begin
   begin
     if DirList.Count > 0 then
     begin
+      /* Cache up datatype and icon-info for FOLDER */
+      var LDesktop    := GetDesktop as IWbDesktop;
+      var LDataTypes  := LDesktop.GetDatatypes();
+      var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+
       for var x:=0 to Dirlist.Count-1 do
       begin
         var LItem := TWbListItemIcon.Create(FView);
-        LItem.TextShadow.Clear();
 
         if DirList[x].StartsWith('[d]') then
         begin
           LItem.TagValue := 2;
           LText := Copy(Dirlist[x],4,100);
-          LItem.Text.Caption := "<u>" + LText + "</u>";
+          LItem.Text.Caption := LText;
+          LItem.Text.AlignText := TTextAlign.taLeft;
+          LItem.Text.Invalidate;
           LItem.Text.Font.Color := CNT_STYLE_WINDOW_BASE_SELECTED;
-          LItem.Glyph.Background.FromURL('res/DefDrawer.png');
+          LItem.Glyph.Background.FromURL( LFolderInfo.UnSelectedIcon );
+
+          LItem.OnDblClick := procedure (Sender: TObject)
+          begin
+            TW3Dispatch.Execute( procedure ()
+            begin
+              FView.Clear();
+              BrowseTo(aDevice, apath + '/' + TWbListItemIcon(Sender).Text.Caption);
+            end, 200);
+          end;
 
           LItem.OnSelected := procedure (sender: TObject)
           begin
-            TWbListItemIcon(Sender).Glyph.Background.FromURL('res/DefDrawerSel.png');
+            var LDesktop    := GetDesktop as IWbDesktop;
+            var LDataTypes  := LDesktop.GetDatatypes();
+            var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+            TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.SelectedIcon);
           end;
 
           LItem.OnUnSelected := procedure (Sender: TObject)
           begin
-            TWbListItemIcon(Sender).Glyph.Background.FromURL('res/DefDrawer.png');
+            var LDesktop    := GetDesktop as IWbDesktop;
+            var LDataTypes  := LDesktop.GetDatatypes();
+            var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+            TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.UnSelectedIcon);
           end;
 
         end else
@@ -199,8 +223,18 @@ begin
           LItem.TagValue := 1;
           LText := Copy(Dirlist[x],4,100);
           LItem.Text.Caption := LText;
+          LItem.Text.AlignText := TTextAlign.taLeft;
           LItem.Text.Font.Color := clBlack;
+          LItem.Text.Invalidate;
           LItem.Glyph.Background.FromURL('res/HTM.png');
+
+          LItem.OnDblClick := procedure (Sender: TObject)
+          begin
+            TW3Dispatch.Execute( procedure ()
+            begin
+              // Dispatch here
+            end, 200);
+          end;
 
           LItem.OnSelected := procedure (sender: TObject)
           begin
@@ -215,6 +249,10 @@ begin
       end;
       FView.Invalidate();
     end;
+
+    self.Cursor := crDefault;
+    FView.enabled := true;
+    FView.SetFocus();
   end);
 
 end;
@@ -231,7 +269,7 @@ begin
   FPanel.SetBounds(0,0, wd, 76);
   dy := FPanel.top + FPanel.Height;
 
-  FView.SetBounds(0, dy, wd, hd); //-dy
+  FView.SetBounds(0, dy, wd, hd);
 
   FToolbar.SetBounds(0,0,wd, FToolbar.ButtonHeight + 8);
 

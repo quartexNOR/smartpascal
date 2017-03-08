@@ -1,31 +1,31 @@
 <SMART>
   <state>
     <editor>
-      <tab filename="Unit1" fullname="Unit1.pas" topline="1" col="15" row="19" />
-      <tab filename="Form1" topline="112" col="40" row="131" splitview="0" designview="0" splitter="0.444602280855179" />
-      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="51" col="52" row="76" />
-      <tab filename="wb.desktop.window" fullname="wb.desktop.window.pas" topline="235" col="46" row="253" />
-      <tab filename="wb.desktop.iconview" fullname="wb.desktop.iconview.pas" topline="141" col="41" row="366" />
-      <tab filename="WinPhone8.css" topline="121" col="35" row="137" />
-      <tab filename="SmartCL.Components" fullname="..\..\..\RTL\SmartCL\SmartCL.Components.pas" topline="2052" col="27" row="2067" />
-      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="25" col="36" row="43" />
-      <tab filename="wb.desktop.devices" fullname="wb.desktop.devices.pas" topline="226" col="27" row="21" />
-      <tab filename="wb.desktop.menu" fullname="wb.desktop.menu.pas" topline="59" col="17" row="22" />
-      <tab filename="wb.desktop.prefs" fullname="wb.desktop.prefs.pas" topline="289" col="1" row="1" />
-      <tab filename="wb.desktop.textviewer" fullname="wb.desktop.textviewer.pas" topline="51" col="37" row="79" />
-      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="13" col="21" row="27" />
-      <tab filename="wb.network.client" fullname="wb.network.client.pas" topline="26" col="17" row="48" />
-      <tab filename="Amibian.js Amiga Cloud Desktop" topline="1" col="1" row="1" />
-      <activetab>WinPhone8.css</activetab>
+      <tab filename="Unit1" fullname="Unit1.pas" topline="41" col="15" row="19" />
+      <tab filename="Form1" topline="142" col="13" row="172" splitview="0" designview="0" splitter="0.444529443979263" />
+      <tab filename="wb.desktop.window" fullname="wb.desktop.window.pas" topline="774" col="23" row="791" />
+      <tab filename="SmartCL.Components" fullname="..\..\..\RTL\SmartCL\SmartCL.Components.pas" topline="444" col="25" row="460" />
+      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="23" col="27" row="102" />
+      <tab filename="wb.desktop.window.editor" fullname="wb.desktop.window.editor.pas" topline="14" col="21" row="32" />
+      <tab filename="SmartCL.NiceEdit" fullname="SmartCL.NiceEdit.pas" topline="156" col="13" row="162" />
+      <tab filename="wb.desktop.filesystem" fullname="wb.desktop.filesystem.pas" topline="94" col="1" row="1" />
+      <tab filename="wb.desktop.devices" fullname="wb.desktop.devices.pas" topline="18" col="1" row="39" />
+      <tab filename="wb.desktop.iconview" fullname="wb.desktop.iconview.pas" topline="83" col="15" row="101" />
+      <tab filename="wb.desktop.window.prefs" fullname="wb.desktop.window.prefs.pas" topline="46" col="23" row="61" />
+      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="210" col="44" row="232" />
+      <tab filename="SmartCL.System" fullname="..\..\..\RTL\SmartCL\SmartCL.System.pas" topline="100" col="10" row="118" />
+      <tab filename="wb.desktop.datatypes" fullname="wb.desktop.datatypes.pas" topline="4" col="22" row="18" />
+      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="52" col="48" row="81" />
+      <activetab>wb.desktop.window.folder</activetab>
       <breakpoints />
     </editor>
     <Statistics>
-      <BackgroundCompilations>72518</BackgroundCompilations>
-      <EditTime>23:41:18.113</EditTime>
-      <CompileTime>00:26:44.445</CompileTime>
-      <TotalTime>00:17:31.934</TotalTime>
-      <DesigningTime>12:17:44.909</DesigningTime>
-      <RunningTime>00:26:09.684</RunningTime>
+      <BackgroundCompilations>89838</BackgroundCompilations>
+      <EditTime>01:05:46.565</EditTime>
+      <CompileTime>00:39:41.456</CompileTime>
+      <TotalTime>06:17:13.992</TotalTime>
+      <DesigningTime>13:23:49.630</DesigningTime>
+      <RunningTime>22:35:34.656</RunningTime>
     </Statistics>
   </state>
 </SMART>

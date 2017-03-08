@@ -33,7 +33,7 @@ uses
   SmartCL.Time;
 
 const
-  CALLMAX_MAX = 1500;
+  CALLMAX_MAX = 200;
 
 type
 
@@ -222,25 +222,22 @@ procedure TWbBrowserStorageDevice.WriteFileSystem;
 var
   LFileName: string;
   LText: string;
-  LStream:  TStream;
   LBytes: TByteArray;
+  LStream:  TMemoryStream;
 begin
   LFileName := Name + '.directory';
 
-  LStream := FFileIndex.ToStream();
+  LStream := TMemoryStream.Create;
   try
-    if LStream.size > 0 then
-    begin
-      LStream.Position:=0;
+    FFileIndex.SaveToStream(LStream);
+    LStream.position := 0;
 
-      // Convert raw bytes to text
-      LBytes := LStream.Read(LStream.Size);
-      LText := TDataType.BytesToString(LBytes);
+    // Convert raw bytes to text
+    LBytes := LStream.Read(LStream.Size);
+    LText := TDataType.BytesToString(LBytes);
 
-      // Write to storage target
-      FStorage.SetKeyStr(LFileName, LText);
-    end else
-    FStorage.SetKeyStr(LFileName, '');
+    // Write to storage target
+    FStorage.SetKeyStr(LFileName, LText);
   finally
     LStream.free;
   end;
@@ -251,42 +248,88 @@ var
   LFileName: string;
   LText: string;
   LBytes: TByteArray;
+
+  procedure SetupInitial;
+  begin
+    writeln("Filesystem data invalid or not found, using default");
+    writeln("Setting up initial directory structure ..");
+
+    FFileIndex.Clear();
+    FFileIndex.MKDir('System');
+    FFileIndex.MKDir('Storage');
+    FFileIndex.MKDir('Utilities');
+    FFileIndex.MKDir('Prefs');
+    FFileIndex.MKDir('Devs');
+    FFileIndex.MKDir('Libs');
+    FFileIndex.MKDir('S');
+
+    FFileIndex.ChDir('s');
+    FFileIndex.mkFile('startup-sequence','startup sequence here');
+    FFileIndex.ChDir('');
+
+    FFileIndex.MKFile('info.txt', "This is so cool!");
+
+    Writeln("Storing filesystem data");
+    WriteFileSystem();
+  end;
+
 begin
   LFileName := Name + '.directory';
-  if FStorage.GetKeyExists(LFileName) then
+  if FStorage.GetKeyExists(LFileName) = false then
   begin
-    LText := FStorage.GetKeyStr(LFileName,'');
-    if LText.length > 0 then
-    begin
-      var LStream := TMemoryStream.Create;
-      try
-        // Write raw bytes
-        LBytes := TDataType.StringToBytes(LText);
-        LStream.Write(LBytes );
+    SetupInitial();
+  end;
 
-        // Load into Fileindex instance
-        LStream.Position := 0;
-        FFileIndex.FromStream(LStream);
-      finally
-        LStream.free;
+
+  LText := FStorage.GetKeyStr(LFileName,'');
+  if LText.length > 0 then
+  begin
+    var LStream := TMemoryStream.Create;
+    try
+      // Write raw bytes
+      LBytes := TDataType.StringToBytes(LText);
+      LStream.Write(LBytes);
+      LStream.Position := 0;
+
+      try
+        FFileIndex.LoadFromStream(LStream);
+      except
+        on e: exception do
+        begin
+          writeln("** Failed to re-create filesystem, re-making from scratch");
+          SetupInitial();
+        end;
       end;
+    finally
+      LStream.free;
     end;
   end else
   begin
-    writeln("Filesystem data invalid or not found, using default");
-    FFileIndex.MKDir('files');
-    FFileIndex.MKFile('info.txt', "This is so cool!");
-    WriteFileSystem();
+    writeln("Filesystem info exists, but it was empty");
+    SetupInitial();
   end;
+
 end;
 
 procedure TWbBrowserStorageDevice.DoMount;
 
 begin
   // Read into on Mount
-  FStorage.Open(Name);
+  try
+    FStorage.Open(Name);
+  except
+    on e: exception do
+    raise Exception.Create('Failed to open storage error: ' + e.message);
+  end;
+
   FFileIndex := TW3VirtualFileSystem.Create;
-  ReadFileSystem();
+
+  try
+    ReadFileSystem();
+  except
+    on e: exception do
+    raise Exception.Create('Failed to read file-system error: ' + e.message);
+  end;
 end;
 
 procedure TWbBrowserStorageDevice.DoUnMount;
@@ -402,7 +445,7 @@ begin
       begin
         if (LItem is TW3VirtualFileSystemFile) then
         begin
-          CB(Filename, TW3VirtualFileSystemFile(LItem).ReadData());
+          CB(Filename, TW3VirtualFileSystemFile(LItem).FetchData());
         end else
         raise Exception.Create('Expected filetype <' + Filename + '> to be file, not folder error');
       end else

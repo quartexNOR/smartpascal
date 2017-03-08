@@ -27,6 +27,8 @@ uses
   wb.desktop.menu,
   wb.desktop.window,
   wb.desktop.iconview,
+  wb.desktop.datatypes,
+  wb.desktop.preferences,
 
   SmartCL.MouseTouch,
   SmartCL.Effects,
@@ -38,28 +40,49 @@ uses
 
 type
 
-  TWbDesktop = class(TWbIconView, IWbDesktop)
+
+  TWbDesktopEnumCallback = function (const Item: TWbCustomWindow): TEnumResult;
+
+  TWbDesktop = class(TWbIconView, IWbDesktop, IWbPreferences)
   private
     FFocusedWindow: TWbCustomWindow;
     FWindows: TWbWindowList;
-    FPrefs:   TJSONStructure;
+    FPrefs:   TWbPreferences;
+    FDatatypes: TWbDatatypeRegistry;
+
+  private
+    /* Implements:: IWbPreferences */
+    function  GetPreferencesReader: IW3StructureReadAccess;
+    function  GetPreferencesWriter: IW3StructureWriteAccess;
+
   protected
     procedure InitializeObject; override;
     procedure FinalizeObject; override;
-    procedure ObjectReady; override;
-  public
+  protected
     procedure RegisterWindow(const Window: TWbCustomWindow);
     procedure UnRegisterWindow(const Window: TWbCustomWindow);
     procedure SetFocusedWindow(const Window: TWbCustomWindow);
     function  FindWindowFor(const Control: TWbCustomControl): TWbCustomWindow;
     function  GetActiveWindow: TWbCustomWindow;
     function  GetWindowList: TWbWindowList;
-    function  GetPreferencesObject: TW3Structure;
+
+    function  GetPreferences: IWbPreferences;
+    function  GetDatatypes: IWbDatatypeRegistry;
+
     function  KnownWindow(const Window: TWbCustomWindow): boolean;
     function  GetDeviceManager: TWbDeviceManager;
     function  IsDesktop(const Control: TW3CustomControl): boolean;
-
     procedure SavePreferences;
+  public
+    property  Preferences: TJSONStructure read FPrefs;
+    property  Datatypes: TWbDatatypeRegistry read FDatatypes;
+
+    procedure ForEachWindow(const Process: TWbDesktopEnumCallback);
+    procedure ForEachWindowEx(const Before: TProcedureRef;
+              const Process: TWbDesktopEnumCallback;
+              const After: TProcedureRef);
+
+    procedure LayoutWindows;
   end;
 
 
@@ -68,26 +91,108 @@ implementation
 
 uses SmartCL.Application, Unit1;
 
+//#############################################################################
+// TWbDesktop
+//#############################################################################
+
 procedure TWbDesktop.InitializeObject;
 begin
   inherited;
-  FPrefs := TJSONStructure.Create;
-  FPrefs.WriteBool(PREFS_WINDOW_EFFECTS_OPEN, true);
-  FPrefs.WriteBool(PREFS_WINDOW_EFFECTS_CLOSE, true);
-  FPrefs.WriteBool(PREFS_WINDOW_EFFECTS_MIN, false);
-  FPrefs.WriteBool(PREFS_WINDOW_EFFECTS_MAX, false);
+  FPrefs := TWbPreferences.Create;
+  FDatatypes := TWbDatatypeRegistry.Create;
+
+  /* Register common folder datatype */
+  var LFolder := TWbDatatypeIconInfo.Create;
+  LFolder.SelectedIcon    := 'res/DefDrawerSel.png';
+  LFolder.UnSelectedIcon  := 'res/DefDrawer.png';
+  LFolder.Description     := 'Common folder type declaration';
+  LFolder.TypeName        := 'folder';
+  FDataTypes.Register(LFolder);
 end;
 
 procedure TWbDesktop.FinalizeObject;
 begin
   FPrefs.free;
+  FDatatypes.free;
   inherited;
 end;
 
-procedure TWbDesktop.ObjectReady;
+procedure TWbDesktop.ForEachWindow(const Process: TWbDesktopEnumCallback);
 begin
-  inherited;
+  for var LItem in FWindows do
+  begin
+    if Process(LItem) = erBreak then
+    break;
+  end;
 end;
+
+procedure TWbDesktop.ForEachWindowEx(const Before: TProcedureRef;
+          const Process: TWbDesktopEnumCallback;
+          const After: TProcedureRef);
+begin
+  try
+    if assigned(Before) then
+    Before();
+  finally
+    try
+      if assigned(Process) then
+      begin
+        for var LItem in FWindows do
+        begin
+          if Process(LItem) = erBreak then
+          break;
+        end;
+      end;
+    finally
+      if assigned(After) then
+        After();
+    end;
+  end;
+end;
+
+procedure TWbDesktop.LayoutWindows;
+var
+  dx, dy: integer;
+  wd, hd: integer;
+begin
+  wd := (clientwidth - 30) div 3;
+  hd := clientheight div 2;
+  dx := 16;
+  dy := 98;
+  ForEachWindow( function (const Item: TWbCustomWindow): TEnumResult
+  begin
+    Item.SetBounds(dx, dy, Item.width, Item.height);
+    inc(dx, 32);
+    inc(dy, 32);
+    result := erContinue;
+  end);
+end;
+
+/* Datatypes */
+
+function TWbDesktop.GetDatatypes: IWbDatatypeRegistry;
+begin
+  result := FDatatypes as IWbDatatypeRegistry;
+end;
+
+/* Preferences */
+
+function  TWbDesktop.GetPreferences: IWbPreferences;
+begin
+  result := (self as IWbPreferences);
+end;
+
+function  TWbDesktop.GetPreferencesReader: IW3StructureReadAccess;
+begin
+  result := (FPrefs as IW3StructureReadAccess);
+end;
+
+function  TWbDesktop.GetPreferencesWriter: IW3StructureWriteAccess;
+begin
+  result := (FPrefs as IW3StructureWriteAccess);
+end;
+
+/* misc */
 
 function TWbDesktop.IsDesktop(const Control:TW3CustomControl): boolean;
 begin
@@ -101,11 +206,6 @@ end;
 
 procedure TWbDesktop.SavePreferences;
 begin
-end;
-
-function TWbDesktop.GetPreferencesObject: TW3Structure;
-begin
-  result := FPrefs;
 end;
 
 function TWbDesktop.KnownWindow(const Window: TWbWindow): boolean;

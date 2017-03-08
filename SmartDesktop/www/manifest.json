@@ -1,0 +1,54 @@
+{
+	"manifest_version" : 2,
+	"name" : "Amibian.js Amiga Cloud Desktop",
+	"version" : "0.1.1",
+	"description" : "This is a remake of Amiga OS 4 for the cloud.\nIt is a front-end for node.js cloud backend systems written in Smart Pascal (or indeed, any JS backend). Lightweight and very easy to incorporate existing websites and JS code.",
+	"author" : "Jon Lennart Aasenden",
+	"short_name" : "Amibian.js Amiga Cloud Desktop",
+	"icons" : {
+		"512" : "res\/Default-512x512",
+		"256" : "res\/Default-256x256",
+		"228" : "res\/Default-228x228",
+		"192" : "res\/Default-192x192",
+		"180" : "res\/Default-180x180",
+		"152" : "res\/Default-152x152",
+		"150" : "res\/Default-150x150",
+		"144" : "res\/Default-144x144",
+		"128" : "res\/Default-128x128",
+		"120" : "res\/Default-120x120",
+		"114" : "res\/Default-114x114",
+		"100" : "res\/Default-100x100",
+		"99" : "res\/Default-99x99",
+		"96" : "res\/Default-96x96",
+		"94" : "res\/Default-94x94",
+		"80" : "res\/Default-80x80",
+		"76" : "res\/Default-76x76",
+		"72" : "res\/Default-72x72",
+		"64" : "res\/Default-64x64",
+		"60" : "res\/Default-60x60",
+		"58" : "res\/Default-58x58",
+		"57" : "res\/Default-57x57",
+		"50" : "res\/Default-50x50",
+		"48" : "res\/Default-48x48",
+		"40" : "res\/Default-40x40",
+		"32" : "res\/Default-32x32",
+		"30" : "res\/Default-30x30",
+		"29" : "res\/Default-29x29",
+		"24" : "res\/Default-24x24",
+		"16" : "res\/Default-16x16"
+	},
+	"kiosk_enabled" : true,
+	"kiosk_only" : true,
+	"offline_enabled" : false,
+	"permissions" : [
+		"app.window"
+	],
+	"app" : {
+		"background" : {
+			"persistent" : false,
+			"scripts" : [
+				"background.js"
+			]
+		}
+	}
+}

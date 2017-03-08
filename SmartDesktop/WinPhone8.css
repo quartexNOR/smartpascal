@@ -1,0 +1,862 @@
+/*
+ * Windows Phone 8 theme for Smart Mobile Studio
+ * --
+ * Colors:
+ * --
+ * ButtonFace: #1ba1e2
+ * Dialog: #1f1f1f
+ * --
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+:focus {
+    outline: 0;
+}
+
+/* Apply to all elements */
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+
+  /* Define "normal" boxing */
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+       -o-box-sizing: border-box;
+          box-sizing: border-box;
+
+
+  /* no tap highlight color */
+  -webkit-tap-highlight-color: transparent;
+     -moz-tap-highlight-color: transparent;
+      -ms-tap-highlight-color: transparent;
+       -o-tap-highlight-color: transparent;
+          tap-highlight-color: transparent;
+
+  /* no border style by default */
+  -webkit-border-style: none;
+     -moz-border-style: none;
+      -ms-border-style: none;
+       -o-border-style: none;
+          border-style: none;
+
+  /* Turn off font resizing */
+  -webkit-text-size-adjust: none;
+     -moz-text-size-adjust: none;
+      -ms-text-size-adjust: none;
+          text-size-adjust: none;
+
+    -webkit-font-smoothing: always;
+       -moz-font-smoothing: always;
+        -ms-font-smoothing: always;
+            font-smoothing: always;
+
+  font-family: "Ubuntu", Helvetica, sans-serif;
+}
+
+html, body, div, span, applet, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, ins, del, form, input, textarea, select, button, option, optgroup, hr, br {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  /* default to black screen */
+  background-color: #000;
+  cursor: default;
+}
+
+
+/* -------------------- */
+/* Window ZORDER BUTTON */
+.TWbWindowZOrderGlyph {
+  cursor: default;
+  background-image: url("res/window.header.zorder.disabled.png");
+}
+
+.TWbWindowZOrderGlyph_focused {
+  background-image: url("res/window.header.zorder.enabled.png");
+}
+
+/* -------------------- */
+/* Window CLOSE BUTTON */
+.TWbWindowCloseGlyph {
+  cursor: default;
+  background-image: url("res/window.header.closer.disabled.png");
+}
+
+.TWbWindowCloseGlyph_focused {
+  background-image: url("res/window.header.closer.enabled.png");
+}
+
+/* -------------------- */
+/* Window SIZE BUTTON */
+.TWbWindowSizerGlyph {
+  cursor: default;
+  background-image: url("res/window.footer.sizer.disabled.png");
+}
+
+.TWbWindowSizerGlyph_focused {
+  background-image: url("res/window.footer.sizer.enabled.png");
+}
+
+/* -------------------- */
+/* Window Minimize BUTTON */
+.TWbWindowMinimizeGlyph {
+  cursor: default;
+  background-image: url("res/window.header.edge.minimize.disabled.png");
+ }
+
+.TWbWindowMinimizeGlyph_focused {
+  background-image: url("res/window.header.edge.minimize.enabled.png");
+}
+
+/* -------------------- */
+/* Window HEADER AREA   */
+.TWbWindowHeader {
+  cursor: default;
+  background-image: url("res/window_header_unselected.png");
+  box-shadow: 0 5px 5px -5px #333;
+}
+
+.TWbWindowHeader_focused {
+  background-image: url("res/window_header_selected.png");
+}
+
+.TWbWindowHeader: disabled {
+  background-image: url("res/window_header_unselected.png");
+}
+
+
+.TWbWindowContent {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.TWbWindow {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.TWbIconView {
+  background-color: #FEFEFE;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+
+/* ------------------------------------------------- */
+
+.TW3Button {
+  cursor: default;
+
+  border-top: 1px solid #E0E0E0;
+  border-left: 1px solid #E0E0E0;
+  border-bottom: 1px solid #979797;
+  border-right: 1px solid #979797;
+
+  outline: 1px solid #42415A;
+  outline-offset: 0px;
+
+  background-image: -ms-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to bottom, #B0B0B0 0%, #D7D7D7 100%);
+
+  font-size: normal;
+  text-align: center;
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+.TW3Button:active {
+  border-top: 1px solid #979797;
+  border-left: 1px solid #979797;
+  border-bottom: 1px solid #E0E0E0;
+  border-right: 1px solid #E0E0E0;
+
+  background-image: -ms-linear-gradient(bottom left, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(bottom left, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(bottom left, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left bottom, right top, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(bottom left, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to top right, #B0B0B0 0%, #D7D7D7 100%);
+}
+
+.TW3Button:focus {
+       color: #618ECE;
+  font-color: #618ECE;
+  text-decoration: underline;
+ }
+
+.TW3Button:disabled {
+  cursor: wait;
+	opacity: 0.5;
+}
+
+/* ------------------------------------------------- */
+
+ul {
+  cursor: default;
+  list-style: none;
+  font-size: small;
+}
+
+ul li {
+  color: #fff;
+  margin: 0 0 2px 0;
+  cursor: hand;
+
+  padding: 8px;
+  background: #1ba1e2;
+}
+
+ul li:active { }
+
+/**
+ * TW3CustomControl
+ * @purpose TW3CustomControl control style
+ * @status done
+ */
+.TW3CustomControl {
+  cursor: default;
+  background-color: #fff;
+}
+
+/**
+ * TW3ScrollContentIndicator
+ * @purpose TW3ScrollContentIndicator style
+ * @status done
+ */
+.TW3ScrollContentIndicator {
+  background-color: #9e2b83;
+  border: solid 1px #9A9A9A;
+}
+
+/**
+ * TW3CustomForm
+ * @purpose TW3CustomForm control style
+ * @status done
+ */
+.TW3CustomForm, .TW3Form {
+  /* This forces the browsers that support it to
+     use the GPU rather than CPU for movement */
+  -webkit-transform: translateZ(0);
+     -moz-transform: translateZ(0);
+      -ms-transform: translateZ(0);
+       -o-transform: translateZ(0);
+
+   background: #000;
+}
+
+/**
+ * TW3BlockBox:
+ * In order to emulate modal dialogs we use
+ * a single DIV to cover the active form.
+ * This div prevents the user from clicking
+ * on the underlying controls - thus forcing
+ * the user to deal with the dialog, which is
+ * hosted as a child of the TW3BlockBox control
+ */
+
+.TW3BlockBox {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/**
+ * @purpose TW3AlertDialog control
+ * @status done
+ */
+.TW3AlertDialog {
+  font-size: medium;
+  background: #1f1f1f;
+
+  z-index: 1000;
+  padding: 10px;
+
+  text-align: center;
+}
+
+/**
+ * @purpose TW3AlertDialog title & text
+ * @status done
+ * @todo It will be nice if there will be a style
+ *       for title separated from text
+ */
+.TW3AlertDialog .TW3LabelText {
+  color: #fff;
+  font-size: medium;
+  font-weight: normal;
+}
+
+/**
+ * TW3Label
+ * @purpose TW3Label control style
+ * @status done
+ */
+.TW3Label, TW3LabelText {
+  color: #fff;
+  font-size: small;
+	cursor: default;
+}
+
+.TW3Label:disabled,
+.TW3LabelText:disabled {
+  opacity: 0.5;
+}
+
+
+.TW3AlertButton {
+  color: #fff;
+  font-size: normal;
+
+  border: 2px solid #fff;
+
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+.TW3AlertButton:active:enabled {
+  background: #1ba1e2;
+}
+
+/**
+ * TW3EditBox
+ * TW3EditBox
+ * TW3ComboBox
+ * @purpose 
+ * @status done
+ */
+.TW3Memo,
+.TW3EditBox,
+.TW3ComboBox {
+  border: 1px solid #fff;
+  border-radius: 0;
+
+  background-color: #CFCFCF;
+
+  border-top: 1px solid #979797;
+  border-left: 1px solid #979797;
+  border-bottom: 1px solid #E0E0E0;
+  border-right: 1px solid #E0E0E0;
+
+  outline: 1px solid #42415A;
+  outline-offset: 0px;
+  outline-bottom: 1px solid #000;
+	-webkit-user-select: auto;
+}
+
+.TW3EditBox:focus {
+}
+
+/**
+ * TW3ToolButton
+ * @purpose TW3ToolButton control style
+ * @status done
+ */
+.TW3ToolButton {
+  cursor: default;
+  padding: 2px;
+  border-bottom: 1px solid #4F6EAA;
+
+  background-image: -ms-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to bottom, #B0B0B0 0%, #D7D7D7 100%);
+
+  font-size: normal;
+  /* border: 2px solid #fff; */
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+.TW3ToolbarButton {
+  cursor: default;
+  padding: 2px;
+
+  border-top: 1px solid #E0E0E0;
+  border-left: 1px solid #E0E0E0;
+  border-bottom: 1px solid #979797;
+  border-right: 1px solid #979797;
+
+  outline: 1px solid #42415A;
+  outline-offset: 0px;
+  outline-bottom: 1px solid #000;
+
+  background-image: -ms-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to bottom, #B0B0B0 0%, #D7D7D7 100%);
+
+  font-size: normal;
+  text-align: center;
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+.TW3ToolbarButton:active {
+  border-top: 1px solid #979797;
+  border-left: 1px solid #979797;
+  border-bottom: 1px solid #E0E0E0;
+  border-right: 1px solid #E0E0E0;
+
+  background-image: -ms-linear-gradient(bottom, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(bottom, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(bottom, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(bottom, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to top, #B0B0B0 0%, #D7D7D7 100%);
+
+}
+
+.TW3ToolbarButton:focus {
+  color: #618ECE;
+  text-decoration: underline;
+ }
+
+.TW3ToolbarButton:disabled {
+  cursor: wait;
+	opacity: 0.5;
+}
+
+.TW3ToolbarButtonSelected {
+  background-image: -ms-linear-gradient(top, #A8A8A8 60%, #EDEDED 100%);
+  background-image: -moz-linear-gradient(top, #A8A8A8 60%, #EDEDED 100%);
+  background-image: -o-linear-gradient(top, #A8A8A8 60%, #EDEDED 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(60, #A8A8A8), color-stop(100, #EDEDED));
+  background-image: -webkit-linear-gradient(top, #A8A8A8 60%, #EDEDED 100%);
+  background-image: linear-gradient(to bottom, #A8A8A8 60%, #EDEDED 100%);
+}
+
+
+/**
+ * TW3Toolbar
+ * @purpose TW3Toolbar control
+ * @status done
+ */
+.TW3Toolbar {
+  cursor: default;
+  padding: 2px;
+  background-color: #EFECE9;
+  border-bottom: 1px solid #979797;
+}
+
+
+/**
+ * TW3ToolButton
+ * @purpose TW3Toolbar control
+ * @status done
+ */
+.TW3ToolButton {
+}
+
+.TW3ToolButton:active:enabled {
+}
+
+.TW3ToolButton:disabled {
+  cursor: wait;
+	opacity: 0.5;
+}
+
+
+
+.ButtonDown {
+  border: 2px inset;
+}
+
+.TWbPathPanel {
+  cursor: default;
+  padding: 2px;
+
+  border-top: 1px solid #FFFFFF;
+  background-color: #EFECE9;
+
+  font-size: normal;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+
+/**
+ * TW3Panel
+ * @purpose TW3Panel control style
+ * @status done
+ */
+.TW3Panel {
+  cursor: default;
+  padding: 2px;
+
+  border-top: 1px solid #FFFFFF;
+  border-left: 1px solid #FFFFFF;   /* ECECEC */
+  border-bottom: 1px solid #979797;
+  border-right: 1px solid #979797;
+
+
+  background-color: #EFECE9;
+
+  font-size: normal;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+/**
+ * TW3ToggleSwitch
+ * @purpose TW3ToggleSwitch control style
+ * @status done
+ */
+.TW3ToggleSwitch {
+  border: 1px solid;
+
+  border-top: 1px solid #979797;
+  border-left: 1px solid #979797;
+  border-bottom: 1px solid #E0E0E0;
+  border-right: 1px solid #E0E0E0;
+
+  background: #000;
+  font-size: small;
+	overflow: hidden;
+}
+
+.TW3ToggleOnLabel .TW3LabelText { color: #1ba1e2; }
+
+.TW3ToggleOnLabel,
+
+.TW3ToggleOffLabel {
+  text-align: center;
+  cursor: default;
+  background-image: -ms-linear-gradient(top, #000000 0%, #293D69 100%);
+  background-image: -moz-linear-gradient(top, #000000 0%, #293D69 100%);
+  background-image: -o-linear-gradient(top, #000000 0%, #293D69 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #000000), color-stop(100, #293D69));
+  background-image: -webkit-linear-gradient(top, #000000 0%, #293D69 100%);
+  background-image: linear-gradient(to bottom, #000000 0%, #293D69 100%);
+}
+
+.TW3ToggleOnLabel {
+  text-align: center;
+  cursor: default;
+  background: #618ECE;
+  background-image: -webkit-linear-gradient(top, #2B5897 0%, #5B88C7 100%);
+  background-image:    -moz-linear-gradient(top, #2B5897 0%, #5B88C7 100%);
+  background-image:     -ms-linear-gradient(top, #2B5897 0%, #5B88C7 100%);
+  background-image:      -o-linear-gradient(top, #2B5897 0%, #5B88C7 100%);
+  background-image:        -webkit-gradient(linear, left top, left bottom, color-stop(0, #2B5897), color-stop(100, #5B88C7));
+  background-image:         linear-gradient(to bottom, #2B5897 0%, #5B88C7 100%);
+
+  -webkit-box-shadow: inset 0 0 10px #000000;
+     -moz-box-shadow: inset 0 0 10px #000000;
+       -o-box-shadow: inset 0 0 10px #000000;
+          box-shadow: inset 0 0 10px #000000;
+ }
+
+.TW3ToggleKnob {
+  cursor: default;
+
+  border-top: 1px solid #E0E0E0;
+  border-left: 1px solid #E0E0E0;
+  border-bottom: 1px solid #979797;
+  border-right: 1px solid #979797;
+
+  outline: 1px solid #42415A;
+  outline-offset: 0px;
+
+  background-image: -ms-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -moz-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -o-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #B0B0B0), color-stop(100, #D7D7D7));
+  background-image: -webkit-linear-gradient(top, #B0B0B0 0%, #D7D7D7 100%);
+  background-image: linear-gradient(to bottom, #B0B0B0 0%, #D7D7D7 100%);
+
+  font-size: normal;
+  text-align: center;
+  -webkit-text-size-adjust: auto;
+     -moz-text-size-adjust: auto;
+      -ms-text-size-adjust: auto;
+       -o-text-size-adjust: auto;
+}
+
+  .TW3ToggleKnob:hover { }
+
+/**
+ * TW3ListBox
+ * @purpose TW3ListBox control style
+ * @status done
+ */
+.TW3Listbox {
+  padding: 1px;
+  border: 2px solid #fff;
+  font-size: normal;
+}
+
+.TW3Listbox .TW3LabelText { color: #000; }
+
+.TW3ListBoxItemSelected {
+  color: #fff;
+  font-size: small;
+  background: #1ba1e2;
+}
+
+.TW3ListBoxItemSelected .TW3LabelText { color: #fff; }
+
+/**
+ * TW3HeaderControl
+ * @purpose Style for TW3HeaderControl
+ * @status done
+ */
+.TW3HeaderControl {
+  cursor: default;
+  background: #1f1f1f;
+}
+
+.TW3HeaderControl:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+/**
+ * TW3ProgressBar
+ * @purpose ProgressBar
+ * @status done
+ */
+.TW3ProgressBar,
+.TW3ProgressMeter {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+}
+
+.TW3ProgressBar { background: #292929; }
+
+/**
+ * TW3ProgressMeter
+ * @purpose Content of ProgressBar
+ * @status done
+ */
+.TW3ProgressMeter { background: #1ba1e2; }
+
+/**
+ * TW3Scrollbar
+ * @purpose Style for TW3Scrollbar
+ * @status done
+ */
+.TW3ScrollBar {
+  background: #1f1f1f;
+}
+
+.TW3ScrollbarUpBtn,
+.TW3ScrollbarDownBtn,
+.TW3ScrollbarLeftBtn,
+.TW3ScrollbarRightBtn {
+  overflow: hidden;
+}
+
+.TW3ScrollbarUpBtn:active,
+.TW3ScrollbarDownBtn:active,
+.TW3ScrollbarLeftBtn:active,
+.TW3ScrollbarRightBtn:active {
+  background: #1ba1e2;
+}
+
+.TW3ScrollbarDownBtn:hover,
+.TW3ScrollbarUpBtn:hover,
+.TW3ScrollbarLeftBtn:hover,
+.TW3ScrollbarRightBtn:hover {
+  cursor: pointer;
+}
+
+.TW3ScrollbarHandle {
+  background: #1ba1e2;
+  overflow: hidden;
+}
+
+.TW3ScrollbarHandle:active { }
+
+.TW3ScrollbarHandsle:Hover {
+  cursor: pointer;
+}
+
+.TW3HorizontalScrollbar,
+.TW3VerticalScrollbar {
+  background: white;
+
+  overflow: hidden;
+  -webkit-touch-callout: none;
+}
+
+.TW3HorizontalScrollbar,
+.TW3VerticalScrollbar {
+  padding: 0;
+  background: #1f1f1f;
+}
+
+.TW3VerticalScrollbar:disabled,
+.TW3HorizontalScrollbar:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+/* =============================================
+ * Page Animation: BACKSCROLL
+ * ============================================= */
+
+@-webkit-keyframes BACKSCROLL {
+  0% {
+    -webkit-transform: translateZ(0);
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: -557px 0%;
+    -webkit-transform: translateZ(0);
+  }
+}
+
+@-moz-keyframes BACKSCROLL {
+  0% {
+    -webkit-transform: translateZ(0);
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: -557px 0%;
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* =============================================
+ * Page Animation: MOVE-LEFT
+ * ============================================= */
+
+@-webkit-keyframes MOVE-LEFT {
+    0% {
+        -webkit-transform: translateX(100%);
+    }
+    100% {
+        -webkit-transform: translateX(0px);
+    }
+}
+
+@-webkit-keyframes MOVE-OUT-LEFT {
+    0% {
+        -webkit-transform: translateX(0%);
+    }
+    100% {
+        -webkit-transform: translateX(-100%);
+    }
+}
+
+@-moz-keyframes MOVE-LEFT {
+    0% {
+        -moz-transform: translateX(100%);
+    }
+    100% {
+        -moz-transform: translateX(0px);
+    }
+}
+
+
+@-moz-keyframes MOVE-OUT-LEFT {
+    0% {
+      -moz-transform: translateX(0%);
+      }
+    100% {
+      -moz-transform: translateX(-100%);
+      }
+}
+
+/* =============================================
+ * Page Animation: MOVE-Right
+ * ============================================= */
+
+@-webkit-keyframes MOVE-RIGHT {
+    0% {
+        -webkit-transform: translateX(-100%);
+    }
+    100% {
+        -webkit-transform: translateX(0%);
+        visibility: none;
+    }
+}
+
+@-webkit-keyframes MOVE-OUT-RIGHT {
+    0% {
+        -webkit-transform: translateX(0%);
+    }
+    100% {
+        -webkit-transform: translateX(100%);
+        visibility: none;
+    }
+}
+
+@-moz-keyframes MOVE-RIGHT {
+    0% {
+        -moz-transform: translateX(-100%);
+    }
+    100% {
+        -moz-transform: translateX(0%);
+    }
+}
+
+@-moz-keyframes MOVE-OUT-RIGHT {
+    0% {
+        -moz-transform: translateX(0%);
+    }
+    100% {
+        -moz-transform: translateX(100%);
+        visibility: none;
+    }
+}
+
+/* =============================================
+ * Page Animation: ROTATE-FOREVER
+ * ============================================= */
+
+@-webkit-keyframes ROTATE-FOREVER {
+  from {
+    -webkit-transform: none;
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes ROTATE-FOREVER {
+  from {
+    -moz-transform: none;
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}

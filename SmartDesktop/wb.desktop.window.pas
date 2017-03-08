@@ -4,6 +4,7 @@ interface
 
 uses
   W3C.DOM,
+  System.Widget,
   System.Types,
   System.Types.Convert,
   System.Types.Graphics,
@@ -21,10 +22,9 @@ uses
   System.Memory.Allocation,
   System.Memory.Buffer,
 
-  System.Widget,
-
   wb.desktop.types,
   wb.desktop.iconView,
+  wb.desktop.preferences,
 
   SmartCL.System,
   SmartCl.MouseCapture,
@@ -102,6 +102,9 @@ type
     function  InputDisabled: boolean;
     procedure DisableInput(const BlockPermanent: boolean);
     procedure EnableInput;
+  published
+    property  OnInputDisabled: TNotifyEvent;
+    property  OnInputEnabled: TNotifyEvent;
   end;
 
   TWbWindowMoveBeginsEvent  = TNotifyEvent;
@@ -127,7 +130,7 @@ type
     procedure HandleZOrderClick(Sender: TObject); virtual;
     procedure HandleMinimizeClick(Sender: TObject); virtual;
     procedure HandleGotFocus(Sender: TObject); virtual;
-    procedure HandleLostFocus(Sender: TObject); virtual;
+    // procedure HandleLostFocus(Sender: TObject); virtual;
   protected
     procedure HandleMouseDown(Sender: TObject; Button: TMouseButton;
               Shift: TShiftState; X, Y: integer); virtual;
@@ -151,6 +154,8 @@ type
 
     procedure StyleAsFocused;
     procedure StyleAsUnFocused;
+
+    procedure UnSelect;
 
     procedure PatchChildControls; virtual;
 
@@ -252,16 +257,8 @@ begin
 end;
 
 function TWbExternalWindow.FrameHasFocus: boolean;
-var
-  LHandle:  TControlHandle;
-  LAccess:  IWbDesktop;
 begin
-  LHandle := FFrame.Handle;
-  result := GetDOMFocusedElement = LHandle;
-  (* asm
-    @result = (document.activeElement == @LHandle);
-  end; *)
-  result := TW3TagObj.GetDOMFocusedElement() = LHandle;
+  result := TW3TagObj.GetDOMFocusedElement() = FFrame.Handle;
 end;
 
 //#############################################################################
@@ -351,7 +348,7 @@ end;
 procedure TWbCustomWindow.InitializeObject;
 var
   LAccess:  IWbDesktop;
-  LPrefs:   TW3Structure;
+  LReader:  IW3StructureReadAccess;
 begin
   inherited;
   FLeft     := TWbWindowLeftSide.Create(self);
@@ -364,47 +361,43 @@ begin
   LAccess := GetDesktop();
   LAccess.RegisterWindow(Self);
 
-  LPrefs := LAccess.GetPreferencesObject();
-  if LPrefs <> nil then
+  LReader := LAccess.GetPreferences().GetPreferencesReader();
+
+  if LReader.ReadBool(PREFS_WINDOW_EFFECTS_OPEN) then
   begin
-    if LPrefs.ReadBool(PREFS_WINDOW_EFFECTS_OPEN) then
+    fxWarpIn(0.4, procedure ()
     begin
-      self.fxWarpIn(0.4, procedure ()
-      begin
-        Setfocus();
-        invalidate;
-      end);
-    end;
+      Setfocus();
+      invalidate;
+    end);
   end;
 end;
 
 procedure TWbCustomWindow.CloseWindow;
 var
   LAccess:  IWbDesktop;
-  LPrefs:   TW3Structure;
+  LReader:  IW3StructureReadAccess;
 begin
-  if not (csDestroying in ComponentState) then
+  LAccess := GetDesktop() as IWbDesktop;
+  LReader := LAccess.GetPreferences().GetPreferencesReader();
+
+  if LReader.ReadBool(PREFS_WINDOW_EFFECTS_CLOSE) then
   begin
-    LAccess := GetDesktop() as IWbDesktop;
-    LPrefs := LAccess.GetPreferencesObject();
-    if LPrefs.ReadBool(PREFS_WINDOW_EFFECTS_CLOSE) then
+    fxWarpOut(0.3, procedure ()
     begin
-      self.fxWarpOut(0.3, procedure ()
+      TW3Dispatch.Execute( procedure ()
+      var
+        LAccess: IWbDesktop;
       begin
-        TW3Dispatch.Execute( procedure ()
-        var
-          LAccess: IWbDesktop;
-        begin
-          LAccess := GetDesktop() as IWbDesktop;
-          LAccess.SetFocusedWindow(nil);
-          self.Free();
-        end, 300);
-      end);
-    end else
-    begin
-      LAccess.SetFocusedWindow(nil);
-      self.Free();
-    end;
+        LAccess := GetDesktop() as IWbDesktop;
+        LAccess.SetFocusedWindow(nil);
+        self.Free();
+      end, 300);
+    end);
+  end else
+  begin
+    LAccess.SetFocusedWindow(nil);
+    self.Free();
   end;
 end;
 
@@ -439,16 +432,22 @@ end;
 procedure TWbCustomWindow.ObjectReady;
 begin
   inherited;
+
   FHeader.CloseGlyph.OnClick := HandleCloseClick;
   FHeader.ZOrderGlyph.OnClick := HandleZOrderClick;
   FHeader.MinimizeGlyph.OnClick := HandleMinimizeClick;
+
+  FHeader.OnClick := procedure (sender: TObject)
+  begin
+    if not Topmost then
+      BringToFront();
+  end;
 
   /* Setup event handlers */
   OnMouseDown := HandleMouseDown;
   OnMouseMove := HandleMouseMove;
   OnMouseUp   := HandleMouseUp;
   OnGotFocus  := HandleGotFocus;
-  OnLostFocus := HandleLostFocus;
 
   FFooter.Border.Top.Style := besSolid;
   FFooter.Border.Top.Color := $92BFFF;; //CNT_STYLE_WINDOW_FRAME_DARK;
@@ -501,11 +500,11 @@ end;
 procedure TWbCustomWindow.Resize;
 const
   CNT_HEADER_HEIGHT = 29;
-  CNT_FOOTER_HEIGHT = 20;
-  CNT_RIGHT_WIDTH   = 20;
+  CNT_FOOTER_HEIGHT = 21;
+  CNT_RIGHT_WIDTH   = 6;
   CNT_SIZER_WIDTH   = 20;
   CNT_SIZER_HEIGHT  = 20;
-  CNT_LEFT_WIDTH    = 8;
+  CNT_LEFT_WIDTH    = 6;
 begin
   inherited;
   if not (csDestroying in ComponentState) then
@@ -551,20 +550,20 @@ end;
 procedure TWbCustomWindow.HandleMinimizeClick(Sender: TObject);
 var
   LAccess: IWbDesktop;
-  LPrefs: TW3Structure;
+  LReader: IW3StructureReadAccess;
   LHost:  TW3CustomControl;
 begin
   if Parent <> nil then
   begin
     LAccess := GetDesktop() as IWbDesktop;
-    LPrefs := LAccess.GetPreferencesObject();
-    LHost := TW3CustomControl(Parent);
+    LReader := LAccess.GetPreferences().GetPreferencesReader();
 
+    LHost := TW3CustomControl(Parent);
     if BoundsRect.Compare(LHost.ClientRect) then
     begin
       if not FOldSize.Empty then
       begin
-        if LPrefs.ReadBool(PREFS_WINDOW_EFFECTS_MIN) then
+        if LReader.ReadBool(PREFS_WINDOW_EFFECTS_MIN) then
         begin
           fxScaleTo(FOldSize.left, FOldSize.top, FOldSize.width, FOldSize.height, 0.3,
             procedure ()
@@ -578,17 +577,15 @@ begin
     begin
       FOldSize := BoundsRect;
       var LTemp := LHost.ClientRect;
-
-        if LPrefs.ReadBool(PREFS_WINDOW_EFFECTS_MAX) then
-        begin
-          fxScaleTo(LTemp.left, LTemp.top, LTemp.width, LTemp.height, 0.3,
-            procedure ()
-            begin
-              Invalidate();
-            end);
-        end else
-        SetBounds(LTemp.left, LTemp.top, LTemp.width, LTemp.height);
-
+      if LReader.ReadBool(PREFS_WINDOW_EFFECTS_MAX) then
+      begin
+        fxScaleTo(LTemp.left, LTemp.top, LTemp.width, LTemp.height, 0.3,
+          procedure ()
+          begin
+            Invalidate();
+          end);
+      end else
+      SetBounds(LTemp.left, LTemp.top, LTemp.width, LTemp.height);
     end;
   end;
 end;
@@ -610,26 +607,50 @@ end;
 
 procedure TWbCustomWindow.StyleAsFocused;
 begin
-  Content.EnableInput();
-  FHeader.TagStyle.Add("TWbWindowHeader_focused");
-  FHeader.ZOrderGlyph.TagStyle.Add("TWbWindowZOrderGlyph_focused");
-  FHeader.MinimizeGlyph.TagStyle.Add("TWbWindowMinimizeGlyph_focused");
-  FHeader.CloseGlyph.TagStyle.Add("TWbWindowCloseGlyph_focused");
-  FSizer.TagStyle.Add("TWbWindowSizerGlyph_focused");
-  Background.fromColor(CNT_STYLE_WINDOW_BASE_SELECTED);
-  FStyled := true;
+  try
+    Content.EnableInput();
+    FHeader.TagStyle.Add("TWbWindowHeader_focused");
+    FHeader.ZOrderGlyph.TagStyle.Add("TWbWindowZOrderGlyph_focused");
+    FHeader.MinimizeGlyph.TagStyle.Add("TWbWindowMinimizeGlyph_focused");
+    FHeader.CloseGlyph.TagStyle.Add("TWbWindowCloseGlyph_focused");
+    FSizer.TagStyle.Add("TWbWindowSizerGlyph_focused");
+    Background.fromColor(CNT_STYLE_WINDOW_BASE_SELECTED);
+  finally
+    FStyled := true;
+  end;
 end;
 
 procedure TWbCustomWindow.StyleAsUnFocused;
 begin
-  Content.DisableInput(false);
-  FHeader.TagStyle.RemoveByName("TWbWindowHeader_focused");
-  FHeader.ZOrderGlyph.TagStyle.RemoveByName("TWbWindowZOrderGlyph_focused");
-  FHeader.MinimizeGlyph.TagStyle.RemoveByName("TWbWindowMinimizeGlyph_focused");
-  FHeader.CloseGlyph.TagStyle.RemoveByName("TWbWindowCloseGlyph_focused");
-  FSizer.TagStyle.RemoveByName("TWbWindowSizerGlyph_focused");
-  Background.fromColor(CNT_STYLE_WINDOW_BASE_UNSELECTED);
-  FStyled := false;
+  try
+    Content.DisableInput(false);
+    FHeader.TagStyle.RemoveByName("TWbWindowHeader_focused");
+    FHeader.ZOrderGlyph.TagStyle.RemoveByName("TWbWindowZOrderGlyph_focused");
+    FHeader.MinimizeGlyph.TagStyle.RemoveByName("TWbWindowMinimizeGlyph_focused");
+    FHeader.CloseGlyph.TagStyle.RemoveByName("TWbWindowCloseGlyph_focused");
+    FSizer.TagStyle.RemoveByName("TWbWindowSizerGlyph_focused");
+    Background.fromColor(CNT_STYLE_WINDOW_BASE_UNSELECTED);
+  finally
+    FStyled := false;
+  end;
+end;
+
+procedure TWbCustomWindow.UnSelect;
+begin
+  // Remove styling by brute force. Actually quicker :/
+  var LAccess := GetDesktop();
+  LAccess.SetFocusedWindow(nil);
+
+  var LList := LAccess.GetWindowList();
+  if LList.count > 0 then
+  begin
+    for var x:=low(LList) to high(LList) do
+    begin
+      var LItem := LList[x];
+      if LItem.Styled then
+        LItem.StyleAsUnFocused();
+    end;
+  end;
 end;
 
 procedure TWbCustomWindow.HandleGotFocus(Sender: TObject);
@@ -640,169 +661,28 @@ begin
   var LAccess := GetDesktop();
   LAccess.SetFocusedWindow(self);
   StyleAsFocused();
-end;
 
-procedure TWbCustomWindow.HandleLostFocus(Sender: TObject);
-begin
-  if not (csDestroying in ComponentState) then
+  // Remove styling by brute force. Actually quicker :/
+  var LList := LAccess.GetWindowList();
+  if LList.count > 0 then
   begin
-
-    TW3Dispatch.Execute( procedure ()
-    var
-      LAccess:  IWbDesktop;
-      LActive:  TWbCustomWindow;
-      LTemp: TW3TagContainer;
+    for var x:=low(LList) to high(LList) do
     begin
-      LAccess := GetDesktop() as IWbDesktop;
-
-      LTemp := TW3TagContainer( TW3ControlTracker.GetFocusedControl() );
-      if LTemp <> nil then
+      var LItem := LList[x];
+      if LItem <> self then
       begin
-
-        if QueryChildInThisBranch(LTemp) then
-        begin
-          {$IFDEF DEBUG}
-          WritelnF("[%s] A child was clicked that belongs to this window's branch", ["HandleLostFocus"]);
-          {$ENDIF}
-
-          LActive := LAccess.GetActiveWindow();
-          if LActive <> self then
-          begin
-            if LActive <> nil then
-            {$IFDEF DEBUG}
-            WritelnF("[%s] Another window had focus, informing manager that we should still have focus", ["HandleLostFocus"]) else
-            {$ENDIF}
-            begin
-              {$IFDEF DEBUG}
-              writelnF("[%s] Eh, ok im exiting", ["HandleLostFocus"]);
-              WritelnF("[%s] Styling window as un-focused", ["HandleLostFocus"]);
-              {$ENDIF}
-              StyleAsUnFocused();
-              exit;
-            end;
-            LAccess.SetFocusedWindow(self);
-          end;
-
-          if FStyled then
-          begin
-            {$IFDEF DEBUG}
-            WritelnF("[%s] Aborting de-styling of window", ["HandleLostFocus"]);
-            {$ENDIF}
-            exit;
-          end;
-        end else
-        begin
-          {$IFDEF DEBUG}
-          WritelnF("[%s] A child was clicked but does not register to this window's branch?", ["HandleLostFocus"]);
-          {$ENDIF}
-          var qParent := LTemp.GetRootControlFor(LTemp);
-          //if qParent <> nil then
-          //writeln("Parent =" + qParent.ClassName);
-
-          if qParent = self then
-          begin
-            {$IFDEF DEBUG}
-            WritelnF("[%s] Odd, we can trace it back to us", ["HandleLostFocus"]);
-            {$ENDIF}
-            LAccess.SetFocusedWindow(self);
-            exit;
-          end
-
-          else
-            begin
-              writeln("DAMN! ->" + LTemp.classname);
-            end
-
-          {$IFDEF DEBUG}
-          else
-          begin
-            WritelnF("[%s] Could not be found in our branch, so allowing blur()", ["HandleLostFocus"]);
-          end
-          {$ENDIF}
-          ;
-        end;
+        if LItem.Styled then
+          LItem.StyleAsUnFocused();
       end;
-
-      {$IFDEF DEBUG}
-      WritelnF("[%s] Styling window as un-focused", ["HandleLostFocus"]);
-      {$ENDIF}
-      StyleAsUnFocused();
-    end, 30);
-
+    end;
   end;
 end;
 
 procedure TWbCustomWindow.HandleMouseDown(Sender: TObject; Button: TMouseButton;
                     Shift: TShiftState; X, Y: integer);
-var
-  LAccess:  IWbDesktop;
-  LActive: TWbCustomWindow;
 begin
   if (csDestroying in ComponentState) then
     exit;
-
-  (* LAccess := GetDesktop() as IWbDesktop;
-  LActive := LAccess.GetActiveWindow();
-
-  if LActive <> nil then
-  begin
-    if LActive <> self then
-    begin
-      {$IFDEF DEBUG}
-      WritelnF("[%s] Another window is set as active, changing", [{$I %FUNCTION%}]);
-      {$ENDIF}
-      LAccess.SetFocusedWindow(self);
-      self.SetFocus();
-
-      {$IFDEF DEBUG}
-      Writeln("Calling DropFocus() on the previously active window");
-      {$ENDIF}
-      LActive.DropFocus();
-      if LActive.Styled then
-      begin
-        {$IFDEF DEBUG}
-        WritelnF("[%s] Other window styled as active, removing", [{$I %FUNCTION%}]);
-        {$ENDIF}
-        LActive.StyleAsUnFocused();
-      end;
-
-      if not FStyled then
-      begin
-        {$IFDEF DEBUG}
-        WritelnF("[%s] Applying focused styling to this window", [{$I %FUNCTION%}]);
-        {$ENDIF}
-        StyleAsFocused();
-      end;
-
-    end else
-    begin
-      {$IFDEF DEBUG}
-      WritelnF("[%s] We are already set as the selected window", [{$I %FUNCTION%}]);
-      {$ENDIF}
-      if not FStyled then
-      begin
-        {$IFDEF DEBUG}
-        WritelnF("[%s] Styling missing somehow, applying", [{$I %FUNCTION%}]);
-        {$ENDIF}
-        StyleAsFocused();
-      end;
-    end;
-  end else
-  begin
-    {$IFDEF DEBUG}
-    WritelnF("[%s] No window set as focused, setting this one", [{$I %FUNCTION%}]);
-    {$ENDIF}
-    LAccess.SetFocusedWindow(self);
-    SetFocus();
-
-    if not Styled then
-    begin
-      {$IFDEF DEBUG}
-      WritelnF("[%s] Frame not styled, applying that", [{$I %FUNCTION%}]);
-      {$ENDIF}
-      StyleAsFocused();
-    end;
-  end;    *)
 
   if Button = TMouseButton.mbLeft then
   begin
@@ -819,6 +699,7 @@ begin
       FContent.DisableInput(false);
       FMoveActive := true;
       FStartPos := TPoint.Create(x, y);
+
     end else
 
     if FSizer.BoundsRect.ContainsPos(x,y) then
@@ -909,13 +790,15 @@ begin
     BeginUpdate;
     try
       FPermanent := BlockPermanent;
+
       FBlocker := TW3WindowFocusBlock.Create(self);
       FBlocker.Handle.ReadyExecute( procedure ()
         begin
           FBlocker.Background.fromColor(clblue);
           FBlocker.AlphaBlend := true;
-          FBlocker.Opacity := 10;
+          FBlocker.Opacity := 3;
         end);
+
 
       if not BlockPermanent then
       begin
@@ -926,6 +809,10 @@ begin
     finally
       EndUpdate;
       Invalidate;
+
+      // Fire event
+      if assigned(OnInputDisabled) then
+      OnInputDisabled(self);
     end;
   end;
 end;
@@ -944,6 +831,10 @@ begin
       finally
         EndUpdate;
         Invalidate();
+
+        // Fire event
+        if assigned(OnInputEnabled) then
+        OnInputEnabled(self);
       end;
     end;
   end;

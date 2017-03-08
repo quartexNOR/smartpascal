@@ -44,6 +44,7 @@ type
       ioFullSize
     );
 
+
   TWbListItem = class(TWbCustomControl)
   private
     FOptions: TWbListItemOptions;
@@ -89,6 +90,8 @@ type
     FGlyph:   TW3Image;
     FText:    TW3Label;
   protected
+    procedure SetSelected(const NewSelection: boolean); override;
+  protected
     procedure InitializeObject; override;
     procedure FinalizeObject; override;
     procedure ObjectReady; override;
@@ -131,6 +134,8 @@ type
 
   TWbIconViewItemSelectEvent = procedure (Sender: TObject; const NewItem, OldItem: TWbListItem);
 
+  TWbViewList = array of TWbListItem;
+
   TWbIconView = class(TWbCustomControl)
   private
     FOnItemSelect: TWbIconViewItemSelectEvent;
@@ -155,6 +160,9 @@ type
     procedure MouseUp(button : TMouseButton;
       shiftState : TShiftState; x, y : integer); override;
 
+    procedure UnSelectAll;
+    procedure UnSelectItem(const Item: TWbListItem);
+
   protected
     procedure InitializeObject; override;
     procedure FinalizeObject; override;
@@ -163,9 +171,12 @@ type
   public
     property  SelectedItem: TWbListItem read FSelectItem;
 
+    function  GetItemList: TWbViewList;
+
     class function CreationFlags: TW3CreationFlags; override;
 
     procedure ClearSelected;
+    procedure Clear;
 
   published
     property OnItemSelected: TWbIconViewItemSelectEvent read FOnItemSelect write FOnItemSelect;
@@ -256,7 +267,7 @@ procedure TWbListItemPlaque.Render;
 var
   LText:  string;
 begin
-  LText := #'<table width="100%" height="100%" border="1" >
+  LText := #'<table width="100%" height="100%" border="0" >
              <tr>
               <td width="80px" halign="center">
                 $DATA1$
@@ -318,21 +329,15 @@ begin
     FSelected := NewSelection;
     AddToComponentState([csSized]);
 
-    case NewSelection of
-    true:
-      begin
-        Handle.style['outline-width'] := '1px';
-        Handle.style['outline-style'] := 'dotted';
-        Handle.style['outline-color'] := '#000000';
-      end;
-    false:
-      begin
-        Handle.style['outline-width'] := '0px';
-        Handle.style['outline-style'] := 'hidden';
-        Handle.style['outline-color'] := 'transparent';
-      end;
+    if NewSelection then
+    begin
+      self.BorderRadius := 6;
+      //self.handle.style['background-color'] := ColorToWebStr(0,0,0,64);
+    end else
+    begin
+      self.BorderRadius := 0;
+      //self.Background.FromColor(clNone);
     end;
-
     EndUpdate;
   end else
   FSelected := NewSelection;
@@ -393,6 +398,21 @@ begin
   SetSize(76, 84);
 end;
 
+procedure TWbListItemIcon.SetSelected(const NewSelection: boolean);
+begin
+  case NewSelection of
+  true:   begin
+            FGlyph.BorderRadius := 6;
+            FGlyph.handle.style['background-color'] := ColorToWebStr(0,0,0,32);
+          end;
+  false:  begin
+            FGlyph.BorderRadius := 0;
+            FGlyph.handle.style['background-color'] := "transparent";
+          end;
+  end;
+  inherited SetSelected(NewSelection);
+end;
+
 procedure TWbListItemIcon.Resize;
 var
   dx, dy: integer;
@@ -417,7 +437,6 @@ begin
   inherited;
   Border.Style := besDotted;
   Border.Size := 2;
-  Handle.style['border-radius'] := '1px';
   Border.Color := clBlack;
   Background.FromColor(clNone);
 end;
@@ -468,6 +487,7 @@ end;
 function TWbIconView.CheckMouseInElement(const Xpos, Ypos: integer): TW3CustomControl;
 var
   LCount: integer;
+  LElement: TW3TagContainer;
   LChild: TW3CustomControl;
 begin
   LCount := GetChildCount();
@@ -475,14 +495,39 @@ begin
   begin
     for var x := 0 to LCount-1 do
     begin
-      LChild := TW3CustomControl( GetChildObject(x) );
-      if not (LChild is TWbLayoutSelectMask) then
+      LElement := GetChildObject(x);
+      if (LElement is TW3CustomControl) then
       begin
-        if LChild.BoundsRect.ContainsPos(xpos,ypos) then
+        LChild := TW3CustomControl( LElement );
+
+        if (LChild is TWbListItem) then
         begin
-          result := TWbListItem(LChild);
-          break;
+          if LChild.BoundsRect.ContainsPos(xpos,ypos) then
+          begin
+            result := TWbListItem(LChild);
+            break;
+          end;
         end;
+
+      end;
+    end;
+  end;
+end;
+
+procedure TWbIconView.Clear;
+var
+  LList: TWbViewList;
+begin
+  if (csReady in ComponentState) then
+  begin
+    if not (csDestroying in ComponentState) then
+    begin
+      FSelectItem := nil;
+
+      LList := GetItemList();
+      for var LItem in LList do
+      begin
+        LItem.free;
       end;
     end;
   end;
@@ -513,9 +558,56 @@ begin
   end;
 end;
 
+function TWbIconView.GetItemList: TWbViewList;
+begin
+  for var x := 0 to GetChildCount-1 do
+  begin
+    var LItem := GetChildObject(x);
+    if LItem is TWbListItem then
+    result.add( TWbListItem(LItem) );
+  end;
+end;
+
+procedure TWbIconView.UnSelectItem(const Item: TWbListItem);
+begin
+  if item <> nil then
+  begin
+    if Item.Selected then
+    begin
+      /* Perform unselection if this is *the* selected item */
+      if Item = FSelectItem then
+      begin
+        if assigned(OnItemSelected) then
+        OnItemSelected(self, nil, FSelectItem);
+
+        if assigned(Item.OnUnSelected) then
+        Item.OnUnSelected(FSelectItem);
+
+        FSelectItem := nil;
+      end;
+
+      Item.Selected := false;
+    end;
+  end;
+end;
+
+procedure TWbIconView.UnSelectAll;
+begin
+  if not (csDestroying in ComponentState) then
+  begin
+    var LLitems := GetItemList();
+    for var xi := 0 to LLitems.Count -1 do
+    begin
+      if LLitems[xi].Selected then
+      UnSelectItem(LLItems[xi]);
+    end;
+  end;
+end;
+
 procedure TWbIconView.MouseDown(button : TMouseButton; shiftState : TShiftState;x, y : integer);
 var
   LItem: TW3CustomControl;
+  LDOMFocus: TControlHandle;
 begin
   inherited MouseDown(Button, ShiftState, x, y);
 
@@ -527,29 +619,50 @@ begin
     // Did we hit an ICON?
     LItem := CheckMouseInElement(x, y);
 
+    // No? OK then we must have hit the desktop background at least
     if LItem = nil then
     begin
+
+      UnSelectAll();
+
+      // make sure we have focus
       Self.SetFocus();
 
-      var LDomFocus := null;
-      asm
-        @LDOMFocus = document.querySelector(":focus");
-      end;
+      // Just to make sure, get whatever the DOM has made selected
+      LDomFocus := TW3TagObj.GetDOMFocusedElement();
+
+      // Reference ok?
       if (LDomFocus) then
       begin
+        // Did the DOM pick something else than we did?
         if LDomFocus <> self.handle then
         begin
+          // DOM you suck! Blur out whatever it was
           LDomFocus.blur();
+
+          // Clear the selected element
           TW3ControlTracker.SetFocusedControl(nil);
+
+          // And re-apply focus to the desktop
           self.handle.focus();
         end;
       end;
 
+      /* With the DOM out of the way (or corrected), lets ask
+         the RTL what element last got focus. It doesnt know about
+         desktops or "windows" like this, so it will just keep univeral
+         track of all created elements */
       var LEd := TW3ControlTracker.GetFocusedControl;
+
+      // Did the RTL have a different focal-point?
       if LEd <> self then
       begin
+        // A valid reference to the element?
         if Led <> nil then
         begin
+          // OK, blur the sucker out and fire it's OnLostFocus()
+          // event. It may be that a frame cause this mess, because if this
+          // executes, something is out of whack
           var LCtrl := TW3CustomControl(LEd);
           LCtrl.Handle.blur();
           if assigned(LCtrl.OnLostFocus) then
@@ -562,46 +675,41 @@ begin
         writeln("Could not find an icon at this location");
         {$ENDIF}
 
+        // Right, are we the desktop? Or are we a normal directory listing?
         if LAccess.IsDesktop(self) then
         begin
+          // Ok we are a desktop, then disable all windows
           var LWin := LAccess.GetActiveWindow();
           if LWin <> nil then
           begin
-            {$IFDEF DEBUG}
-            writeln("A window is registered as active, issuing a blur() call");
-            {$ENDIF}
-            LWin.Handle.blur();
+            LWin.UnSelect();
+          end;
 
-            {$IFDEF DEBUG}
-            writeln("Firing its LostFocus event if set");
-            {$ENDIF}
-            if assigned(LWin.OnLostFocus) then
-              LWin.OnLostFocus(LWin);
+        end;
 
-            // Ok thats done, make sure we dont repeat it
-            LAccess.SetFocusedWindow(NIL);
-          end
-          {$IFDEF DEBUG}
-          else
-          writeln("No window registered as active")
-          {$ENDIF}
-          ;
-        end
-        {$IFDEF DEBUG}
-        else
-        writeln("We are not a desktop!!")
-        {$ENDIF}
-        ;
-
+        // Since the mouse-pointer is down, mark the control as "in mouse ready state".
+        // Only create a selection rectangle if the mouse moves (!)
         FActive := true;
+
+        // Clear any selected icons left over from previous activity
         ClearSelected();
-        SetFocus();
+
+        // Set focus again, it may have shifted during this short time
+        if (TW3TagObj.GetDOMFocusedElement() <> Handle) then
+        begin
+          SetFocus();
+        end;
+
+        // Set mouse-capture to get all events to our instance
         SetCapture();
+
+        // And finally, remember where the hell the mouse started
         FStartPos := TPoint.Create(x, y);
       except
         on e: exception do
         begin
-          writeln("HERE->" + e.message);
+          writeln("A mousedown error occured, system threw exception [" + e.message + "]");
+          raise;
         end;
       end;
     end else
@@ -641,12 +749,8 @@ begin
         (* OK, a control has been selected - but its either not a
            child item - or a child's sub-item. Hence we need to fire
            off the unselect events and mark the selected item as NIL *)
-        (* var LWin := LAccess.GetActiveWindow();
-        if LWin <> nil then
-        begin
-          //Showmessage( TWbWindow(LWin).Header.Title.Caption);
-        end else
-        writeln("God dammit!"); *)
+
+
 
         ClearSelected();
 
@@ -674,6 +778,7 @@ begin
           writeln(LItem.classname + " was selected somehow ..");
           {$ENDIF}
         end;
+
       end;
     end;
   end;

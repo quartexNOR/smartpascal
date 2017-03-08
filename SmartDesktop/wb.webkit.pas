@@ -24,10 +24,13 @@ end;
 
 procedure LoadWebKitEngine;
 begin
-  TW3Storage.LoadScript('lib/webkit.js', procedure (Filename: string)
+  TW3Storage.LoadScript('lib/webkit.js', procedure (Filename: string;
+  ScriptObj: THandle; Success: boolean)
   begin
-    writeln("** WebKit CORE LOADED");
-    __LOADED := true;
+    if Success then
+      writeln("** WebKit CORE LOADED");
+
+    __LOADED := Success;
   end);
 end;
 

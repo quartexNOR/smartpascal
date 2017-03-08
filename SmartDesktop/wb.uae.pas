@@ -3,6 +3,7 @@ unit wb.uae;
 interface
 
 uses
+  System.Types,
   SmartCL.require,
   SmartCL.FileUtils,
   SmartCL.System;
@@ -47,7 +48,8 @@ begin
   begin
     var LFileName: string = 'lib/' + CNT_AMIGA_FILES[x];
 
-    TW3Storage.LoadScript(LFileName, procedure (Filename: string)
+    TW3Storage.LoadScript(LFileName, procedure (Filename: string;
+      ScriptObj: THandle; Success: boolean)
       begin
         inc(__DONE);
 

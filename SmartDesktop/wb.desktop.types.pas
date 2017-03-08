@@ -9,6 +9,7 @@ uses
   System.Types.Graphics,
   System.Colors,
   System.Time,
+  System.Widget,
 
   System.Streams,
   System.Reader, System.Stream.Reader,
@@ -21,7 +22,7 @@ uses
   System.Memory.Allocation,
   System.Memory.Buffer,
 
-  System.Widget,
+  wb.desktop.datatypes,
 
   SmartCL.Components,
   SmartCL.Storage,
@@ -61,6 +62,11 @@ type
 
   TWbWindowList = array of TWbCustomWindow;
 
+  IWbPreferences = interface
+    function  GetPreferencesReader: IW3StructureReadAccess;
+    function  GetPreferencesWriter: IW3StructureWriteAccess;
+  end;
+
   IWbDesktop = interface
     ['{2B00D011-4A26-4ADF-A128-651148A2E20F}']
     procedure SetFocusedWindow(const Window: TWbCustomWindow);
@@ -70,7 +76,13 @@ type
     function  GetWindowList: TWbWindowList;
     procedure RegisterWindow(const Window: TWbCustomWindow);
     procedure UnRegisterWindow(const Window: TWbCustomWindow);
-    function  GetPreferencesObject: TW3Structure;
+
+    function  GetPreferences: IWbPreferences;
+    function  GetDatatypes: IWbDatatypeRegistry;
+
+    //function  GetPreferencesObject: TW3Structure;
+    //function  GetDatatypeRegistryObject: TWbDatatypeRegistry;
+
     function  KnownWindow(const Window: TWbCustomWindow): boolean;
     procedure SavePreferences;
   end;
@@ -78,15 +90,10 @@ type
   procedure RegisterDesktop(const Desktop: IWbDesktop);
   function  GetDesktop: IWbDesktop;
 
-const
-  PREFS_WINDOW_EFFECTS_OPEN   = 'window.effects.open';
-  PREFS_WINDOW_EFFECTS_CLOSE  = 'window.effects.close';
-  PREFS_WINDOW_EFFECTS_MIN    = 'window.effects.minimize';
-  PREFS_WINDOW_EFFECTS_MAX    = 'window.effects.maximize';
-
 implementation
 
-uses Wb.Desktop.Window;
+uses
+  wb.desktop.window;
 
 var
 LDesktop: IWbDesktop;
@@ -100,10 +107,5 @@ function  GetDesktop: IWbDesktop;
 begin
   result := LDesktop;
 end;
-
-//#############################################################################
-// TWbCustomControl
-//#############################################################################
-
 
 end.
