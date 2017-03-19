@@ -1,31 +1,38 @@
 <SMART>
   <state>
     <editor>
-      <tab filename="Unit1" fullname="Unit1.pas" topline="41" col="15" row="19" />
-      <tab filename="Form1" topline="142" col="13" row="172" splitview="0" designview="0" splitter="0.444529443979263" />
-      <tab filename="wb.desktop.window" fullname="wb.desktop.window.pas" topline="774" col="23" row="791" />
-      <tab filename="SmartCL.Components" fullname="..\..\..\RTL\SmartCL\SmartCL.Components.pas" topline="444" col="25" row="460" />
-      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="23" col="27" row="102" />
-      <tab filename="wb.desktop.window.editor" fullname="wb.desktop.window.editor.pas" topline="14" col="21" row="32" />
-      <tab filename="SmartCL.NiceEdit" fullname="SmartCL.NiceEdit.pas" topline="156" col="13" row="162" />
-      <tab filename="wb.desktop.filesystem" fullname="wb.desktop.filesystem.pas" topline="94" col="1" row="1" />
-      <tab filename="wb.desktop.devices" fullname="wb.desktop.devices.pas" topline="18" col="1" row="39" />
-      <tab filename="wb.desktop.iconview" fullname="wb.desktop.iconview.pas" topline="83" col="15" row="101" />
-      <tab filename="wb.desktop.window.prefs" fullname="wb.desktop.window.prefs.pas" topline="46" col="23" row="61" />
-      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="210" col="44" row="232" />
-      <tab filename="SmartCL.System" fullname="..\..\..\RTL\SmartCL\SmartCL.System.pas" topline="100" col="10" row="118" />
-      <tab filename="wb.desktop.datatypes" fullname="wb.desktop.datatypes.pas" topline="4" col="22" row="18" />
-      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="52" col="48" row="81" />
-      <activetab>wb.desktop.window.folder</activetab>
-      <breakpoints />
+      <tab filename="SmartCL.Effects" fullname="..\..\..\RTL\SmartCL\SmartCL.Effects.pas" topline="1399" col="47" row="1413" />
+      <tab filename="wb.desktop.window.prefs" fullname="wb.desktop.window.prefs.pas" topline="291" col="19" row="313" />
+      <tab filename="SmartCL.Controls.ToggleSwitch" fullname="..\..\..\RTL\SmartCL\Controls\SmartCL.Controls.ToggleSwitch.pas" topline="149" col="24" row="174" />
+      <tab filename="Form1" topline="241" col="7" row="267" splitview="0" designview="0" splitter="0.444444447755814" />
+      <tab filename="Unit1" fullname="Unit1.pas" topline="1" col="1" row="1" />
+      <tab filename="wb.desktop.devices" fullname="wb.desktop.devices.pas" topline="633" col="34" row="660" />
+      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="283" col="53" row="292" />
+      <tab filename="WinPhone8.css" topline="102" col="1" row="125" />
+      <tab filename="wb.desktop.classes" fullname="wb.desktop.classes.pas" topline="1" col="1" row="1" />
+      <tab filename="wb.desktop.preferences" fullname="wb.desktop.preferences.pas" topline="2" col="34" row="23" />
+      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="67" col="30" row="88" />
+      <tab filename="wb.desktop.filesystem" fullname="wb.desktop.filesystem.pas" topline="796" col="32" row="781" />
+      <tab filename="System.Structure.JSON" fullname="..\..\..\RTL\System\System.Structure.JSON.pas" topline="71" col="13" row="104" />
+      <tab filename="System.JSON" fullname="..\..\..\RTL\System\System.JSON.pas" topline="264" col="67" row="292" />
+      <tab filename="wb.desktop.iconview" fullname="wb.desktop.iconview.pas" topline="896" col="46" row="916" />
+      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="316" col="24" row="330" />
+      <tab filename="SmartCL.Components" fullname="..\..\..\RTL\SmartCL\SmartCL.Components.pas" topline="635" col="1" row="651" />
+      <activetab>wb.desktop.iconview</activetab>
+      <breakpoints>
+        <bkpt>
+          <unit>wb.desktop.filesystem</unit>
+          <line>552</line>
+        </bkpt>
+      </breakpoints>
     </editor>
     <Statistics>
-      <BackgroundCompilations>89838</BackgroundCompilations>
-      <EditTime>01:05:46.565</EditTime>
-      <CompileTime>00:39:41.456</CompileTime>
-      <TotalTime>06:17:13.992</TotalTime>
-      <DesigningTime>13:23:49.630</DesigningTime>
-      <RunningTime>22:35:34.656</RunningTime>
+      <BackgroundCompilations>117518</BackgroundCompilations>
+      <EditTime>07:13:10.385</EditTime>
+      <CompileTime>00:53:20.876</CompileTime>
+      <TotalTime>11:53:06.593</TotalTime>
+      <DesigningTime>13:23:52.854</DesigningTime>
+      <RunningTime>14:48:41.945</RunningTime>
     </Statistics>
   </state>
 </SMART>

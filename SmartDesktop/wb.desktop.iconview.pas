@@ -56,6 +56,9 @@ type
     procedure ObjectReady; override;
     procedure StyleTagObject; override;
   public
+
+    function  CalculatedRect: TRect; virtual;
+
     class function CreationFlags: TW3CreationFlags; override;
   published
     property  Selected: boolean read FSelected write SetSelected;
@@ -87,7 +90,7 @@ type
 
   TWbListItemIcon = class(TWbListItem)
   private
-    FGlyph:   TW3Image;
+    //FGlyph:   TW3Image;
     FText:    TW3Label;
   protected
     procedure SetSelected(const NewSelection: boolean); override;
@@ -99,7 +102,7 @@ type
     procedure Resize; override;
   public
     property  Text: TW3Label read FText;
-    property  Glyph: TW3Image read FGlyph;
+    function  CalculatedRect: TRect; override;
   end;
 
   TWbLayoutSelectMask = class(TWbCustomControl)
@@ -211,7 +214,7 @@ procedure TWbListItemPlaque.StyleTagObject;
 begin
   inherited;
   Font.Name := 'Ubuntu';
-  BorderRadius:=8;
+  BorderRadius := 8;
   SetPadding(2);
 end;
 
@@ -314,6 +317,11 @@ begin
   end;
 end;
 
+function  TWbListItem.CalculatedRect: TRect;
+begin
+  result := BoundsRect;
+end;
+
 class function TWbListItem.CreationFlags: TW3CreationFlags;
 begin
   result := inherited CreationFlags();
@@ -359,11 +367,6 @@ end;
 procedure TWbListItemIcon.InitializeObject;
 begin
   inherited;
-  FGlyph := TW3Image.Create(self);
-
-  FGlyph.Width := 64;
-  FGlyph.Height := 64;
-
   FText := TW3Label.Create(self);
   FText.width := 100;
   FText.height := 20;
@@ -374,42 +377,48 @@ begin
   FText.Font.Size := 12;
   FText.Font.Color := clBlack;
 
-  self.Background.FromColor(clNone);
+  Background.FromColor(clNone);
+  Background.Repeat := brNoRepeat;
+  Self.Handle.style['background-position'] := 'center top';
 end;
 
 procedure TWbListItemIcon.FinalizeObject;
 begin
-  FGlyph.free;
   FText.free;
   inherited;
+end;
+
+function TWbListItemIcon.CalculatedRect: TRect;
+begin
+  result := BoundsRect;
 end;
 
 procedure TWbListItemIcon.StyleTagObject;
 begin
   inherited;
   // set the bare-minimum size
-  w3_setStyle(Handle, 'min-width', '76px');
-  w3_setStyle(Handle, 'min-height', '84px');
+  w3_setStyle(Handle, 'min-width', '64px');
+  w3_setStyle(Handle, 'min-height', '64px');
 end;
 
 procedure TWbListItemIcon.ObjectReady;
 begin
   inherited;
-  SetSize(76, 84);
+  SetSize(64, 64 + 16);
 end;
 
 procedure TWbListItemIcon.SetSelected(const NewSelection: boolean);
 begin
-  case NewSelection of
+  { case NewSelection of
   true:   begin
             FGlyph.BorderRadius := 6;
-            FGlyph.handle.style['background-color'] := ColorToWebStr(0,0,0,32);
+            FGlyph.handle.style['background-color'] := ColorToWebStr($0,$0,$0, 31);
           end;
   false:  begin
             FGlyph.BorderRadius := 0;
             FGlyph.handle.style['background-color'] := "transparent";
           end;
-  end;
+  end;    }
   inherited SetSelected(NewSelection);
 end;
 
@@ -418,14 +427,24 @@ var
   dx, dy: integer;
 begin
   inherited;
-  dx := (clientwidth div 2) - (FGlyph.width div 2);
-  FGlyph.MoveTo(dx, 4);
+  //dx := (clientwidth div 2) - (FGlyph.width div 2);
+  //FGlyph.MoveTo(dx, 4);
 
-  FText.width := FText.Container.Width;
+  //PlaceText();
+  FText.Container.Width := FText.MeasureText(FText.Caption).tmWidth + 2;
+  FText.Width := FText.Container.Width;
 
-  inc(dy, FGlyph.top + FGlyph.height);
+  //inc(dy, FGlyph.top + FGlyph.height);
   dx := (clientwidth div 2) - (FText.width div 2);
-  FText.SetBounds(dx,dy, FText.width, FText.Height);
+
+  FText.MoveTo(dx, ClientRect.bottom - FText.Height);
+  //FText.SetBounds(dx,64, FText.width, FText.Height);
+
+  if FText.Width > ClientWidth then
+  width := FText.width;
+
+
+
 end;
 
 //#############################################################################
@@ -563,7 +582,7 @@ begin
   for var x := 0 to GetChildCount-1 do
   begin
     var LItem := GetChildObject(x);
-    if LItem is TWbListItem then
+    if (LItem is TWbListItem) then
     result.add( TWbListItem(LItem) );
   end;
 end;
@@ -836,10 +855,6 @@ end;
 
 function TWbIconView.CalculateLayout: TCLayout;
 var
-  x, LCount:  integer;
-  LRowHeight: integer;
-  dx, dy:     integer;
-  LChild:     TWbListItem;
   LStack:     Array of TCLayoutElement;
 
   procedure StackToRow;
@@ -847,20 +862,23 @@ var
     LRow:     TCLayoutRow;
     LWidth:   integer;
     LHeight:  integer;
+    LBounds:  TRect;
   begin
-    LHeight := 0;
-    LWidth  := 0;
+    //LHeight := 0;
+    //LWidth  := 0;
     while LStack.Count > 0 do
     begin
       var LTemp := LStack.Pop();
-      if LTemp.leNode.height > LHeight then
-        LHeight := LTemp.leNode.height;
-      inc(LWidth, LTemp.leNode.Width + FSpacing);
+      LBounds := LTemp.leNode.CalculatedRect();
+
+      if LBounds.Height > LHeight then
+        LHeight := LBounds.Height;
+      inc(LWidth, LBounds.Width + FSpacing);
       LRow.lrCols.Add( LTemp );
     end;
 
     if LWidth > 0 then
-      inc(LWidth, FSpacing);
+    inc(LWidth, FSpacing);
 
     LRow.lrHeight := LHeight;
     LRow.lrWidth := LWidth;
@@ -869,21 +887,37 @@ var
     LStack.Clear();
   end;
 
+var
+  x, LCount:  integer;
+  LBounds:    TRect;
+  LRowHeight: integer;
+  dx, dy:     integer;
+  LChild:     TWbListItem;
+
 begin
   LCount := GetChildCount();
   x := 0;
   dx := FSpacing;
-  dy := FSpacing;
+  dy := 0;
 
   while x < LCount do
   begin
-    LChild := TWbListItem( GetChildObject(x) );
+    var LObj := GetChildObject(x);
+    if not (LObj is TWbListItem) then
+    begin
+      inc(x);
+      continue;
+    end;
+
+    LChild := TWbListItem( LObj );
+    LBounds := LChild.CalculatedRect();
+    //LChild.background.FromColor(clRed);
 
     // Child breaks row population?
     if (ioBreak in LChild.Options) then
     begin
-      if LChild.height > LRowHeight then
-      LRowHeight := LChild.Height;
+      if LBounds.Height > LRowHeight then
+      LRowHeight := LBounds.Height;
 
       LStack.add( TCLayoutElement.Create(LChild, dx, dy) );
       StackToRow();
@@ -908,7 +942,7 @@ begin
       inc(dy, FSpacing);
 
       LStack.add( TCLayoutElement.Create(LChild, dx, dy) );
-      inc(dy, LChild.Height);
+      inc(dy, LBounds.Height);
       inc(dy, FSpacing);
 
       LRowHeight := 0;
@@ -920,7 +954,7 @@ begin
       continue;
     end;
 
-    if dx + LChild.Width + FSpacing > ClientWidth then
+    if dx + LBounds.Width + FSpacing > ClientWidth then
     begin
       StackToRow();
       dx := FSpacing;
@@ -928,11 +962,11 @@ begin
       inc(dy, FSpacing);
     end;
 
-    if LChild.height > LRowHeight then
-      LRowHeight := LChild.Height;
+    if LBounds.Height > LRowHeight then
+      LRowHeight := LBounds.Height;
 
     LStack.add( TCLayoutElement.Create(LChild, dx, dy) );
-    inc(dx, LChild.Width);
+    inc(dx, LBounds.Width);
 
     if x < (LCount-1) then
       inc(dx, FSpacing);
@@ -942,7 +976,6 @@ begin
 
   if LStack.Count > 0 then
     StackToRow();
-
 end;
 
 procedure TWbIconView.Resize;
@@ -957,7 +990,7 @@ begin
 
   LLayout := CalculateLayout();
 
-  if LLayout.clRows.Count <1 then
+  if LLayout.clRows.Count < 1 then
     exit;
 
   for x:=low(LLayout.clRows) to high(LLayout.clRows) do

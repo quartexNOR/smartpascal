@@ -105,7 +105,7 @@ begin
   FEffectsOpenLabel.TextShadow.Shadow(1,1,2,clBlack);
   FEffectsOpen := TW3ToggleSwitch.Create(Content);
   FEffectsOpen.Name :='btnEffectsOpen';
-  FEffectsOpen.SetBounds(220,10,150,32);
+  FEffectsOpen.SetBounds(220,10,100,28);
 
   FEffectsCloseLabel := TW3Label.Create(Content);
   FEffectsOpenLabel.Name :='lbEffectsClose';
@@ -115,7 +115,7 @@ begin
   FEffectsCloseLabel.AlignText := TTextAlign.taRight;
   FEffectsClose := TW3ToggleSwitch.Create(Content);
   FEffectsClose.Name :='btnEffectsClose';
-  FEffectsClose.SetBounds(220,52,150,32);
+  FEffectsClose.SetBounds(220,52,100,28);
 
   FEffectsMaximizeLabel := TW3Label.Create(Content);
   FEffectsMaximizeLabel.Name :='lbEffectsMaximize';
@@ -125,7 +125,7 @@ begin
   FEffectsMaximizeLabel.AlignText := TTextAlign.taRight;
   FEffectsMaximize := TW3ToggleSwitch.Create(Content);
   FEffectsMaximize.Name :='btnEffectsMaximize';
-  FEffectsMaximize.SetBounds(220,52 + 42,150,32);
+  FEffectsMaximize.SetBounds(220,52 + 42,100,28);
 
   FEffectsMinimizeLabel := TW3Label.Create(Content);
   FEffectsMinimizeLabel.Name :='lbEffectsMinimize';
@@ -135,15 +135,11 @@ begin
   FEffectsMinimizeLabel.AlignText := TTextAlign.taRight;
   FEffectsMinimize := TW3ToggleSwitch.Create(Content);
   FEffectsMaximize.Name :='btnEffectsMinimize';
-  FEffectsMinimize.SetBounds(220,52 + 42 + 42,150,32);
+  FEffectsMinimize.SetBounds(220,52 + 42 + 42,100,28);
 
   LAccess := GetDesktop() as IWbDesktop;
   LReader := LAccess.GetPreferences.GetPreferencesReader();
 
-  FEffectsOpen.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_OPEN);
-  FEffectsClose.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_CLOSE);
-  FEffectsMinimize.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_MIN);
-  FEffectsMaximize.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_MAX);
 
   FPanel := TW3Panel.Create(Content);
   FPanel.Name :='PnlPrefs';
@@ -191,9 +187,11 @@ begin
 end;
 
 procedure TWbPreferencesWindow.ObjectReady;
+var
+  LAccess:  IWbDesktop;
+  LReader:  IW3StructureReadAccess;
 begin
   inherited;
-
 
   FButtonLayout := Layout.Client(Layout.Margins(2).Spacing(10),
     [
@@ -201,7 +199,6 @@ begin
       Layout.client(FApply),
       Layout.Right(FCancel)
     ]);
-
 
   FLayout := Layout.Client(Layout.Margins(4).Spacing(4),
     [ Layout.top(
@@ -266,6 +263,14 @@ begin
   FEffectsMinimize.TextOn.Container.Font.Color := clWhite;
   FEffectsMinimize.TextOn.Background.fromColor($618ECE);
   FEffectsMinimize.TextOff.Font.Color := clWhite;
+
+  LAccess := GetDesktop() as IWbDesktop;
+  LReader := LAccess.GetPreferences.GetPreferencesReader();
+
+  FEffectsOpen.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_OPEN);
+  FEffectsClose.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_CLOSE);
+  FEffectsMinimize.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_MIN);
+  FEffectsMaximize.Checked := LReader.ReadBool(PREFS_WINDOW_EFFECTS_MAX);
 
   (* w3_setStyle(Handle, 'min-width',  '400px');
   w3_setStyle(Handle, 'min-height', '600px'); *)

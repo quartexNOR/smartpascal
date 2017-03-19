@@ -24,6 +24,7 @@ uses
   System.Widget,
 
   wb.desktop.filesystem,
+  wb.desktop.datatypes,
 
   SmartCL.Storage,
   SmartCL.Storage.Local,
@@ -51,11 +52,9 @@ type
     procedure DirExists(const Path: string;const CB:TWbFileOPCallBack);
     procedure MakeDir(const Path: string; const CB: TWbFileOPCallBack);
     procedure RemoveDir(const Path: string; const CB: TWbFileOPCallBack);
-
+    procedure CdUp(const CB: TWbFileOPCallBack);
     procedure Dir(const Path: string; const CB: TWbDirListCallBack);
-
     procedure ChDir(const Path: string; const CB: TWbFileOPCallBack);
-
     procedure Load(const Filename: string; const CB: TWbFileOPCallBack);
     procedure Save(const Filename: string;
               const Data: TStream;
@@ -80,7 +79,8 @@ type
     );
 
   TWbAuthenticatedEvent = procedure (Sender: TWbStorageDevice; Access: TWbStorageDeviceAccess);
-  TWbMountEvent = procedure (Sender: TWbStorageDevice);
+  TWbStorageDeviceMountEvent = procedure (Sender: TWbStorageDevice);
+  TWbStorageDeviceNeedsSetupEvent = procedure (Sender: TWbStorageDevice);
 
   /* Abstract storage device */
   TWbStorageDevice = class(TObject, IWbFileSystem)
@@ -102,6 +102,7 @@ type
     procedure RemoveDir(const Path: string; const CB: TWbFileOPCallBack); virtual; abstract;
     procedure Dir(const Path: string; const CB: TWbDirListCallBack); virtual; abstract;
     procedure ChDir(const Path: string; const CB: TWbFileOPCallBack); virtual; abstract;
+    procedure CdUp(const CB: TWbFileOPCallBack); virtual; abstract;
 
     procedure Load(const Filename: string; const CB: TWbFileOPCallBack); virtual; abstract;
     procedure Save(const Filename: string;
@@ -114,6 +115,7 @@ type
     function    GetOptions: TWbStorageDeviceOptions; virtual;
     procedure   SetAuthenticated(const NewState: boolean); virtual;
   public
+    property    BootDevice: boolean;
     property    Name: string read FName;
     property    Identifier: string read FId;
     property    Options: TWbStorageDeviceOptions read GetOptions;
@@ -125,11 +127,15 @@ type
     procedure   Authenticate(UserName, Password, Domain: string; Success: TWbAuthenticatedEvent); overload;
     procedure   Authenticate(AuthKey: string; Success: TWbAuthenticatedEvent); overload;
 
-    procedure   Mount(const Success: TWbMountEvent);
+    procedure   Mount(const Success: TWbStorageDeviceMountEvent);
     procedure   UnMount;
 
     constructor Create(const Manager: TWbDeviceManager); virtual;
     destructor  Destroy; override;
+  published
+    property  OnDeviceMounted: TWbStorageDeviceMountEvent;
+    property  OnDeviceUnMounted: TWbStorageDeviceMountEvent;
+    property  OnDeviceNeedsSetup: TWbStorageDeviceNeedsSetupEvent;
   end;
 
   TWbBrowserStorageDevice = class(TWbStorageDevice)
@@ -152,13 +158,15 @@ type
     procedure RemoveDir(const Path: string; const CB: TWbFileOPCallBack); override;
     procedure Dir(const Path: string; const CB: TWbDirListCallBack); override;
     procedure ChDir(const Path: string; const CB: TWbFileOPCallBack); override;
+    procedure CdUp(const CB: TWbFileOPCallBack); override;
 
     procedure Load(const Filename: string; const CB: TWbFileOPCallBack); override;
     procedure Save(const Filename: string;
               const Data: TStream;
               const CB: TWbFileOPCallBack); override;
 
-    public
+  public
+    property  FileDB: TW3VirtualFileSystem read FFileIndex;
 
     constructor Create(const Manager: TWbDeviceManager); override;
     destructor  Destroy; override;
@@ -176,7 +184,7 @@ type
   /* Cache disk */
   TWbStorageDeviceCache = class(TWbBrowserStorageDevice)
   protected
-    (* Overrides and delivers LocalStorage *)
+    /* Overrides and delivers LocalStorage */
     function GetStorageObj: TW3CustomStorage; override;
   public
     constructor Create(const Manager: TWbDeviceManager); override;
@@ -188,10 +196,20 @@ type
     FClasses: array of TWbStorageDeviceClass;
     FObjects: array of TWbStorageDevice;
   public
-    procedure RegisterDevice(const DeviceClass: TWbStorageDeviceClass);
+    procedure RegisterDevice(const DeviceClass: TWbStorageDeviceClass; const BootDevice: boolean);
 
     property  Count: integer read ( FObjects.Count );
     property  Device[const Index: integer]: TWbStorageDevice read ( FObjects[Index] ); default;
+
+
+    function  GetBootDevice: TWbStorageDevice;
+
+    /* These will pack the devices (not external) into a binary
+       distribution. This distro should ultimately be stored in localstorage
+       or used as a "boot disk" until the back-end is operational
+       and the system can boot from a cloud drive */
+    procedure SaveToStream(const Stream: TStream);
+    procedure LoadFromStream(const Stream: TStream);
 
     procedure WriteFile(AmigaPath: string; const Data: string);
     function  ReadFile(AmigaPath: string): string;
@@ -200,6 +218,66 @@ type
   end;
 
 implementation
+
+uses Unit1, SmartCL.Application;
+
+//#############################################################################
+// TWbDeviceManager
+//#############################################################################
+
+destructor TWbDeviceManager.Destroy;
+begin
+  while FObjects.Count >0 do
+  begin
+    FObjects[0].free;
+    FObjects.Delete(0,1);
+  end;
+  FClasses.Clear();
+  inherited;
+end;
+
+procedure TWbDeviceManager.RegisterDevice(const DeviceClass: TWbStorageDeviceClass; const BootDevice: boolean);
+var
+  LInstance:  TWbStorageDevice;
+begin
+  if FClasses.IndexOf(DeviceClass) < 0 then
+  begin
+    LInstance := DeviceClass.Create(self);
+    LInstance.BootDevice := BootDevice;
+    FClasses.add(DeviceClass);
+    FObjects.add( LInstance );
+  end;
+end;
+
+function TWbDeviceManager.GetBootDevice: TWbStorageDevice;
+var
+  x:  integer;
+begin
+  for x:=0 to FObjects.Count-1 do
+  begin
+    if FObjects[x].BootDevice = true then
+    begin
+      result := FObjects[x];
+      break;
+    end;
+  end;
+end;
+
+procedure TWbDeviceManager.SaveToStream(const Stream: TStream);
+begin
+end;
+
+procedure TWbDeviceManager.LoadFromStream(const Stream: TStream);
+begin
+end;
+
+procedure TWbDeviceManager.WriteFile(AmigaPath: string; const Data: string);
+begin
+end;
+
+function TWbDeviceManager.ReadFile(AmigaPath: string): string;
+begin
+end;
 
 //#############################################################################
 // TWbBrowserStorageDevice
@@ -251,32 +329,79 @@ var
 
   procedure SetupInitial;
   begin
-    writeln("Filesystem data invalid or not found, using default");
-    writeln("Setting up initial directory structure ..");
-
     FFileIndex.Clear();
+
+    if assigned(OnDeviceNeedsSetup) then
+    begin
+      try
+        OnDeviceNeedsSetup(Self);
+      finally
+        WriteFileSystem();
+      end;
+      exit;
+    end;
+
     FFileIndex.MKDir('System');
     FFileIndex.MKDir('Storage');
     FFileIndex.MKDir('Utilities');
     FFileIndex.MKDir('Prefs');
     FFileIndex.MKDir('Devs');
+
+      FFileIndex.ChDir('~/Devs');
+        FFileIndex.mkDir("Datatypes");
+        FFileIndex.mkDir("DOSDrivers");
+        FFileIndex.mkDir("Keymaps");
+        FFileIndex.mkDir("Monitors");
+        FFileIndex.mkDir("NetInterfaces");
+        FFileIndex.mkDir("Printers");
+
+          FFileIndex.chdir('~/Devs/Datatypes');
+
+            var LData := TWbDatatypeFile.Create;
+            LData.Identifier := CNT_ID_DATATYPE_TEXT;
+            LData.SelectedIcon := '';
+            LData.UnSelectedIcon := '';
+            LData.Description :='Common textfile format';
+            LData.TypeName := 'textfile';
+            LData.FileExt := '.txt';
+            FFileIndex.MKFile('text.datatype', LData.ToString());
+
+            FFileIndex.MKFile('png.datatype', LData.ToString());
+            FFileIndex.MKFile('jpg.datatype', LData.ToString());
+            FFileIndex.MKFile('gif.datatype', LData.ToString());
+            FFileIndex.MKFile('iff.datatype', LData.ToString());
+            FFileIndex.MKFile('wav.datatype', LData.ToString());
+            FFileIndex.MKFile('mp3.datatype', LData.ToString());
+            FFileIndex.MKFile('mod.datatype', LData.ToString());
+
+          FFileIndex.CdUp();
+      FFileIndex.CdUp();
+
     FFileIndex.MKDir('Libs');
     FFileIndex.MKDir('S');
 
-    FFileIndex.ChDir('s');
-    FFileIndex.mkFile('startup-sequence','startup sequence here');
-    FFileIndex.ChDir('');
+    FFileIndex.ChDir('~/S');
+      FFileIndex.mkFile('startup-sequence','#Content of startup sequence here');
+      FFileIndex.mkFile('user-startup','#User startup goes here');
+    FFileIndex.CdUp();
 
     FFileIndex.MKFile('info.txt', "This is so cool!");
 
-    Writeln("Storing filesystem data");
+    //Writeln("Storing filesystem data");
     WriteFileSystem();
   end;
 
 begin
   LFileName := Name + '.directory';
+
+  writeln("Calling setup #1 [" + Name + "]");
+  //SetupInitial();
+
+  FStorage.RemoveKey(LFileName);
+
   if FStorage.GetKeyExists(LFileName) = false then
   begin
+    writeln("Calling setup #2 [" + Name + "]");
     SetupInitial();
   end;
 
@@ -312,7 +437,6 @@ begin
 end;
 
 procedure TWbBrowserStorageDevice.DoMount;
-
 begin
   // Read into on Mount
   try
@@ -334,7 +458,6 @@ end;
 
 procedure TWbBrowserStorageDevice.DoUnMount;
 begin
-
   try
     WriteFileSystem();
     FStorage.Close();
@@ -344,13 +467,51 @@ begin
   end;
 end;
 
+procedure TWbBrowserStorageDevice.CdUp(const CB: TWbFileOPCallBack);
+var
+  LResult: boolean = true;
+  LFirstPath: string;
+
+  procedure DoCallBack;
+  begin
+    if assigned(CB) then
+    begin
+      TW3Dispatch.Execute( procedure ()
+      begin
+        CB(FFileIndex.Current.Path, LResult)
+      end, 10 + RandomInt(CALLMAX_MAX));
+    end;
+  end;
+
+begin
+  LFirstPath := FFileIndex.Current.Path;
+  writeln("OldPath =" + LFirstPath);
+
+  try
+    FFileIndex.CdUp();
+  except
+    on e: exception do
+    begin
+      LResult := false;
+      DoCallBack();
+      exit;
+    end;
+  end;
+
+  LResult := (FFileIndex.Current.Path <> LFirstPath);
+
+  writeln("NewPath =" + FFileIndex.Current.Path);
+
+  DoCallback();
+end;
+
 procedure TWbBrowserStorageDevice.GetPath(const CB: TWbFileOPCallBack);
 begin
   if assigned(CB) then
   begin
     TW3Dispatch.Execute( procedure ()
     begin
-      CB(FFileIndex.Path, null)
+      CB(FFileIndex.Current.Path, null)
     end, 10 + RandomInt(CALLMAX_MAX));
   end;
 end;
@@ -372,7 +533,7 @@ begin
   begin
     TW3Dispatch.Execute( procedure ()
     begin
-      CB(Path, FFileIndex.GetValidPath(Path) );
+      CB(Path, FFileIndex.FileExists(Path));
     end, 10 + RandomInt(CALLMAX_MAX));
   end;
 end;
@@ -393,29 +554,32 @@ end;
 
 procedure TWbBrowserStorageDevice.Dir(const Path: string; const CB: TWbDirListCallBack);
 begin
-  if assigned(CB) then
+  TW3Dispatch.Execute( procedure ()
   begin
-    TW3Dispatch.Execute( procedure ()
+    if (Path = '~/') then
     begin
-      if Path ='' then
+      // Root entry?
+      if assigned(CB) then
+      CB(Path, FFileIndex.GetDirList() );
+    end else
+    begin
+      var LEntry := FFileIndex.FindFileObject(Path);
+      if LEntry <> nil then
       begin
-        // Root entry?
-        CB(Path, FFileIndex.GetDirList() );
+        if (LEntry is TW3VirtualFileSystemFolder) then
+        begin
+          if assigned(CB) then
+          CB(Path, TW3VirtualFileSystemFolder(LEntry).GetDirList() );
+        end else
+        if assigned(CB) then
+        CB(LEntry.Path, []);
       end else
       begin
-        var LEntry := FFileIndex.FindFileObject(Path);
-        if LEntry <> nil then
-        begin
-          if (LEntry is TW3VirtualFileSystemFolder) then
-          begin
-            CB(Path, TW3VirtualFileSystemFolder(LEntry).GetDirList() );
-          end else
-          raise Exception.Create('Expected filetype <' + Path + '> to be folder, not file error');
-        end else
-        raise Exception.Create('Folder not found <' + Path +'> error');
+        if assigned(CB) then
+        CB(Path, []);
       end;
-    end, 10 + RandomInt(CALLMAX_MAX));
-  end;
+    end;
+  end, 10 + RandomInt(CALLMAX_MAX));
 end;
 
 procedure TWbBrowserStorageDevice.RemoveDir(const Path: string; const CB: TWbFileOPCallBack);
@@ -423,15 +587,38 @@ begin
 end;
 
 procedure TWbBrowserStorageDevice.ChDir(const Path: string; const CB: TWbFileOPCallBack);
-begin
-  if assigned(CB) then
+var
+  LResult: boolean := true;
+
+  procedure DoCallBack;
   begin
-    TW3Dispatch.Execute( procedure ()
+    if assigned(CB) then
     begin
-      FFileIndex.ChDir(Path);
-      CB(Path, true );
-    end, 10 + RandomInt(CALLMAX_MAX));
+      TW3Dispatch.Execute( procedure ()
+      begin
+        CB(FFileIndex.Current.Path, LResult );
+      end, 10 + RandomInt(CALLMAX_MAX));
+    end;
   end;
+
+begin
+
+  try
+    LResult := FFileIndex.ChDir(Path);
+    if not LResult then
+    begin
+      Writeln("ChDir error = " + FFileIndex.LastError);
+    end;
+  except
+    on e: exception do
+    begin
+      LResult := false;
+      DoCallBack();
+      exit;
+    end;
+  end;
+
+  DoCallBack();
 end;
 
 procedure TWbBrowserStorageDevice.Load(const Filename: string; const CB: TWbFileOPCallBack);
@@ -447,9 +634,13 @@ begin
         begin
           CB(Filename, TW3VirtualFileSystemFile(LItem).FetchData());
         end else
-        raise Exception.Create('Expected filetype <' + Filename + '> to be file, not folder error');
+        begin
+          raise Exception.Create('Expected filetype <' + Filename + '> to be file, not folder error');
+        end;
       end else
-      raise Exception.Create('File not found <' + Filename +'> error');
+      begin
+        raise Exception.Create('File not found <' + Filename +'> error');
+      end;
     end, 10 + RandomInt(CALLMAX_MAX));
   end;
 end;
@@ -457,54 +648,30 @@ end;
 procedure TWbBrowserStorageDevice.Save(const Filename: string;
           const Data: TStream;
           const CB: TWbFileOPCallBack);
+var
+  LResult: boolean;
 begin
   if assigned(CB) then
   begin
     TW3Dispatch.Execute( procedure ()
     begin
       // Write the data
-      var LRes := FFileIndex.MKFile(Filename, TDatatype.BytesToBase64(Data.Read(Data.Size - Data.Position))) <> nil;
+      try
+        LResult := FFileIndex.MKFile(Filename, TDatatype.BytesToBase64(Data.Read(Data.Size - Data.Position))) <> nil;
+      except
+        on e: exception do
+        writeln(e.message);
+      end;
 
       // Data written? OK, update the filesystem
-      if LRes then
+      if LResult then
         WriteFileSystem();
 
-      CB(Filename, LRes);
+      CB(Filename, LResult);
     end, 10 + RandomInt(CALLMAX_MAX));
   end;
 end;
 
-//#############################################################################
-// TWbDeviceManager
-//#############################################################################
-
-destructor TWbDeviceManager.Destroy;
-begin
-  while FObjects.Count >0 do
-  begin
-    FObjects[0].free;
-    FObjects.Delete(0,1);
-  end;
-  FClasses.Clear();
-  inherited;
-end;
-
-procedure TWbDeviceManager.RegisterDevice(const DeviceClass: TWbStorageDeviceClass);
-begin
-  if FClasses.IndexOf(DeviceClass) < 0 then
-  begin
-    FClasses.add(DeviceClass);
-    FObjects.add( DeviceClass.Create(self) );
-  end;
-end;
-
-procedure TWbDeviceManager.WriteFile(AmigaPath: string; const Data: string);
-begin
-end;
-
-function TWbDeviceManager.ReadFile(AmigaPath: string): string;
-begin
-end;
 
 //#############################################################################
 // TWbStorageDeviceCache
@@ -556,7 +723,7 @@ begin
   inherited;
 end;
 
-procedure TWbStorageDevice.Mount(const Success: TWbMountEvent);
+procedure TWbStorageDevice.Mount(const Success: TWbStorageDeviceMountEvent);
 begin
   if FMounted then
     UnMount;
@@ -573,6 +740,9 @@ begin
         Success(self);
       end, 100);
   end;
+
+  if assigned(OnDeviceMounted) then
+    OnDeviceMounted(Self);
 end;
 
 procedure TWbStorageDevice.UnMount;
@@ -583,6 +753,9 @@ begin
     DoUnMount();
 
     FMounted := false;
+
+    if assigned(OnDeviceUnMounted) then
+      OnDeviceUnMounted(self);
   end;
 end;
 

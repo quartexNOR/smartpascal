@@ -5,7 +5,7 @@ interface
 uses
   system.types,
   system.types.convert,
-  system.stream,
+  system.streams,
   system.time,
   system.dictionaries,
   system.stream.reader,
@@ -13,6 +13,8 @@ uses
 
   //Smartcl.System,
   SmartCL.Net.websocket;
+
+type
 
   (*  This record is used for storing information in the browser *)
   TWbNetConfig = record

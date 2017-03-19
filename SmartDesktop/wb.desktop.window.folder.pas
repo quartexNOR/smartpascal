@@ -23,17 +23,20 @@ uses
 
   System.Widget,
 
+  wb.desktop.filesystem,
   wb.desktop.types,
   wb.desktop.window,
   wb.desktop.iconView,
   wb.desktop.devices,
   wb.desktop.datatypes,
+  wb.desktop.window.textview,
+  wb.desktop.window.editor,
 
+  SmartCL.Time,
   SmartCL.System,
   SmartCL.MouseCapture,
   SmartCL.MouseTouch,
   SmartCL.Layout,
-  SmartCL.Time,
   SmartCL.Controls.Elements,
   SmartCL.Graphics, SmartCL.Components,
   SmartCL.Effects, SmartCL.Fonts, SmartCL.Borders,
@@ -63,14 +66,28 @@ type
 
   TWbWindowDirectory = class(TWbWindow)
   private
-    FView:    TWbIconView;
-    FDevice:  TWbStorageDevice;
-    FToolBar: TW3Toolbar;
-    FPath:    TWbPathPanel;
-    FPanel:   TW3Panel;
+    FView:        TWbIconView;
+    FToolBar:     TW3Toolbar;
+    FPath:        TWbPathPanel;
+    FPanel:       TW3Panel;
+    FCurrentPath: string;
+    FUpdateTimer: TW3Timer;
 
-    FEffectName: string;
-    FEffectName2: string;
+    FBtnBack:     TW3ToolbarButton;
+    FBtnCut:      TW3ToolbarButton;
+    FBtnCopy:     TW3ToolbarButton;
+    FBtnPaste:    TW3ToolbarButton;
+    procedure UpdateButtonStates(Sender: TObject);
+
+  protected
+    procedure HandleDirectoryAvailable(const Path: string; DirList: TStrArray);
+    procedure HandleFolderSelect(Sender: TObject);
+    procedure HandleFolderUnSelected(Sender: TObject);
+    procedure HandleFileSelect(Sender: TObject);
+    procedure HandleFileUnSelected(Sender: TObject);
+    procedure HandleFolderDblClick(Sender: TObject);
+    procedure HandleFileDblClick(Sender: TObject);
+    procedure SetCurrentPath(DevicePath: string);
   protected
     procedure InitializeObject; override;
     procedure FinalizeObject; override;
@@ -78,8 +95,8 @@ type
     procedure Resize; override;
   public
     property  Path: TWbPathPanel read FPath;
-    property  Device: TWbStorageDevice read FDevice;
-    procedure BrowseTo(aDevice: TWbStorageDevice; aPath: string);
+    property  Device: TWbStorageDevice;
+    procedure BrowseTo(DevicePath: string);
   end;
 
 
@@ -96,8 +113,8 @@ begin
   FToolbar := TW3Toolbar.Create(FPanel);
   FPath := TWbPathPanel.Create(FPanel);
 
-  FEffectName := TSuperStyle.AnimGlow(clWhite, RGBToColor($FD,$E4,$80));
-  FEffectName2 := TSuperStyle.AnimGlow(clWhite, RGBToColor($61,$8E,$CE));
+  //FEffectName := TSuperStyle.AnimGlow(clWhite, RGBToColor($FD,$E4,$80));
+  //FEffectName2 := TSuperStyle.AnimGlow(clWhite, RGBToColor($61,$8E,$CE));
 
   FView := TWbIconView.Create(Content);
   FView.OnItemSelected := procedure (Sender: TObject; const NewItem, OldItem: TWbListItem)
@@ -112,149 +129,310 @@ begin
         //TWbListItemIcon(NewItem).TagStyle.Add(FEffectName2);
       end;
     end;
+
+  FUpdateTimer := TW3Timer.Create(nil);
+  FUpdateTimer.Delay := 200;
+  FUpdateTimer.OnTime := UpdateButtonStates;
+  FUpdateTimer.Enabled := true;
 end;
 
 procedure TWbWindowDirectory.FinalizeObject;
 begin
+  FUpdateTimer.Enabled := false;
+  FUpdateTimer.OnTime := nil;
+  FUpdateTimer.free;
+
   FView.free;
   FToolbar.free;
   FPath.free;
   inherited;
 end;
 
+procedure TWbWindowDirectory.UpdateButtonStates(Sender: TObject);
+begin
+  if not (csDestroying in ComponentState) then
+  begin
+    if (csReady in ComponentState) then
+    begin
+      // Update state for back [parent] button
+      FBtnBack.Enabled := not (FCurrentPath.trim() in ['', '~/']);
+
+      // Update state for Cut button
+      FBtnCut.Enabled := FView.SelectedItem <> nil;
+
+      // Update state for Copy button
+      FBtnCopy.Enabled := FView.SelectedItem <> nil;
+
+      //FBtnCopy.Enabled := false;
+      FBtnPaste.Enabled := false;
+
+    end;
+  end;
+end;
+
 procedure TWbWindowDirectory.ObjectReady;
-var
-  LButton: TW3ToolbarButton;
 begin
   inherited;
-  FToolbar.ButtonWidth := 64;
-  FToolbar.ButtonHeight := 36;
+  FToolbar.ButtonWidth := 80;
+  FToolbar.ButtonHeight := 32;
   FToolbar.ButtonSpace := 4;
 
-  LButton := FToolbar.Add();
-  LButton.Caption := "Back";
+  FBtnBack := FToolbar.Add();
+  FBtnBack.Caption := "Parent";
+  FBtnBack.Layout := blIconLeft;
+  FBtnBack.Glyph.LoadFromURL('res/parent.png');
+  FBtnBack.OnClick := procedure (Sender: TObject)
+    begin
+      (Device as IWbFileSystem).CdUp( procedure (const Path: string; const Value: variant)
+      begin
+        //showmessage("CDUP -> " + Path);
+        // callback returns boolean as second param
+        if value = true then
+        begin
+          BrowseTo(Path);
+        end;
+      end);
+    end;
 
-  LButton := FToolbar.Add();
-  LButton.Caption := "Next";
+  FBtnCut := FToolbar.Add();
+  FBtnCut.Layout := blIconLeft;
+  FBtnCut.Glyph.LoadFromURL('res/cut.png');
+  FBtnCut.Caption := "Cut";
 
-  LButton := FToolbar.Add();
-  LButton.Caption := "Cut";
+  FBtnCopy := FToolbar.Add();
+  FBtnCopy.Layout := blIconLeft;
+  FBtnCopy.Glyph.LoadFromURL('res/copy.png');
+  FBtnCopy.Caption := "Copy";
 
-  LButton := FToolbar.Add();
-  LButton.Caption := "Copy";
-
-  LButton := FToolbar.Add();
-  LButton.Caption := "Paste";
+  FBtnPaste := FToolbar.Add();
+  FBtnPaste.Layout := blIconLeft;
+  FBtnPaste.Glyph.LoadFromURL('res/paste.png');
+  FBtnPaste.Caption := "Paste";
 
   TW3Dispatch.Execute(Invalidate, 100);
 end;
 
-procedure TWbWindowDirectory.BrowseTo(aDevice: TWbStorageDevice; aPath: string);
+procedure TWbWindowDirectory.HandleFolderSelect(Sender: TObject);
 var
-  LDir: TStrArray;
-  LAccess: IWbFileSystem;
+  LDesktop:     IWbDesktop;
+  LDatatypes:   IWbDatatypeRegistry;
+  LFolderInfo:  TWbDatatypeIconInfo;
 begin
-  FDevice := aDevice;
-  FPath.Edit.Text := aPath;
+  LDesktop    := GetDesktop as IWbDesktop;
+  LDataTypes  := LDesktop.GetDatatypes();
+  LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+  TWbListItemIcon(Sender).Background.FromURL(LFolderInfo.SelectedIcon);
+  //TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.SelectedIcon);
+end;
 
-  if aPath ='' then
-    self.Header.Title.Caption := FDevice.Name
-  else
-    self.Header.Title.Caption := FDevice.Name + ' [' + aPath + ']';
+procedure TWbWindowDirectory.HandleFolderUnSelected(Sender: TObject);
+var
+  LDesktop:     IWbDesktop;
+  LDatatypes:   IWbDatatypeRegistry;
+  LFolderInfo:  TWbDatatypeIconInfo;
+begin
+  LDesktop    := GetDesktop as IWbDesktop;
+  LDataTypes  := LDesktop.GetDatatypes();
+  LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+  TWbListItemIcon(Sender).Background.FromURL(LFolderInfo.UnSelectedIcon);
+  //TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.UnSelectedIcon);
+end;
+
+procedure TWbWindowDirectory.HandleFileSelect(Sender: TObject);
+begin
+  TWbListItemIcon(Sender).Background.FromURL('res/HTMSel.png');
+  //TWbListItemIcon(Sender).Glyph.Background.FromURL('res/HTMSel.png');
+end;
+
+procedure TWbWindowDirectory.HandleFileUnSelected(Sender: TObject);
+begin
+  TWbListItemIcon(Sender).Background.FromURL('res/HTM.png');
+  //TWbListItemIcon(Sender).Glyph.Background.FromURL('res/HTM.png');
+end;
+
+procedure TWbWindowDirectory.HandleFolderDblClick(Sender: TObject);
+var
+  LNewPath: string;
+  LFileName: string;
+  LPath:  string;
+begin
+  LPath := TWbListItemIcon(Sender).Data;
 
   FView.Clear();
+
+  LFileName := TWbListItemIcon(Sender).Text.Caption.trim();
+
+  if not LPath.EndsWith('/') then
+  LNewPath := LPath + '/' + LFileName else
+  LNewPath := LPath + LFileName;
+  BrowseTo(LNewPath);
+end;
+
+procedure TWbWindowDirectory.HandleFileDblClick(Sender: TObject);
+var
+  LNewPath: string;
+  LFileName: string;
+  LPath:  string;
+  LFileSystem: IWbFileSystem;
+begin
+  LPath := TWbListItemIcon(Sender).Data;
+  LFileName := TWbListItemIcon(Sender).Text.Caption.trim();
+
+  if not LPath.EndsWith('/') then
+  LNewPath := LPath + '/' + LFileName else
+  LNewPath := LPath + LFileName;
+
+  var LExt := TW3VirtualFileSystemPath.ExtractFileExt(LNewPath).ToLower();
+  if  (LExt = '.txt')
+  or  (LFileName.ToLower() = 'startup-sequence')
+  or  (LFileName.ToLower() = 'user-startup') then
+  begin
+    //var LWindow := TWbTextViewForm.Create(self.Parent);
+    var LWindow := TWbEditWindow.Create(Self.Parent);
+    LWindow.SetBounds(10,100, 400, 400);
+    LWindow.Header.Title.Caption := LNewPath;
+
+    TW3Dispatch.Execute( procedure ()
+    begin
+      LFileSystem := Device as IWbFileSystem;
+      LFileSystem.Load(LNewPath, procedure (const Path: string; const Value: variant)
+      begin
+        LWIndow.Editor.Content.InnerHTML := Value;
+      end);
+    end, 1000);
+
+  end;
+end;
+
+procedure TWbWindowDirectory.HandleDirectoryAvailable
+          (const Path: string; DirList: TStrArray);
+var
+  x:            integer;
+  LText:        string;
+  LItem:        TWbListItemIcon;
+  LDesktop:     IWbDesktop;
+  LDatatypes:   IWbDatatypeRegistry;
+  LFolderInfo:  TWbDatatypeIconInfo;
+  LFileInfo:    TWbDatatypeFile;
+begin
+  try
+    /* Cache up datatype and icon-info for FOLDER */
+    LDesktop    := GetDesktop as IWbDesktop;
+    LDataTypes  := LDesktop.GetDatatypes();
+    LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
+    LFileInfo   := TWbDatatypeFile( LDataTypes.GetInfoByType('file') );
+
+    if DirList.length < 1 then
+    exit;
+
+    for x:=0 to Dirlist.Count-1 do
+    begin
+      LItem := TWbListItemIcon.Create(FView);
+
+      if DirList[x].StartsWith('[d]') then
+      begin
+        LItem.TagValue := 2;
+        LText := Copy(Dirlist[x],4,100);
+        LItem.Text.Caption := LText;
+        LItem.Text.AlignText := TTextAlign.taLeft;
+        LItem.Text.Invalidate;
+        LItem.Text.Font.Color := CNT_STYLE_WINDOW_BASE_SELECTED;
+        LItem.Background.FromURL( LFolderInfo.UnSelectedIcon );
+        //LItem.Glyph.Background.FromURL( LFolderInfo.UnSelectedIcon );
+        LItem.Data := Path;
+        LItem.OnDblClick := HandleFolderDblClick;
+        LItem.OnSelected := HandleFolderSelect;
+        LItem.OnUnSelected := HandleFolderUnSelected;
+
+      end else
+      begin
+        LItem.TagValue := 1;
+        LText := Copy(Dirlist[x],4,100);
+        LItem.Text.Caption := LText;
+        LItem.Text.AlignText := TTextAlign.taLeft;
+        LItem.Text.Font.Color := clBlack;
+        LItem.Text.Invalidate;
+        LItem.Data := Path;
+        LItem.Background.FromURL( 'res/HTM.png' );
+        //LItem.Glyph.Background.FromURL('res/HTM.png');
+        LItem.OnDblClick := HandleFileDblClick;
+        LItem.OnSelected := HandleFileSelect;
+        LItem.OnUnSelected := HandleFileUnSelected;
+      end;
+    end;
+
+  finally
+    self.Cursor := crDefault;
+    FView.enabled := true;
+    FView.Invalidate();
+    FView.SetFocus();
+  end;
+end;
+
+procedure TWbWindowDirectory.SetCurrentPath(DevicePath: string);
+begin
+  DevicePath := DevicePath.trim();
+  if DevicePath <> FCurrentPath then
+  begin
+    FCurrentPath := DevicePath;
+
+    // Set window title
+    if (DevicePath in ['/', '']) then
+    Header.Title.Caption := 'Examining ' + Device.Name else
+    Header.Title.Caption := 'Examining ' + Device.Name + ' [' + FCurrentPath + ']';
+
+    // Set path in panel
+    FPath.Edit.Text := FCurrentPath;
+  end;
+end;
+
+procedure TWbWindowDirectory.BrowseTo(DevicePath: string);
+begin
+  // Device assigned?
+  if Device = nil then
+  begin
+    showmessage("No device available, examination of <" + DevicePath +"> failed error");
+    exit;
+  end;
+
+  // device mounted?
+  if not Device.mounted then
+  begin
+    Showmessage("Device is not mounted, examination of <" + DevicePath +"> failed error");
+    exit;
+  end;
+
+  // clean
+  DevicePath := DevicePath.trim();
+
+  writeln("Browsing to path: " + DevicePath);
+
+  // Clear current view and set new path
+  FView.Clear();
+  SetCurrentPath(DevicePath);
+
+  // Shift window in "wait" mode
   Cursor := TCursor.crProgress;
   FView.enabled := false;
 
-  LAccess := (FDevice as IWbFileSystem);
-
-  LAccess.Dir(aPath, procedure (const Path: string; DirList: TStrArray)
-  var
-    LText:  string;
+  // Change the device path
+  (Device as IWbFileSystem).ChDir(DevicePath, procedure (const Path: string; const Value: variant)
   begin
-    if DirList.Count > 0 then
+    writeln("chdir " + Path);
+    if Value = true then
     begin
-      /* Cache up datatype and icon-info for FOLDER */
-      var LDesktop    := GetDesktop as IWbDesktop;
-      var LDataTypes  := LDesktop.GetDatatypes();
-      var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
-
-      for var x:=0 to Dirlist.Count-1 do
+      // Getting device directory
+      TW3Dispatch.Execute( procedure ()
       begin
-        var LItem := TWbListItemIcon.Create(FView);
-
-        if DirList[x].StartsWith('[d]') then
-        begin
-          LItem.TagValue := 2;
-          LText := Copy(Dirlist[x],4,100);
-          LItem.Text.Caption := LText;
-          LItem.Text.AlignText := TTextAlign.taLeft;
-          LItem.Text.Invalidate;
-          LItem.Text.Font.Color := CNT_STYLE_WINDOW_BASE_SELECTED;
-          LItem.Glyph.Background.FromURL( LFolderInfo.UnSelectedIcon );
-
-          LItem.OnDblClick := procedure (Sender: TObject)
-          begin
-            TW3Dispatch.Execute( procedure ()
-            begin
-              FView.Clear();
-              BrowseTo(aDevice, apath + '/' + TWbListItemIcon(Sender).Text.Caption);
-            end, 200);
-          end;
-
-          LItem.OnSelected := procedure (sender: TObject)
-          begin
-            var LDesktop    := GetDesktop as IWbDesktop;
-            var LDataTypes  := LDesktop.GetDatatypes();
-            var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
-            TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.SelectedIcon);
-          end;
-
-          LItem.OnUnSelected := procedure (Sender: TObject)
-          begin
-            var LDesktop    := GetDesktop as IWbDesktop;
-            var LDataTypes  := LDesktop.GetDatatypes();
-            var LFolderInfo := TWbDatatypeIconInfo( LDataTypes.GetInfoByType('folder') );
-            TWbListItemIcon(Sender).Glyph.Background.FromURL(LFolderInfo.UnSelectedIcon);
-          end;
-
-        end else
-        begin
-          LItem.TagValue := 1;
-          LText := Copy(Dirlist[x],4,100);
-          LItem.Text.Caption := LText;
-          LItem.Text.AlignText := TTextAlign.taLeft;
-          LItem.Text.Font.Color := clBlack;
-          LItem.Text.Invalidate;
-          LItem.Glyph.Background.FromURL('res/HTM.png');
-
-          LItem.OnDblClick := procedure (Sender: TObject)
-          begin
-            TW3Dispatch.Execute( procedure ()
-            begin
-              // Dispatch here
-            end, 200);
-          end;
-
-          LItem.OnSelected := procedure (sender: TObject)
-          begin
-            TWbListItemIcon(Sender).Glyph.Background.FromURL('res/HTMSel.png');
-          end;
-
-          LItem.OnUnSelected := procedure (Sender: TObject)
-          begin
-            TWbListItemIcon(Sender).Glyph.Background.FromURL('res/HTM.png');
-          end;
-        end;
-      end;
-      FView.Invalidate();
+        (Device as IWbFileSystem).Dir(Path, HandleDirectoryAvailable);
+      end, 200);
+    end else
+    begin
+      writeln("Call to chdir(" + DevicePath + ") failed error");
+      Cursor := TCursor.crDefault;
+      FView.enabled := true;
     end;
-
-    self.Cursor := crDefault;
-    FView.enabled := true;
-    FView.SetFocus();
   end);
-
 end;
 
 procedure TWbWindowDirectory.Resize;

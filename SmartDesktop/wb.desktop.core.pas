@@ -28,8 +28,10 @@ uses
   wb.desktop.window,
   wb.desktop.iconview,
   wb.desktop.datatypes,
+  wb.desktop.classes,
   wb.desktop.preferences,
 
+  SmartCL.Controls.Button,
   SmartCL.MouseTouch,
   SmartCL.Effects,
   SmartCL.System, SmartCL.Graphics, SmartCL.Components,
@@ -40,31 +42,36 @@ uses
 
 type
 
+  TWbDesktopView = class(TWbIconView)
+  end;
 
-  TWbDesktopEnumCallback = function (const Item: TWbCustomWindow): TEnumResult;
+  TWbDesktopViewEnumCallback = function (const Item: TWbCustomWindow): TEnumResult;
 
-  TWbDesktop = class(TWbIconView, IWbDesktop, IWbPreferences)
+  TWbDesktopScreen = class(TW3CustomControl, IWbDesktop, IWbPreferences)
   private
+    FHeader:    TWbWorkbenchMenuBar;
+    FView:      TWbDesktopView;
     FFocusedWindow: TWbCustomWindow;
-    FWindows: TWbWindowList;
-    FPrefs:   TWbPreferences;
+    FWindows:   TWbWindowList;
+    FPrefs:     TWbPreferences;
     FDatatypes: TWbDatatypeRegistry;
-
+    FActions:   TWbClassActions;
+    FDevices:   TWbDeviceManager;
+    FCausedMenuToShow: boolean;
   private
     /* Implements:: IWbPreferences */
     function  GetPreferencesReader: IW3StructureReadAccess;
     function  GetPreferencesWriter: IW3StructureWriteAccess;
 
-  protected
-    procedure InitializeObject; override;
-    procedure FinalizeObject; override;
-  protected
+    /* Implements:: IWbDesktop */
     procedure RegisterWindow(const Window: TWbCustomWindow);
     procedure UnRegisterWindow(const Window: TWbCustomWindow);
     procedure SetFocusedWindow(const Window: TWbCustomWindow);
     function  FindWindowFor(const Control: TWbCustomControl): TWbCustomWindow;
     function  GetActiveWindow: TWbCustomWindow;
     function  GetWindowList: TWbWindowList;
+
+    procedure ExecuteFile(Device: TWbStorageDevice; FullPath: string);
 
     function  GetPreferences: IWbPreferences;
     function  GetDatatypes: IWbDatatypeRegistry;
@@ -73,18 +80,25 @@ type
     function  GetDeviceManager: TWbDeviceManager;
     function  IsDesktop(const Control: TW3CustomControl): boolean;
     procedure SavePreferences;
+  protected
+    procedure InitializeObject; override;
+    procedure FinalizeObject; override;
+    procedure Resize; override;
   public
+    property  Menu: TWbWorkbenchMenuBar read FHeader;
+    property  View: TWbDesktopView read FView;
+    property  Devices: TWbDeviceManager read FDevices;
+    property  Actions: TWbClassActions read FActions;
     property  Preferences: TJSONStructure read FPrefs;
     property  Datatypes: TWbDatatypeRegistry read FDatatypes;
 
-    procedure ForEachWindow(const Process: TWbDesktopEnumCallback);
+    procedure ForEachWindow(const Process: TWbDesktopViewEnumCallback);
     procedure ForEachWindowEx(const Before: TProcedureRef;
-              const Process: TWbDesktopEnumCallback;
+              const Process: TWbDesktopViewEnumCallback;
               const After: TProcedureRef);
 
     procedure LayoutWindows;
   end;
-
 
 
 implementation
@@ -92,32 +106,100 @@ implementation
 uses SmartCL.Application, Unit1;
 
 //#############################################################################
-// TWbDesktop
+// TWbDesktopScreen
 //#############################################################################
 
-procedure TWbDesktop.InitializeObject;
+procedure TWbDesktopScreen.InitializeObject;
 begin
   inherited;
+
+  self.OnMouseDown := procedure (Sender: TObject; Button: TMouseButton;
+    Shift: TShiftState; X, Y: integer)
+  begin
+    if Button = TMouseButton.mbRight then
+    begin
+      if not FHeader.Active then
+      begin
+        FCausedMenuToShow := true;
+        FHeader.SetCapture();
+        FHeader.ShowMenus();
+      end;
+    end;
+  end;
+
+  self.OnMouseUp :=  procedure (Sender: TObject; Button: TMouseButton;
+    Shift: TShiftState; X, Y: integer)
+  begin
+    if Button = TMouseButton.mbRight then
+    begin
+      if FHeader.Active then
+      begin
+        if FCausedMenuToShow then
+        begin
+          FCausedMenuToShow := false;
+          FHeader.ReleaseCapture();
+          FHeader.HideMenus();
+        end;
+      end;
+    end;
+  end;
+
+  FView := TWbDesktopView.Create(self);
+  FHeader := TWbWorkbenchMenuBar.Create(self);
+  FHeader.Handle.style['box-shadow'] := "10px 10px 23px -4px rgba(0,0,0,0.69)";
+
+  FDevices := TWbDeviceManager.Create;
+  FDevices.RegisterDevice(TWbStorageDeviceRamDisk, false);
+  FDevices.RegisterDevice(TWbStorageDeviceCache, true);
+
   FPrefs := TWbPreferences.Create;
   FDatatypes := TWbDatatypeRegistry.Create;
+  FActions := TWbClassActions.Create;
 
   /* Register common folder datatype */
   var LFolder := TWbDatatypeIconInfo.Create;
+  LFolder.Identifier      := CNT_ID_DATATYPE_FOLDER;
   LFolder.SelectedIcon    := 'res/DefDrawerSel.png';
   LFolder.UnSelectedIcon  := 'res/DefDrawer.png';
   LFolder.Description     := 'Common folder type declaration';
   LFolder.TypeName        := 'folder';
   FDataTypes.Register(LFolder);
+
+  /* Register common textfile datatype */
+  var LText := TWbDatatypeFile.Create;
+  LText.Identifier := CNT_ID_DATATYPE_TEXT;
+  LText.SelectedIcon := '';
+  Ltext.UnSelectedIcon := '';
+  LText.Description :='Common textfile format';
+  LText.TypeName := 'textfile';
+  LText.FileExt := '.txt';
+  FDataTypes.Register(LText);
+
+  /* Connect textfile with open class-action */
+  FActions.AddRunWith(LText.Identifier,'$internal:aminote');
+
 end;
 
-procedure TWbDesktop.FinalizeObject;
+procedure TWbDesktopScreen.FinalizeObject;
 begin
+  FHeader.free;
+  FView.free;
   FPrefs.free;
   FDatatypes.free;
+  FActions.free;
+  FDevices.free;
   inherited;
 end;
 
-procedure TWbDesktop.ForEachWindow(const Process: TWbDesktopEnumCallback);
+procedure TWbDesktopScreen.Resize;
+begin
+  inherited;
+  FHeader.SetBounds(0,0, ClientWidth, FHeader.height);
+  FView.SetBounds(0, FHeader.height, ClientWidth, ClientHeight - FHeader.Height);
+end;
+
+
+procedure TWbDesktopScreen.ForEachWindow(const Process: TWbDesktopViewEnumCallback);
 begin
   for var LItem in FWindows do
   begin
@@ -126,8 +208,8 @@ begin
   end;
 end;
 
-procedure TWbDesktop.ForEachWindowEx(const Before: TProcedureRef;
-          const Process: TWbDesktopEnumCallback;
+procedure TWbDesktopScreen.ForEachWindowEx(const Before: TProcedureRef;
+          const Process: TWbDesktopViewEnumCallback;
           const After: TProcedureRef);
 begin
   try
@@ -150,7 +232,7 @@ begin
   end;
 end;
 
-procedure TWbDesktop.LayoutWindows;
+procedure TWbDesktopScreen.LayoutWindows;
 var
   dx, dy: integer;
   wd, hd: integer;
@@ -168,47 +250,76 @@ begin
   end);
 end;
 
+procedure TWbDesktopScreen.ExecuteFile(Device: TWbStorageDevice; FullPath: string);
+begin
+  showmessage('Execution of [' + Fullpath + '] dispatched');
+end;
+
 /* Datatypes */
 
-function TWbDesktop.GetDatatypes: IWbDatatypeRegistry;
+function TWbDesktopScreen.GetDatatypes: IWbDatatypeRegistry;
 begin
   result := FDatatypes as IWbDatatypeRegistry;
 end;
 
 /* Preferences */
 
-function  TWbDesktop.GetPreferences: IWbPreferences;
+function  TWbDesktopScreen.GetPreferences: IWbPreferences;
 begin
   result := (self as IWbPreferences);
 end;
 
-function  TWbDesktop.GetPreferencesReader: IW3StructureReadAccess;
+function  TWbDesktopScreen.GetPreferencesReader: IW3StructureReadAccess;
 begin
   result := (FPrefs as IW3StructureReadAccess);
 end;
 
-function  TWbDesktop.GetPreferencesWriter: IW3StructureWriteAccess;
+function  TWbDesktopScreen.GetPreferencesWriter: IW3StructureWriteAccess;
 begin
   result := (FPrefs as IW3StructureWriteAccess);
 end;
 
 /* misc */
 
-function TWbDesktop.IsDesktop(const Control:TW3CustomControl): boolean;
+function TWbDesktopScreen.IsDesktop(const Control:TW3CustomControl): boolean;
 begin
   result := self = Control;
 end;
 
-function TWbDesktop.GetDeviceManager: TWbDeviceManager;
+function TWbDesktopScreen.GetDeviceManager: TWbDeviceManager;
 begin
-  result := TApplication(Application).Devices;
+  result := FDevices;
 end;
 
-procedure TWbDesktop.SavePreferences;
+procedure TWbDesktopScreen.SavePreferences;
+const
+  CNT_PREFSPATH = '~/Prefs/preferences.set';
+var
+  LDevice: TWbStorageDevice;
+  LFileSys: IWbFileSystem;
+  LData:    TStream;
 begin
+  LDevice := FDevices.GetBootDevice();
+  if LDevice <> nil then
+  begin
+    LFileSys := LDevice as IWbFileSystem;
+    LData :=FPrefs.ToStream();
+    try
+      writeln("Issuing save for preferences data");
+      LFileSys.Save(CNT_PREFSPATH, LData,
+        procedure (const Path: string; const Value: variant)
+        begin
+          if not Value = true then
+          showmessage("There was a problem saving data to " + Path );
+        end);
+    finally
+      LData.free;
+    end;
+  end else
+  writeln("Could not find boot device");
 end;
 
-function TWbDesktop.KnownWindow(const Window: TWbWindow): boolean;
+function TWbDesktopScreen.KnownWindow(const Window: TWbWindow): boolean;
 begin
   if Window <> nil then
   begin
@@ -216,7 +327,7 @@ begin
   end;
 end;
 
-procedure TWbDesktop.RegisterWindow(const Window: TWbWindow);
+procedure TWbDesktopScreen.RegisterWindow(const Window: TWbWindow);
 var
   LIndex: integer;
 begin
@@ -228,7 +339,7 @@ begin
   end;
 end;
 
-procedure TWbDesktop.UnRegisterWindow(const Window: TWbWindow);
+procedure TWbDesktopScreen.UnRegisterWindow(const Window: TWbWindow);
 var
   LIndex: integer;
 begin
@@ -240,22 +351,22 @@ begin
   end;
 end;
 
-procedure TWbDesktop.SetFocusedWindow(const Window: TWbWindow);
+procedure TWbDesktopScreen.SetFocusedWindow(const Window: TWbWindow);
 begin
   FFocusedWindow := Window;
 end;
 
-function TWbDesktop.GetActiveWindow: TWbWindow;
+function TWbDesktopScreen.GetActiveWindow: TWbWindow;
 begin
   result := FFocusedWindow;
 end;
 
-function TWbDesktop.GetWindowList: TWbWindowList;
+function TWbDesktopScreen.GetWindowList: TWbWindowList;
 begin
   result := FWindows;
 end;
 
-function TWbDesktop.FindWindowFor(const Control: TWbCustomControl): TWbWindow;
+function TWbDesktopScreen.FindWindowFor(const Control: TWbCustomControl): TWbWindow;
 var
   LNode: TW3TagContainer;
 begin

@@ -38,6 +38,8 @@ type
     property  Content: TW3DIVHtmlElement read FChild;
     procedure ActivateEditor;
     procedure DeactivateEditor;
+  published
+    property  OnEditorReady: TNotifyEvent;
   end;
 
   TW3NiceEditEngineCallback = procedure (Success: boolean);
@@ -54,14 +56,12 @@ type
     class procedure ShutdownLibrary(const CB: TW3NiceEditEngineCallback);
   end;
 
-
-
 implementation
 
 uses
   SmartCL.FileUtils;
 
-{$R "nicEdit.js"}
+{$r "nicEdit.js"}
 
 //#############################################################################
 // TW3NiceEdit
@@ -140,7 +140,10 @@ begin
     end;
     FInstance := LObj;
 
-    FChild.innerHTML :='<b>This is a test</b><br>Of NiceEdit which is very cool';
+    FChild.innerHTML :='';
+
+    if assigned(OnEditorReady) then
+      OnEditorReady(self);
 
     TW3Dispatch.Execute( procedure ()
     begin
@@ -206,9 +209,9 @@ begin
   if not FInitialized then
   begin
 
-    TW3Storage.LoadImage('/res/nicEditorIcons.gif');
+    TW3Storage.LoadImage('res/nicEditorIcons.gif');
 
-    TW3Storage.LoadScript('/lib/nicEdit.js', procedure (Filename: string; ScriptObj: THandle; Success: boolean)
+    TW3Storage.LoadScript('lib/nicEdit.js', procedure (Filename: string; ScriptObj: THandle; Success: boolean)
       begin
         FInitialized := Success;
         if Success then

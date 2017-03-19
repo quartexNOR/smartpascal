@@ -23,6 +23,7 @@ uses
   System.Memory.Buffer,
 
   wb.desktop.datatypes,
+  wb.desktop.devices,
 
   SmartCL.Components,
   SmartCL.Storage,
@@ -77,11 +78,11 @@ type
     procedure RegisterWindow(const Window: TWbCustomWindow);
     procedure UnRegisterWindow(const Window: TWbCustomWindow);
 
+    procedure ExecuteFile(Device: TWbStorageDevice; FullPath: string);
+
     function  GetPreferences: IWbPreferences;
     function  GetDatatypes: IWbDatatypeRegistry;
-
-    //function  GetPreferencesObject: TW3Structure;
-    //function  GetDatatypeRegistryObject: TWbDatatypeRegistry;
+    function  GetDeviceManager: TWbDeviceManager;
 
     function  KnownWindow(const Window: TWbCustomWindow): boolean;
     procedure SavePreferences;

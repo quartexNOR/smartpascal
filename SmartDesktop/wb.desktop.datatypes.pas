@@ -6,28 +6,43 @@ uses
   System.Types,
   System.Types.Convert;
 
+  /* Identifiers for common objects */
+  const
+  CNT_ID_DATATYPE_FOLDER = 'BC4D4E7E-6593-47B3-8EB5-2DE9DC8E71C4';
+  CNT_ID_DATATYPE_TEXT   = 'BF04CD30-7C28-48DC-92D4-F1A3A224D0A6';
+
 type
 
+  { TWbJSonObject = class(TObject)
+  protected
+    procedure WriteValues(var JsObj: variant); virtual; abstract;
+    procedure ReadValues(const JsObj: variant); virtual; abstract;
+  public
+    procedure ToString: string; virtual;
+    procedure FromString(const Data: string); virtual;
+  end;  }
 
   TWbDatatypeInfo = class(TObject)
   public
-    property  TypeName: string;
-    property  Description: string;
+    property    TypeName: string;
+    property    Description: string;
+    property    Identifier: string;
+    function    ToString: string; virtual;
+    procedure   FromString(const Data: string); virtual;
+    constructor Create; virtual;
   end;
 
   TWbDatatypeIconInfo = class(TWbDatatypeInfo)
   public
     property  SelectedIcon: string;
     property  UnSelectedIcon: string;
-  end;
-
-  TWbDatatypeProgram = class(TWbDatatypeIconInfo)
+    function  ToString: string; override;
   end;
 
   TWbDatatypeFile = class(TWbDatatypeIconInfo)
   public
     property  FileExt: string;
-    property  RunWithApplication: string;
+    function    ToString: string; override;
   end;
 
   TWbDatatypeRegistryEnumProc = function (const Item: TWbDatatypeInfo): TEnumResult;
@@ -69,7 +84,59 @@ type
 
 implementation
 
-uses wb.desktop.filesystem;
+uses
+  System.JSon,
+  wb.desktop.filesystem;
+
+//#############################################################################
+// TWbDatatypeFile
+//#############################################################################
+
+function TWbDatatypeFile.ToString: string;
+begin
+  var temp := TJSon.parse(inherited ToString());
+  temp.FileExt := FileExt;
+  result := TJSON.Stringify(Temp);
+end;
+
+//#############################################################################
+// TWbDatatypeIconInfo
+//#############################################################################
+
+function TWbDatatypeIconInfo.ToString: string;
+begin
+  var temp := TJSon.parse(inherited ToString());
+  temp.SelectedIcon := SelectedIcon;
+  temp.UnSelectedIcon := UnSelectedIcon;
+  result := TJSON.Stringify(Temp);
+end;
+
+//#############################################################################
+// TWbDatatypeInfo
+//#############################################################################
+
+constructor TWbDatatypeInfo.Create;
+begin
+  inherited Create;
+  Identifier := TDatatype.CreateGUID();
+end;
+
+function TWbDatatypeInfo.ToString: string;
+begin
+  var temp := TVariant.CreateObject();
+  temp.TypeName := TypeName;
+  temp.Description := Description;
+  temp.Identifier := Identifier;
+  result := TJSON.Stringify(Temp);
+end;
+
+procedure TWbDatatypeInfo.FromString(const Data: string);
+begin
+  var temp := TJSOn.Parse(Data);
+  TypeName := temp.TypeName;
+  Description := temp.Description;
+  Identifier := temp.Identifier;
+end;
 
 //#############################################################################
 // TWbDatatypeRegistry
@@ -167,7 +234,7 @@ end;
 
 function TWbDatatypeRegistry.GetInfoByExt(FileName: string): TWbDataTypeInfo;
 begin
-  var LExt := TW3VirtualFileSystem.ExtractFileExt(Filename).ToLower();
+  var LExt := TW3VirtualFileSystemPath.ExtractFileExt(Filename).ToLower();
   for var LItem in FObjects do
   begin
     if (LItem is TWbDatatypeFile) then

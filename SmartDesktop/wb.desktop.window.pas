@@ -370,7 +370,8 @@ begin
       Setfocus();
       invalidate;
     end);
-  end;
+  end else
+  TW3Dispatch.Execute(Invalidate, 150);
 end;
 
 procedure TWbCustomWindow.CloseWindow;
