@@ -40,7 +40,9 @@ uses
 
   SmartCL.Controls.Image, SmartCL.Controls.Label,
   SmartCL.Controls.Panel, SmartCL.Controls.Button,
-  SMartCL.Controls.ToggleSwitch, SmartCL.Controls.Toolbar
+  SMartCL.Controls.ToggleSwitch,
+  SMartCL.Controls.CheckBox,
+  SmartCL.Controls.Toolbar
   ;
 
 type
@@ -59,6 +61,8 @@ type
     FEffectsMinimize: TW3ToggleSwitch;
     FEffectsMinimizeLabel: TW3Label;
 
+    FShowDocking: TW3CheckBox;
+
     FLayout:  TLayout;
     FButtonLayout: TLayout;
 
@@ -72,6 +76,7 @@ type
     procedure HandleApply(Sender: TObject);
     procedure HandleSave(Sender: TObject);
     procedure HandleCancel(Sender: TObject);
+    procedure StoreCurrentValues;
   protected
     procedure InitializeObject; override;
     procedure FinalizeObject; override;
@@ -143,6 +148,12 @@ begin
 
   FPanel := TW3Panel.Create(Content);
   FPanel.Name :='PnlPrefs';
+
+  FShowDocking := TW3CheckBox.Create(FPanel);
+  FShowDocking.Font.Size := 14;
+  FShowDocking.Caption := 'Show workbench dock';
+  FShowDocking.SetBounds(10,10, 300,16);
+
 
   FFooter := TW3Panel.Create(Content);
   FPanel.Name :='PnlPrefsFooter';
@@ -276,7 +287,7 @@ begin
   w3_setStyle(Handle, 'min-height', '600px'); *)
 end;
 
-procedure TWbPreferencesWindow.HandleApply(Sender: TObject);
+procedure TWbPreferencesWindow.StoreCurrentValues;
 var
   LAccess:  IWbDesktop;
   LWriter:  IW3StructureWriteAccess;
@@ -289,6 +300,12 @@ begin
   LWriter.WriteBool(PREFS_WINDOW_EFFECTS_CLOSE, FEffectsClose.Checked);
   LWriter.WriteBool(PREFS_WINDOW_EFFECTS_MIN, FEffectsMinimize.Checked);
   LWriter.WriteBool(PREFS_WINDOW_EFFECTS_MAX, FEffectsMaximize.Checked);
+end;
+
+procedure TWbPreferencesWindow.HandleApply(Sender: TObject);
+begin
+  // Apply to preferences
+  StoreCurrentValues();
 
   // Exit, dont save prefs permanently (!)
   CloseWindow();
@@ -297,16 +314,11 @@ end;
 procedure TWbPreferencesWindow.HandleSave(Sender: TObject);
 var
   LAccess:  IWbDesktop;
-  LWriter:  IW3StructureWriteAccess;
 begin
   LAccess := GetDesktop() as IWbDesktop;
-  LWriter := LAccess.GetPreferences.GetPreferencesWriter();
 
   // Apply to preferences
-  LWriter.WriteBool(PREFS_WINDOW_EFFECTS_OPEN, FEffectsOpen.Checked);
-  LWriter.WriteBool(PREFS_WINDOW_EFFECTS_CLOSE, FEffectsClose.Checked);
-  LWriter.WriteBool(PREFS_WINDOW_EFFECTS_MIN, FEffectsMinimize.Checked);
-  LWriter.WriteBool(PREFS_WINDOW_EFFECTS_MAX, FEffectsMaximize.Checked);
+  StoreCurrentValues();
 
   // Store values permanently
   try

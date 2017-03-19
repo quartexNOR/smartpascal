@@ -1,0 +1,12 @@
+unit wb.desktop.window.textview;
+
+interface
+
+uses 
+  SmartCL.System;
+
+implementation
+
+
+
+end.

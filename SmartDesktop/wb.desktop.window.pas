@@ -37,6 +37,7 @@ uses
 
   SmartCL.Controls.Image, SmartCL.Controls.Label,
   SmartCL.Controls.Panel, SmartCL.Controls.Button,
+  SMartCL.Controls.Scrollbar,
   SMartCL.Controls.ToggleSwitch, SmartCL.Controls.Toolbar;
 
 type
@@ -81,9 +82,29 @@ type
   end;
 
   TWbWindowRightSide = class(TWbWindowElement)
+  private
+    FScrollbar: TW3VerticalScrollbar;
+  protected
+    procedure FinalizeObject; override;
+    procedure Resize; override;
+  public
+    property  Scrollbar: TW3VerticalScrollbar read FScrollbar;
+    procedure ShowScrollbar;
+    procedure HideScrollbar;
+    function  GetCalculatedWidth: integer;
   end;
 
   TWbWindowFooter = class(TWbWindowElement)
+  private
+    FScrollbar: TW3HorizontalScrollbar;
+  protected
+    procedure FinalizeObject; override;
+    procedure Resize; override;
+  public
+    property  Scrollbar: TW3HorizontalScrollbar read FScrollbar;
+    procedure ShowScrollbar;
+    procedure HideScrollbar;
+    function  GetCalculatedHeight: integer;
   end;
 
   TW3WindowFocusBlock = class(TWbWindowElement)
@@ -112,6 +133,8 @@ type
   TWbWindowSizeBeginsEvent  = TNotifyEvent;
   TWbWindowSizeEndsEvent    = TNotifyEvent;
 
+  TWbWindowOptions = set of (woSizeable, woHScroll, woVScroll);
+
   TWbCustomWindow = partial class(TWbCustomControl)
   private
     FHeader:      TWbWindowHeader;
@@ -123,6 +146,7 @@ type
     FMoveActive:  boolean;
     FSizeActive:  boolean;
     FStartPos:    TPoint;
+    FOptions:     TWbWindowOptions;
     FOldSize:     TRect; // Size of window before maximize
     FStyled:      boolean;
   protected
@@ -130,7 +154,9 @@ type
     procedure HandleZOrderClick(Sender: TObject); virtual;
     procedure HandleMinimizeClick(Sender: TObject); virtual;
     procedure HandleGotFocus(Sender: TObject); virtual;
-    // procedure HandleLostFocus(Sender: TObject); virtual;
+
+    procedure SetOptions(const NewOptions: TWbWindowOptions); virtual;
+
   protected
     procedure HandleMouseDown(Sender: TObject; Button: TMouseButton;
               Shift: TShiftState; X, Y: integer); virtual;
@@ -157,12 +183,11 @@ type
 
     procedure UnSelect;
 
-    procedure PatchChildControls; virtual;
-
     class function CreationFlags: TW3CreationFlags; override;
 
     procedure CloseWindow;
   published
+    property  Options: TWbWindowOptions read FOptions write SetOptions;
     property  OnMoveBegins:   TWbWindowMoveBeginsEvent;
     property  OnMoveEnds:     TWbWindowMoveEndsEvent;
     property  OnReSizeBegins: TWbWindowSizeBeginsEvent;
@@ -175,6 +200,8 @@ type
     procedure HandleMouseDown(Sender: TObject; Button: TMouseButton;
               Shift: TShiftState; X, Y: integer); override;
   end;
+
+
 
   TWbExternalWindowOptions = set of (eoAllowFocus, eoCheckFrameFocus);
 
@@ -194,6 +221,129 @@ type
   end;
 
 implementation
+
+//#############################################################################
+// TWbWindowRightSide
+//#############################################################################
+
+procedure TWbWindowRightSide.FinalizeObject;
+begin
+  if FScrollbar <> nil then
+  FScrollbar.free;
+  inherited;
+end;
+
+function TWbWindowRightSide.GetCalculatedWidth: integer;
+begin
+  if FScrollbar <> nil then
+    result := FScrollbar.width
+  else
+    result := 0;
+end;
+
+procedure TWbWindowRightSide.ShowScrollbar;
+begin
+  if FScrollbar = nil then
+  begin
+    FScrollbar := TW3VerticalScrollbar.Create(self);
+    FScrollbar.Total := 2000;
+    FScrollbar.PageSize := 600;
+    FScrollbar.Position := 200;
+    FScrollbar.HandlePadding := 1;
+    FScrollbar.MinButton.InnerHtml := '';
+    FScrollbar.MaxButton.InnerHtml := '';
+    FScrollbar.MinButton.Background.FromURL('res/btnup.png');
+    FScrollbar.MaxButton.Background.FromURL('res/btndown.png');
+    FScrollbar.DragHandle.StyleClass := 'TW3ScrollbarHandleV';
+  end;
+end;
+
+procedure TWbWindowRightSide.HideScrollbar;
+begin
+  if FScrollbar <> nil then
+  begin
+    try
+      FScrollbar.free;
+    finally
+      FScrollbar:=nil;
+    end;
+    invalidate;
+  end;
+end;
+
+procedure TWbWindowRightSide.Resize;
+var
+  dx: integer;
+begin
+  inherited;
+  if FScrollbar <> nil then
+  begin
+    dx := (ClientWidth div 2) - 8;
+    FScrollbar.SetBounds(dx, 0, 16, ClientHeight);
+  end;
+end;
+
+//#############################################################################
+// TWbWindowFooter
+//#############################################################################
+
+procedure TWbWindowFooter.FinalizeObject;
+begin
+  if FScrollbar <> nil then
+  FScrollbar.free;
+  inherited;
+end;
+
+function TWbWindowFooter.GetCalculatedHeight: integer;
+begin
+  if FScrollbar <> nil then
+    result := FScrollbar.height
+  else
+    result := 0;
+end;
+
+procedure TWbWindowFooter.ShowScrollbar;
+begin
+  if FScrollbar = nil then
+  begin
+    FScrollbar := TW3HorizontalScrollbar.Create(self);
+    FScrollbar.Total := 2000;
+    FScrollbar.PageSize := 600;
+    FScrollbar.Position := 200;
+    FScrollbar.HandlePadding := 1;
+    FScrollbar.MinButton.InnerHtml := '';
+    FScrollbar.MaxButton.InnerHtml := '';
+    FScrollbar.MinButton.Background.FromURL('res/btnleft.png');
+    FScrollbar.MaxButton.Background.FromURL('res/btnright.png');
+
+    invalidate;
+  end;
+end;
+
+procedure TWbWindowFooter.HideScrollbar;
+begin
+  if FScrollbar <> nil then
+  begin
+    try
+      FScrollbar.free;
+    finally
+      FScrollbar := nil;
+    end;
+    Invalidate();
+  end;
+end;
+
+procedure TWbWindowFooter.Resize;
+var
+  dy: integer;
+begin
+  inherited;
+  if FScrollbar <> nil then
+  begin
+    dy := (ClientHeight div 2) - 8;
+    FScrollbar.SetBounds(0, dy, clientwidth, 16);
+  end;
+end;
 
 //#############################################################################
 // TWbExternalWindow
@@ -430,6 +580,40 @@ begin
   include(result, cfAllowSelection);
 end;
 
+procedure TWbCustomWindow.SetOptions(const NewOptions: TWbWindowOptions);
+begin
+  FOptions := NewOptions;
+
+  if (woSizeable in FOptions) then
+  begin
+    FSizer.Visible := true;
+  end else
+  begin
+    FSizer.Visible := false;
+  end;
+
+  if (woHScroll in FOptions) then
+  begin
+    if FFooter.Scrollbar = nil then
+      FFooter.ShowScrollbar();
+  end else
+  begin
+    if FFooter.Scrollbar <> nil then
+      FFooter.HideScrollbar();
+  end;
+
+  if (woVScroll in FOptions) then
+  begin
+    if FRight.Scrollbar = nil then
+      FRight.ShowScrollbar();
+  end else
+  begin
+    if FRight.Scrollbar <> nil then
+      FRight.HideScrollbar();
+  end;
+
+end;
+
 procedure TWbCustomWindow.ObjectReady;
 begin
   inherited;
@@ -451,8 +635,9 @@ begin
   OnGotFocus  := HandleGotFocus;
 
   FFooter.Border.Top.Style := besSolid;
-  FFooter.Border.Top.Color := $92BFFF;; //CNT_STYLE_WINDOW_FRAME_DARK;
+  FFooter.Border.Top.Color := $92BFFF;
   FFooter.Border.Top.Width := 1;
+  //FFooter.Background.FromColor(clGreen);
 
   FRight.Border.Left.Style := besSolid;
   FRight.Border.Left.Color := $92BFFF;
@@ -486,7 +671,7 @@ begin
   FContent.Border.left.Color := CNT_STYLE_WINDOW_FRAME_DARK;
   FContent.Border.left.Width := 1;
 
-  background.fromColor(CNT_STYLE_Background); //CNT_STYLE_WINDOW_BASE_UNSELECTED
+  background.fromColor(CNT_STYLE_Background);
 
   EdgeRadius.Top.Left := 4;
   EdgeRadius.Top.Right := 4;
@@ -499,52 +684,80 @@ begin
 end;
 
 procedure TWbCustomWindow.Resize;
-const
-  CNT_HEADER_HEIGHT = 29;
-  CNT_FOOTER_HEIGHT = 21;
-  CNT_RIGHT_WIDTH   = 6;
-  CNT_SIZER_WIDTH   = 20;
-  CNT_SIZER_HEIGHT  = 20;
-  CNT_LEFT_WIDTH    = 6;
+var
+  LHeader_Height,
+  LFooter_Height,
+  LRight_Width,
+  LSizer_Width,
+  LSizer_Height,
+  LLeft_Width:  integer;
 begin
   inherited;
+
+  LHeader_Height := 29;
+  LFooter_Height := 4 + TInteger.EnsureRange(FFooter.GetCalculatedHeight, 0, 16);
+  LRight_Width := 4 + TInteger.EnsureRange(FRight.GetCalculatedWidth, 0, 16);;
+  LSizer_Width := 20;
+  LSizer_Height := 20;
+  LLeft_Width := 4;
+
+  if (woSizeable in FOptions) then
+  begin
+    if LFooter_Height < 20 then
+      LFooter_Height := 20;
+  end;
+
   if not (csDestroying in ComponentState) then
   begin
     FHeader.SetBounds(
       0,
       0,
       ClientWidth,
-      CNT_HEADER_HEIGHT);
+      LHeader_Height);
 
     FContent.SetBounds(
-      CNT_LEFT_WIDTH,
-      CNT_HEADER_HEIGHT,
-      ClientWidth - (CNT_RIGHT_WIDTH + CNT_LEFT_WIDTH),
-      ClientHeight -( CNT_HEADER_HEIGHT + CNT_FOOTER_HEIGHT) );
+      LLeft_Width,
+      LHeader_Height,
+      ClientWidth - (LRight_Width + LLeft_Width),
+      ClientHeight -( LHeader_Height + LFooter_Height) );
 
     FLeft.SetBounds(
       0,
-      CNT_HEADER_HEIGHT,
-      CNT_LEFT_WIDTH,
-      ClientHeight - CNT_HEADER_HEIGHT );
+      LHeader_Height,
+      LLeft_Width,
+      ClientHeight - LHeader_Height );
 
-    FRight.SetBounds(
-      Clientwidth - CNT_RIGHT_WIDTH,
-      CNT_HEADER_HEIGHT,
-      CNT_RIGHT_WIDTH,
-      ClientHeight - (CNT_HEADER_HEIGHT + CNT_SIZER_HEIGHT) );
+    if ((woSizeable in FOptions) and FSizer.visible) then
+    begin
+      FRight.SetBounds(
+      Clientwidth - LRight_Width,
+      LHeader_Height,
+      LRight_Width,
+      ClientHeight - (LHeader_Height + LSizer_Height) );
+    end else
+    begin
+      FRight.SetBounds(
+      Clientwidth - LRight_Width,
+      LHeader_Height,
+      LRight_Width,
+      ClientHeight - (LHeader_Height ) );
+    end;
 
     FFooter.SetBounds(
       FContent.left,
       FContent.top + FContent.Height,
       FContent.width,
-      CNT_FOOTER_HEIGHT);
+      LFooter_Height);
 
-    FSizer.SetBounds(
-      Clientwidth - CNT_SIZER_WIDTH,
-      ClientHeight - CNT_SIZER_HEIGHT,
-      CNT_SIZER_WIDTH,
-      CNT_SIZER_HEIGHT);
+    if (woSizeable in FOptions) then
+    begin
+      if FSizer.visible then
+      FSizer.SetBounds(
+      Clientwidth - LSizer_Width,
+      ClientHeight - LSizer_Height,
+      LSizer_Width,
+      LSizer_Height);
+    end;
   end;
 end;
 
@@ -600,10 +813,6 @@ end;
 procedure TWbCustomWindow.HandleCloseClick(Sender: TObject);
 begin
   TW3Dispatch.Execute(CloseWindow, 100);
-end;
-
-procedure TWbCustomWindow.PatchChildControls;
-begin
 end;
 
 procedure TWbCustomWindow.StyleAsFocused;

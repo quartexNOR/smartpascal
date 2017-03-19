@@ -1,0 +1,12 @@
+unit wb.desktop.classes;
+
+interface
+
+uses 
+  SmartCL.System;
+
+implementation
+
+
+
+end.

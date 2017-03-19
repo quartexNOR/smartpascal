@@ -17,6 +17,7 @@ const
   PREFS_WINDOW_EFFECTS_CLOSE  = 'window.effects.close';
   PREFS_WINDOW_EFFECTS_MIN    = 'window.effects.minimize';
   PREFS_WINDOW_EFFECTS_MAX    = 'window.effects.maximize';
+  PREFS_DESKTOP_FREATURE_DOC  = 'desktop.feature.doc';
 
 type
 
@@ -38,6 +39,7 @@ begin
   WriteBool(PREFS_WINDOW_EFFECTS_CLOSE,  true);
   WriteBool(PREFS_WINDOW_EFFECTS_MIN,    false);
   WriteBool(PREFS_WINDOW_EFFECTS_MAX,    false);
+  writeBool(PREFS_DESKTOP_FREATURE_DOC,   true);
 end;
 
 

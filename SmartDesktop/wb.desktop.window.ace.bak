@@ -1,0 +1,12 @@
+unit wb.desktop.window.ace;
+
+interface
+
+uses 
+  SmartCL.System;
+
+implementation
+
+
+
+end.

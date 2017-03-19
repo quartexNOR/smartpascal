@@ -1,0 +1,12 @@
+unit wb.desktop.window.editor;
+
+interface
+
+uses 
+  SmartCL.System;
+
+implementation
+
+
+
+end.

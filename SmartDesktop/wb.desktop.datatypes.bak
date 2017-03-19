@@ -1,0 +1,86 @@
+unit wb.desktop.datatypes;
+
+interface
+
+uses 
+  SmartCL.System;
+
+type
+
+
+  TWbDatatypeInfo = class(TObject)
+  public
+    property  TypeName: string;
+    property  Description: string;
+  end;
+
+  TWbDatatypeProgram = class(TWbDatatypeInfo)
+  end;
+
+  TWbDatatypeFile = class(TWbDatatypeInfo)
+  public
+    property  FileExt: string;
+    property  RunWithApplication: string;
+    property  SelectedIcon: string;
+    property  UnSelectedIcon: string;
+  end;
+
+  TWbDatatypeRegistry = class
+  private
+    FObjects: array of TWbDatatypeInfo;
+  public
+    property  Count: integer read (FObjects.length);
+    property  Item[const index: integer]: TWbDataTypeInfo read (FObjects[index]);
+    function  Register(const Info: TWbDataTypeInfo): TWbDataTypeInfo;
+    procedure Clear;
+    function  GetInfoByExt(FileName: string): TWbDataTypeInfo;
+  end;
+
+implementation
+
+uses wb.desktop.filesystem;
+
+//#############################################################################
+// TWbDatatypeRegistry
+//#############################################################################
+
+function TWbDatatypeRegistry.GetInfoByExt(FileName: string): TWbDataTypeInfo;
+begin
+  result := nil;
+  var LExt := TW3VirtualFileSystem.ExtractFileExt(Filename).ToLower();
+  for var LItem in FObjects do
+  begin
+    if (LItem is TWbDatatypeFile) then
+    begin
+      if LExt = TWbDatatypeFile(LItem).FileExt then
+      begin
+        result := LItem;
+        break;
+      end;
+    end;
+  end;
+end;
+
+procedure TWbDatatypeRegistry.Clear;
+begin
+  try
+    for var LItem in FObjects do
+    begin
+      LItem.free;
+    end;
+  finally
+    FObjects.clear;
+  end;
+end;
+
+function TWbDatatypeRegistry.Register(const Info: TWbDataTypeInfo): TWbDataTypeInfo;
+begin
+  result := Info;
+  if Info <> nil then
+  begin
+    if FObjects.IndexOf(Info) <= -1 then
+    FObjects.add(Info);
+  end;
+end;
+
+end.

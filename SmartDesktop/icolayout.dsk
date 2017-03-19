@@ -2,23 +2,23 @@
   <state>
     <editor>
       <tab filename="SmartCL.Effects" fullname="..\..\..\RTL\SmartCL\SmartCL.Effects.pas" topline="1399" col="47" row="1413" />
-      <tab filename="wb.desktop.window.prefs" fullname="wb.desktop.window.prefs.pas" topline="291" col="19" row="313" />
+      <tab filename="wb.desktop.window.prefs" fullname="wb.desktop.window.prefs.pas" topline="140" col="19" row="154" />
       <tab filename="SmartCL.Controls.ToggleSwitch" fullname="..\..\..\RTL\SmartCL\Controls\SmartCL.Controls.ToggleSwitch.pas" topline="149" col="24" row="174" />
       <tab filename="Form1" topline="241" col="7" row="267" splitview="0" designview="0" splitter="0.444444447755814" />
       <tab filename="Unit1" fullname="Unit1.pas" topline="1" col="1" row="1" />
       <tab filename="wb.desktop.devices" fullname="wb.desktop.devices.pas" topline="633" col="34" row="660" />
-      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="283" col="53" row="292" />
-      <tab filename="WinPhone8.css" topline="102" col="1" row="125" />
+      <tab filename="wb.desktop.core" fullname="wb.desktop.core.pas" topline="402" col="33" row="417" />
+      <tab filename="WinPhone8.css" topline="722" col="33" row="734" />
       <tab filename="wb.desktop.classes" fullname="wb.desktop.classes.pas" topline="1" col="1" row="1" />
-      <tab filename="wb.desktop.preferences" fullname="wb.desktop.preferences.pas" topline="2" col="34" row="23" />
-      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="67" col="30" row="88" />
+      <tab filename="wb.desktop.preferences" fullname="wb.desktop.preferences.pas" topline="10" col="43" row="42" />
+      <tab filename="wb.desktop.types" fullname="wb.desktop.types.pas" topline="40" col="3" row="58" />
       <tab filename="wb.desktop.filesystem" fullname="wb.desktop.filesystem.pas" topline="796" col="32" row="781" />
       <tab filename="System.Structure.JSON" fullname="..\..\..\RTL\System\System.Structure.JSON.pas" topline="71" col="13" row="104" />
       <tab filename="System.JSON" fullname="..\..\..\RTL\System\System.JSON.pas" topline="264" col="67" row="292" />
-      <tab filename="wb.desktop.iconview" fullname="wb.desktop.iconview.pas" topline="896" col="46" row="916" />
-      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="316" col="24" row="330" />
-      <tab filename="SmartCL.Components" fullname="..\..\..\RTL\SmartCL\SmartCL.Components.pas" topline="635" col="1" row="651" />
-      <activetab>wb.desktop.iconview</activetab>
+      <tab filename="wb.desktop.window" fullname="wb.desktop.window.pas" topline="238" col="55" row="257" />
+      <tab filename="SmartCL.Controls.ScrollBar" fullname="..\..\..\RTL\SmartCL\Controls\SmartCL.Controls.ScrollBar.pas" topline="55" col="3" row="46" />
+      <tab filename="wb.desktop.window.folder" fullname="wb.desktop.window.folder.pas" topline="100" col="30" row="113" />
+      <activetab>WinPhone8.css</activetab>
       <breakpoints>
         <bkpt>
           <unit>wb.desktop.filesystem</unit>
@@ -27,12 +27,12 @@
       </breakpoints>
     </editor>
     <Statistics>
-      <BackgroundCompilations>117518</BackgroundCompilations>
-      <EditTime>07:13:10.385</EditTime>
-      <CompileTime>00:53:20.876</CompileTime>
-      <TotalTime>11:53:06.593</TotalTime>
+      <BackgroundCompilations>121032</BackgroundCompilations>
+      <EditTime>08:05:57.068</EditTime>
+      <CompileTime>00:56:53.985</CompileTime>
+      <TotalTime>16:33:43.078</TotalTime>
       <DesigningTime>13:23:52.854</DesigningTime>
-      <RunningTime>14:48:41.945</RunningTime>
+      <RunningTime>17:01:19.136</RunningTime>
     </Statistics>
   </state>
 </SMART>

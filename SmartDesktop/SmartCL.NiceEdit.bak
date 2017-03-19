@@ -1,0 +1,15 @@
+unit SmartCL.NiceEdit;
+
+interface
+
+uses 
+  SmartCL.System;
+
+implementation
+
+{$R "nicEdit.js"}
+{$R "nicEditorIcons.gif"}
+
+
+
+end.

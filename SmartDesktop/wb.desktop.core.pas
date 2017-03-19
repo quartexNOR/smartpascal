@@ -42,7 +42,17 @@ uses
 
 type
 
+
+  TWbIconDoc = class(TWbCustomControl)
+  end;
+
   TWbDesktopView = class(TWbIconView)
+  private
+    FDoc:     TWbIconDoc;
+  protected
+    procedure InitializeObject; override;
+    procedure FinalizeObject; override;
+    procedure Resize; override;
   end;
 
   TWbDesktopViewEnumCallback = function (const Item: TWbCustomWindow): TEnumResult;
@@ -394,5 +404,38 @@ begin
   end;
 end;
 
+//#############################################################################
+// TWbDesktopView
+//#############################################################################
+
+procedure TWbDesktopView.InitializeObject;
+begin
+  inherited;
+  FDoc := TWbIconDoc.Create(self);
+  FDoc.Border.Size := 2;
+  FDoc.Border.Color := clBlack;
+  FDoc.Border.Style := besSolid;
+  FDoc.BorderRadius := 6;
+  FDoc.Background.FromColor(clWhite);
+end;
+
+procedure TWbDesktopView.FinalizeObject;
+begin
+  FDoc.free;
+  inherited;
+end;
+
+procedure TWbDesktopView.Resize;
+var
+  dx, dy, wd, hd: integer;
+begin
+  inherited;
+  wd := 64 + 8;
+  dx := Clientwidth - (wd + 8);
+  hd := 70 * ClientHeight div 100;
+  dy := ((clientheight - 16) div 2) - (hd div 2);
+  //hd := ClientHeight - (dy * 2);
+  FDoc.SetBounds(dx, dy, wd, hd);
+end;
 
 end.

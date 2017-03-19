@@ -109,6 +109,9 @@ implementation
 procedure TWbWindowDirectory.InitializeObject;
 begin
   inherited;
+  // We want the window to be sizable, and we want scrollbars
+  self.SetOptions([woSizeable, woHScroll, woVScroll]);
+
   FPanel := TW3Panel.Create(Content);
   FToolbar := TW3Toolbar.Create(FPanel);
   FPath := TWbPathPanel.Create(FPanel);
